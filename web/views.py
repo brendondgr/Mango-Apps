@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django_ratelimit.decorators import ratelimit
 
 # Add libs to path
 LIBS_PATH = Path(__file__).resolve().parent.parent.parent / 'libs'
@@ -24,6 +25,7 @@ def pr_view(request):
     return render(request, 'body.html')
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def login_view(request):
     """Handle user login"""
     if request.method == 'POST':
@@ -63,7 +65,6 @@ def logout_view(request):
 # Configuration API
 # ============================================================================
 
-@csrf_exempt
 def api_config(request):
     """GET/POST /api/config - Load or save configuration"""
     if request.method == 'GET':
@@ -156,7 +157,6 @@ def api_refresh_models(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def api_manage_models(request):
     """POST /api/models/manage - Add or remove models"""
@@ -202,7 +202,6 @@ def api_manage_models(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def api_update_directories(request):
     """POST /api/config/directories - Update model directories"""
@@ -232,7 +231,6 @@ def api_server_status(request):
     return JsonResponse({'status': status})
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def api_server_start(request):
     """POST /api/server/start - Start the LLM server"""
@@ -257,7 +255,6 @@ def api_server_start(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def api_server_stop(request):
     """POST /api/server/stop - Stop the LLM server"""

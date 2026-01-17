@@ -2,8 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Main page
+    # Landing page
     path('', views.index, name='index'),
+    path('login', views.login_view, name='login'),
+    path('logout', views.logout_view, name='logout'),
+
+
+    # Main Dashboard (PR)
+    path('pr/', views.pr_view, name='pr_view'),
     
     # Configuration API
     path('api/config', views.api_config, name='api_config'),

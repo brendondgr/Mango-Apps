@@ -2,7 +2,8 @@ import json
 import os
 import sys
 from pathlib import Path
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -14,8 +15,48 @@ import llm_service
 
 
 def index(request):
-    """Serve the main page"""
+    """Serve the landing page"""
+    return render(request, 'index.html')
+
+
+def pr_view(request):
+    """Serve the main dashboard page (previously index)"""
     return render(request, 'body.html')
+
+
+def login_view(request):
+    """Handle user login"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        next_path = request.GET.get('next', '/')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            auth_login(request, user)
+            # Prevent Open Redirect vulnerability by ensuring next_path is safe
+            # For simplicity in this internal tool, we'll just check if it starts with /
+            if not next_path.startswith('/'):
+                next_path = '/'
+            return redirect(next_path)
+        else:
+            return render(request, 'login.html', {
+                'error': 'Invalid username or password',
+                'next': next_path
+            })
+            
+    return render(request, 'login.html', {'next': request.GET.get('next', '/')})
+
+
+def logout_view(request):
+    """Handle user logout"""
+    auth_logout(request)
+    return redirect('login')
+
+
+
+
 
 
 # ============================================================================

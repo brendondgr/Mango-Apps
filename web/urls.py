@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     # Astro static assets (JS/CSS bundles)
     re_path(r'^(?P<path>_astro/.*)$', views.index),
+    re_path(r'^(?P<path>images/.*)$', views.index),
     re_path(r'^favicon\.svg$', views.index, {'path': 'favicon.svg'}),
     
     path('login', views.login_view, name='login'),

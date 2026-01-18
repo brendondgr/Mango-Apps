@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         parseError.textContent = '';
 
         try {
-            const response = await fetch('/api/parse-recipe', {
+            const response = await fetch('api/parse-recipe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
@@ -157,11 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            let url = '/save-recipe';
+            let url = 'save-recipe';
             let method = 'POST';
 
             if (window.EXISTING_RECIPE) {
-                url = `/update-recipe/${window.EXISTING_RECIPE.id}`;
+                url = `update-recipe/${window.EXISTING_RECIPE.id}`;
             }
 
             const response = await fetch(url, {
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resData = await response.json();
 
             if (response.ok) {
-                window.location.href = `/recipe/${resData.recipe_id}`;
+                window.location.href = `recipe/${resData.recipe_id}`;
             } else {
                 showError(resData.error || "Failed to save recipe");
             }
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         async function searchIngredients(query) {
             try {
-                const res = await fetch(`/api/search-ingredients?q=${encodeURIComponent(query)}`);
+                const res = await fetch(`api/search-ingredients?q=${encodeURIComponent(query)}`);
                 if (res.ok) return await res.json();
             } catch (err) {
                 console.error('Search failed', err);
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('image', file);
 
-        fetch('/api/upload-image', {
+        fetch('api/upload-image', {
             method: 'POST',
             body: formData
         })

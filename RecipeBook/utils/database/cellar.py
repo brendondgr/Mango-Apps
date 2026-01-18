@@ -18,7 +18,7 @@ class Cellar:
     
     # Default database path relative to project root
     DEFAULT_DB_PATH = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))),
         'data',
         'RecipeBook',
         'RecipeBook.db'

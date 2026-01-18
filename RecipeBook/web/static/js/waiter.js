@@ -121,7 +121,7 @@
      */
     async function fetchAndRenderPrimaryFilters() {
         try {
-            const response = await fetch('/api/filter-options');
+            const response = await fetch('api/filter-options');
             if (!response.ok) {
                 throw new Error('Failed to fetch filter options');
             }
@@ -210,7 +210,7 @@
             if (recipeId) {
                 card.style.cursor = 'pointer';
                 card.addEventListener('click', () => {
-                    window.location.href = `/recipe/${recipeId}`;
+                    window.location.href = `recipe/${recipeId}`;
                 });
             }
         });
@@ -292,7 +292,7 @@
         showLoading(true);
 
         try {
-            const response = await fetch('/api/filter', {
+            const response = await fetch('api/filter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -460,7 +460,7 @@
         // Make card clickable to navigate to recipe detail
         article.style.cursor = 'pointer';
         article.addEventListener('click', () => {
-            window.location.href = `/recipe/${recipe.id}`;
+            window.location.href = `recipe/${recipe.id}`;
         });
 
         return article;

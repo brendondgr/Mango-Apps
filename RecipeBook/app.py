@@ -11,10 +11,9 @@ from flask import Flask, render_template, jsonify, request, abort
 from dotenv import load_dotenv
 import uuid
 
-from utils.database.pantry import get_ingredients_by_category
-from utils.database.pantry import get_ingredients_by_category, search_ingredients
-from utils.database.cookbook import get_recipes_with_pantry_comparison, get_all_recipes, get_recipe_by_id, save_new_recipe, update_recipe, delete_recipe, get_distinct_meal_types, get_distinct_cuisine_regions
-from utils.database.food_processor import parse_recipe_text
+from apps.RecipeBook.utils.database.pantry import get_ingredients_by_category, search_ingredients
+from apps.RecipeBook.utils.database.cookbook import get_recipes_with_pantry_comparison, get_all_recipes, get_recipe_by_id, save_new_recipe, update_recipe, delete_recipe, get_distinct_meal_types, get_distinct_cuisine_regions
+from apps.RecipeBook.utils.database.food_processor import parse_recipe_text
 
 # Load environment variables from .env file
 load_dotenv()

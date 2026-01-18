@@ -212,7 +212,7 @@ def pr_view(request):
             'url': '/pr/notes/',
             'active': False
         },
-        },
+
         {
             'name': 'Recipe Book',
             'description': 'Manage recipes and pantry ingredients.',

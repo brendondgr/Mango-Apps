@@ -4,18 +4,19 @@
  */
 
 const BASE_TITLE = 'Calendar/Scheduler';
+const BASE_PATH = '/pr/calendar';
 
 /**
  * Get current route information from URL
  * @returns {Object} Route info { view, schedule, date, calendarView }
  */
 export function getCurrentRoute() {
-    const path = window.location.pathname;
+    const path = window.location.pathname.replace(BASE_PATH, '') || '/';
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     let view = 'calendar';
     let schedule = null;
-    
+
     if (path.startsWith('/editor/')) {
         view = 'schedule-editor';
         // Extract schedule name from /editor/Spring_2026.json or /editor/Spring_2026
@@ -27,10 +28,10 @@ export function getCurrentRoute() {
                 schedule += '.json';
             }
         }
-    } else if (path.startsWith('/calendar/')) {
+    } else if (path.startsWith('/calendar/') || path === '/' || path === '') {
         view = 'calendar';
     }
-    
+
     return {
         view,
         schedule,
@@ -48,10 +49,10 @@ export function navigateToCalendar(date, view) {
     const params = new URLSearchParams();
     if (date) params.set('date', date);
     if (view) params.set('view', view);
-    
-    const url = `/calendar/?${params.toString()}`;
-    
-    if (window.location.pathname !== '/calendar/') {
+
+    const url = `${BASE_PATH}/?${params.toString()}`;
+
+    if (window.location.pathname !== `${BASE_PATH}/`) {
         pushState(url, 'Calendar');
     } else {
         replaceState(url, 'Calendar');
@@ -64,12 +65,12 @@ export function navigateToCalendar(date, view) {
  */
 export function navigateToEditor(scheduleName) {
     if (!scheduleName) return;
-    
+
     // Remove .json for cleaner URL if present, or keep it? 
     // User request example: /editor/schedule_name.json
     // Let's keep it consistent with the filename
-    
-    const url = `/editor/${encodeURIComponent(scheduleName)}`;
+
+    const url = `${BASE_PATH}/editor/${encodeURIComponent(scheduleName)}`;
     pushState(url, `Editor - ${scheduleName.replace('.json', '')}`);
 }
 
@@ -79,7 +80,7 @@ export function navigateToEditor(scheduleName) {
  */
 export function updateQueryParams(params) {
     const searchParams = new URLSearchParams(window.location.search);
-    
+
     Object.entries(params).forEach(([key, value]) => {
         if (value === null || value === undefined) {
             searchParams.delete(key);
@@ -87,7 +88,7 @@ export function updateQueryParams(params) {
             searchParams.set(key, value);
         }
     });
-    
+
     const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
     replaceState(newUrl, document.title);
 }
@@ -99,7 +100,7 @@ export function updateQueryParams(params) {
  */
 function pushState(url, title) {
     if (window.location.pathname + window.location.search === url) return;
-    
+
     window.history.pushState({}, '', url);
     updateTitle(title);
 }
@@ -111,7 +112,7 @@ function pushState(url, title) {
  */
 function replaceState(url, title) {
     if (window.location.pathname + window.location.search === url) return;
-    
+
     window.history.replaceState({}, '', url);
     updateTitle(title);
 }

@@ -208,10 +208,40 @@ def flask_proxy_recipebook(request, path=''):
     return django_response
 
 
+# Path to the Astro frontend build
+ASTRO_BUILD_PATH = Path(__file__).resolve().parent.parent.parent / 'web' / 'frontend-main' / 'dist'
 
-def index(request):
-    """Serve the landing page"""
-    return render(request, 'index.html')
+
+def index(request, path=''):
+    """Serve the public landing page from Astro static build
+    
+    This serves index.html for the root and handles requests
+    for assets within the _astro directory.
+    """
+    # Default to index.html for root path
+    if not path or path == '/':
+        file_path = ASTRO_BUILD_PATH / 'index.html'
+    else:
+        # Sanitize path to prevent directory traversal
+        file_path = ASTRO_BUILD_PATH / path.lstrip('/')
+    
+    # Security: ensure the resolved path is within the build directory
+    try:
+        file_path = file_path.resolve()
+        if not str(file_path).startswith(str(ASTRO_BUILD_PATH.resolve())):
+            raise Http404("File not found")
+    except (ValueError, OSError):
+        raise Http404("File not found")
+    
+    if not file_path.exists() or not file_path.is_file():
+        raise Http404("File not found")
+    
+    # Determine content type
+    content_type, _ = mimetypes.guess_type(str(file_path))
+    if content_type is None:
+        content_type = 'application/octet-stream'
+    
+    return FileResponse(open(file_path, 'rb'), content_type=content_type)
 
 
 # Path to the MIMIC static app directory

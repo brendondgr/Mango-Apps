@@ -2,8 +2,12 @@ from django.urls import path, re_path, include
 from . import views
 
 urlpatterns = [
-    # Landing page
+    # Landing page (Astro static build)
     path('', views.index, name='index'),
+    # Astro static assets (JS/CSS bundles)
+    re_path(r'^(?P<path>_astro/.*)$', views.index),
+    re_path(r'^favicon\.svg$', views.index, {'path': 'favicon.svg'}),
+    
     path('login', views.login_view, name='login'),
     path('logout', views.logout_view, name='logout'),
     

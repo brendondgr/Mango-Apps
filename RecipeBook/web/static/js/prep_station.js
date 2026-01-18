@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Harvest Images from Preview Grid
         const image_urls = [];
         imagePreviewGrid.querySelectorAll('.image-preview-card img').forEach(img => {
-            const src = img.getAttribute('src');
+            const src = img.src; // Use property to get full resolved URL
             if (src) image_urls.push(src);
         });
 

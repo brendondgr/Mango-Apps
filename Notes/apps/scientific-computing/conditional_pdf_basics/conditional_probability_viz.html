@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Probability Density Functions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary: #4C3BCF;
+            --accent: #FF6B6B;
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            
+            /* Viz Colors */
+            --viz-blue: #3b82f6;
+            --viz-purple: #a855f7;
+            --viz-teal: #14b8a6;
+            --viz-orange: #f97316;
+            --viz-green: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header p {
+            max-width: 700px;
+            margin: 10px auto;
+            color: #636e72;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .viz-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #fdfdfd;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            cursor: move;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value-display {
+            color: var(--primary);
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input:checked + .toggle {
+            background: var(--viz-green);
+        }
+
+        input:checked + .toggle::after {
+            transform: translateX(24px);
+        }
+
+        .hidden-checkbox {
+            display: none;
+        }
+
+        .math-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            font-size: 0.85rem;
+            font-family: 'Space Grotesk', serif;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .info-panel {
+            margin-top: 30px;
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .info-panel h2 {
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Conditional Probability Density Functions</h1>
+        <p>Explore how knowing the value of one variable changes our expectation of another in a Bivariate Normal distribution.</p>
+    </header>
+
+    <div class="dashboard">
+        <!-- Joint Distribution (3D) -->
+        <div class="card">
+            <div class="control-label">
+                <span>Joint PDF Surface: f(x, y)</span>
+                <span class="value-display">3D View</span>
+            </div>
+            <div class="viz-container" id="container3d">
+                <canvas id="canvas3d"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background: var(--viz-blue)"></div> Joint Surface</div>
+                <div class="legend-item"><div class="dot" style="background: var(--accent)"></div> Slicing Plane (X)</div>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Slice Position (x)</span>
+                        <span id="x-val" class="value-display">0.00</span>
+                    </div>
+                    <input type="range" id="slider-x" min="-3" max="3" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Correlation (&rho;)</span>
+                        <span id="rho-val" class="value-display">0.50</span>
+                    </div>
+                    <input type="range" id="slider-rho" min="-0.95" max="0.95" step="0.05" value="0.5">
+                </div>
+            </div>
+        </div>
+
+        <!-- Conditional Distribution (2D) -->
+        <div class="card">
+            <div class="control-label">
+                <span id="slice-title">Joint Slice vs. Conditional PDF</span>
+                <span class="value-display">2D View</span>
+            </div>
+            <div class="viz-container" id="container2d">
+                <canvas id="canvas2d"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background: var(--accent)"></div> Slice at x</div>
+                <div class="legend-item"><div class="dot" style="background: var(--viz-teal)"></div> Full Conditional f(y|x)</div>
+            </div>
+            <div class="controls">
+                <label class="toggle-container">
+                    <input type="checkbox" id="normalize-toggle" class="hidden-checkbox">
+                    <div class="toggle"></div>
+                    <span style="font-weight: 600;">Normalize to PDF (Area = 1)</span>
+                </label>
+                <div class="math-box" id="math-output">
+                    f(y | x=0.0) is Normal with Mean: 0.00 and Std Dev: 0.87
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <h2>Understanding the Visualization</h2>
+        <div class="info-grid">
+            <div>
+                <h3>The Joint Surface</h3>
+                <p>The 3D "mountain" represents the <strong>Joint PDF</strong>, f(x, y). It shows the probability density of X and Y occurring simultaneously. When correlation (&rho;) is zero, the surface is a circular bell. As &rho; increases, the mountain stretches along a diagonal.</p>
+                <p style="margin-top: 10px;">Move the <strong>Slice Position</strong> slider to see how we restrict our universe to a specific "slice" of X.</p>
+            </div>
+            <div>
+                <h3>The Conditional PDF</h3>
+                <p>When we know X = x, we are only interested in the values of Y on that specific slice. However, a slice of a PDF doesn't necessarily have an area of 1.</p>
+                <p style="margin-top: 10px;">The <strong>Normalize</strong> toggle transforms the raw slice into a valid <strong>Conditional PDF</strong>, f(y|x), by dividing every point by the total probability of that X occurring. Notice how the shape stays the same, but the height changes!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Design System Constants
+        const COLORS = {
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            bg: '#FEFBF6',
+            blue: '#3b82f6',
+            teal: '#14b8a6',
+            green: '#10b981',
+            text: '#2D3436'
+        };
+
+        // State
+        let state = {
+            x: 0,
+            rho: 0.5,
+            normalize: false,
+            rotation: { x: 0.6, z: 0.5 },
+            isDragging: false,
+            lastMouse: { x: 0, y: 0 }
+        };
+
+        // DOM Elements
+        const canvas3d = document.getElementById('canvas3d');
+        const canvas2d = document.getElementById('canvas2d');
+        const ctx3d = canvas3d.getContext('2d');
+        const ctx2d = canvas2d.getContext('2d');
+        
+        const sliderX = document.getElementById('slider-x');
+        const sliderRho = document.getElementById('slider-rho');
+        const toggleNormalize = document.getElementById('normalize-toggle');
+        const valX = document.getElementById('x-val');
+        const valRho = document.getElementById('rho-val');
+        const mathOutput = document.getElementById('math-output');
+
+        function init() {
+            resize();
+            attachListeners();
+            animate();
+        }
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            
+            const rect3d = canvas3d.parentElement.getBoundingClientRect();
+            canvas3d.width = rect3d.width * dpr;
+            canvas3d.height = rect3d.height * dpr;
+            
+            const rect2d = canvas2d.parentElement.getBoundingClientRect();
+            canvas2d.width = rect2d.width * dpr;
+            canvas2d.height = rect2d.height * dpr;
+        }
+
+        function attachListeners() {
+            window.addEventListener('resize', resize);
+
+            sliderX.addEventListener('input', (e) => {
+                state.x = parseFloat(e.target.value);
+                valX.textContent = state.x.toFixed(2);
+                updateMath();
+            });
+
+            sliderRho.addEventListener('input', (e) => {
+                state.rho = parseFloat(e.target.value);
+                valRho.textContent = state.rho.toFixed(2);
+                updateMath();
+            });
+
+            toggleNormalize.addEventListener('change', (e) => {
+                state.normalize = e.target.checked;
+            });
+
+            // 3D Interaction
+            canvas3d.addEventListener('mousedown', startDrag);
+            window.addEventListener('mousemove', drag);
+            window.addEventListener('mouseup', endDrag);
+
+            canvas3d.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+            window.addEventListener('touchmove', (e) => drag(e.touches[0]));
+            window.addEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            state.isDragging = true;
+            state.lastMouse = { x: e.clientX, y: e.clientY };
+        }
+
+        function drag(e) {
+            if (!state.isDragging) return;
+            const dx = e.clientX - state.lastMouse.x;
+            const dy = e.clientY - state.lastMouse.y;
+            state.rotation.z += dx * 0.01;
+            state.rotation.x += dy * 0.01;
+            state.lastMouse = { x: e.clientX, y: e.clientY };
+        }
+
+        function endDrag() {
+            state.isDragging = false;
+        }
+
+        function updateMath() {
+            // Conditional Normal: Mean = mu_y + rho * (sigma_y / sigma_x) * (x - mu_x)
+            // Assuming mu=0, sigma=1
+            const condMean = state.rho * state.x;
+            const condStd = Math.sqrt(1 - state.rho * state.rho);
+            mathOutput.innerHTML = `f(y | x=${state.x.toFixed(1)}) is Normal with Mean: <b>${condMean.toFixed(2)}</b> and Std Dev: <b>${condStd.toFixed(2)}</b>`;
+        }
+
+        // --- Math Functions ---
+
+        function bivariateNormal(x, y, rho) {
+            const z = (x*x - 2*rho*x*y + y*y) / (2 * (1 - rho*rho));
+            const norm = 1 / (2 * Math.PI * Math.sqrt(1 - rho*rho));
+            return norm * Math.exp(-z);
+        }
+
+        function marginalX(x) {
+            // Standard normal f(x) since sigma=1, mu=0
+            return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+        }
+
+        // --- Rendering ---
+
+        function project(x, y, z, width, height) {
+            // Simple 3D projection
+            const scale = width * 0.15;
+            
+            // Rotate around Z
+            let x1 = x * Math.cos(state.rotation.z) - y * Math.sin(state.rotation.z);
+            let y1 = x * Math.sin(state.rotation.z) + y * Math.cos(state.rotation.z);
+            
+            // Rotate around X
+            let y2 = y1 * Math.cos(state.rotation.x) - z * Math.sin(state.rotation.x);
+            let z2 = y1 * Math.sin(state.rotation.x) + z * Math.cos(state.rotation.x);
+            
+            return {
+                x: width / 2 + x1 * scale,
+                y: height / 2 - y2 * scale,
+                z: z2 // for sorting if needed
+            };
+        }
+
+        function draw3D() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = canvas3d.width;
+            const h = canvas3d.height;
+            ctx3d.clearRect(0, 0, w, h);
+            ctx3d.save();
+            ctx3d.scale(dpr, dpr);
+            const sw = w / dpr;
+            const sh = h / dpr;
+
+            const res = 20;
+            const range = 4;
+            const step = (range * 2) / res;
+
+            // Draw grid / Surface
+            ctx3d.lineWidth = 1;
+            
+            // Draw Y-lines
+            for (let x = -range; x <= range; x += step) {
+                ctx3d.beginPath();
+                const isSlice = Math.abs(x - state.x) < step/2;
+                ctx3d.strokeStyle = isSlice ? COLORS.accent : `${COLORS.blue}44`;
+                ctx3d.lineWidth = isSlice ? 3 : 1;
+
+                for (let y = -range; y <= range; y += 0.2) {
+                    const z = bivariateNormal(x, y, state.rho) * 4;
+                    const p = project(x, y, z, sw, sh);
+                    if (y === -range) ctx3d.moveTo(p.x, p.y);
+                    else ctx3d.lineTo(p.x, p.y);
+                }
+                ctx3d.stroke();
+            }
+
+            // Draw X-lines (faint)
+            ctx3d.lineWidth = 1;
+            ctx3d.strokeStyle = `${COLORS.blue}22`;
+            for (let y = -range; y <= range; y += step) {
+                ctx3d.beginPath();
+                for (let x = -range; x <= range; x += 0.2) {
+                    const z = bivariateNormal(x, y, state.rho) * 4;
+                    const p = project(x, y, z, sw, sh);
+                    if (x === -range) ctx3d.moveTo(p.x, p.y);
+                    else ctx3d.lineTo(p.x, p.y);
+                }
+                ctx3d.stroke();
+            }
+
+            // Draw Axes
+            ctx3d.strokeStyle = '#ccc';
+            ctx3d.lineWidth = 1;
+            const o = project(0,0,0, sw, sh);
+            const ax = project(4.5,0,0, sw, sh);
+            const ay = project(0,4.5,0, sw, sh);
+            const az = project(0,0,4.5, sw, sh);
+            
+            ctx3d.beginPath();
+            ctx3d.moveTo(o.x, o.y); ctx3d.lineTo(ax.x, ax.y);
+            ctx3d.moveTo(o.x, o.y); ctx3d.lineTo(ay.x, ay.y);
+            ctx3d.moveTo(o.x, o.y); ctx3d.lineTo(az.x, az.y);
+            ctx3d.stroke();
+
+            ctx3d.restore();
+        }
+
+        function draw2D() {
+            const dpr = window.devicePixelRatio || 1;
+            const w = canvas2d.width;
+            const h = canvas2d.height;
+            ctx2d.clearRect(0, 0, w, h);
+            ctx2d.save();
+            ctx2d.scale(dpr, dpr);
+            const sw = w / dpr;
+            const sh = h / dpr;
+
+            const padding = 40;
+            const plotW = sw - padding * 2;
+            const plotH = sh - padding * 2;
+
+            // Draw Axes
+            ctx2d.strokeStyle = '#ddd';
+            ctx2d.beginPath();
+            ctx2d.moveTo(padding, sh - padding);
+            ctx2d.lineTo(sw - padding, sh - padding);
+            ctx2d.moveTo(padding, padding);
+            ctx2d.lineTo(padding, sh - padding);
+            ctx2d.stroke();
+
+            // Labels
+            ctx2d.fillStyle = COLORS.text;
+            ctx2d.font = '12px DM Sans';
+            ctx2d.textAlign = 'center';
+            ctx2d.fillText('y axis', sw/2, sh - 10);
+            ctx2d.save();
+            ctx2d.translate(15, sh/2);
+            ctx2d.rotate(-Math.PI/2);
+            ctx2d.fillText('Density', 0, 0);
+            ctx2d.restore();
+
+            const range = 4;
+            const points = [];
+            let maxZ = 0.5; // Fixed viewport max for scale stability
+
+            const marginalAtX = marginalX(state.x);
+
+            for (let y = -range; y <= range; y += 0.05) {
+                let z = bivariateNormal(state.x, y, state.rho);
+                
+                // If normalizing, we divide by the marginal of X at that point
+                if (state.normalize) {
+                    z = z / marginalAtX;
+                    maxZ = 1.0; // Rescale axis for probability
+                }
+
+                points.push({ y, z });
+            }
+
+            // Map points to pixels
+            const getX = (y) => padding + ((y + range) / (range * 2)) * plotW;
+            const getY = (z) => (sh - padding) - (z / maxZ) * plotH;
+
+            // Draw the Slice (filled area)
+            ctx2d.beginPath();
+            ctx2d.fillStyle = state.normalize ? `${COLORS.teal}22` : `${COLORS.accent}22`;
+            ctx2d.moveTo(getX(-range), getY(0));
+            points.forEach(p => ctx2d.lineTo(getX(p.y), getY(p.z)));
+            ctx2d.lineTo(getX(range), getY(0));
+            ctx2d.fill();
+
+            // Draw the Curve
+            ctx2d.beginPath();
+            ctx2d.strokeStyle = state.normalize ? COLORS.teal : COLORS.accent;
+            ctx2d.lineWidth = 3;
+            points.forEach((p, i) => {
+                if (i === 0) ctx2d.moveTo(getX(p.y), getY(p.z));
+                else ctx2d.lineTo(getX(p.y), getY(p.z));
+            });
+            ctx2d.stroke();
+
+            // Draw target conditional mean indicator
+            const condMean = state.rho * state.x;
+            const condZ = state.normalize ? bivariateNormal(state.x, condMean, state.rho) / marginalAtX : bivariateNormal(state.x, condMean, state.rho);
+            
+            ctx2d.setLineDash([5, 5]);
+            ctx2d.beginPath();
+            ctx2d.moveTo(getX(condMean), sh - padding);
+            ctx2d.lineTo(getX(condMean), getY(condZ));
+            ctx2d.strokeStyle = '#999';
+            ctx2d.stroke();
+            ctx2d.setLineDash([]);
+
+            ctx2d.restore();
+        }
+
+        function animate() {
+            draw3D();
+            draw2D();
+            requestAnimationFrame(animate);
+        }
+
+        // Run
+        init();
+
+    </script>
+</body>
+</html>

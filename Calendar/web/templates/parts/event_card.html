@@ -1,0 +1,23 @@
+<template id="event-card-template">
+    <div class="event-card border-l-4 overflow-hidden cursor-pointer font-sans">
+        <div class="event-content h-full">
+             <!-- Normal Layout (taller events) -->
+            <div class="normal-layout hidden flex flex-col h-full overflow-hidden">
+                 <div class="event-title font-semibold leading-tight line-clamp-2" style="font-family: var(--font-heading);"></div>
+                 <div class="event-sub text-xs opacity-75 truncate hidden"></div>
+                 <div class="event-time-block text-xs mt-auto time-font truncate whitespace-nowrap"></div>
+            </div>
+            
+            <!-- Compact Layout (shorter events - title priority) -->
+             <div class="small-layout hidden flex flex-col justify-center h-full overflow-hidden">
+                <span class="small-title font-semibold leading-tight line-clamp-2" style="font-family: var(--font-heading);"></span>
+                <span class="small-time text-xs time-font truncate whitespace-nowrap"></span>
+            </div>
+            
+            <!-- Tiny Layout (very short events - title only) -->
+             <div class="tiny-layout hidden flex items-center h-full overflow-hidden">
+                <span class="tiny-title font-semibold truncate" style="font-family: var(--font-heading);"></span>
+            </div>
+        </div>
+    </div>
+</template>

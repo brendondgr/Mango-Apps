@@ -1,0 +1,42 @@
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-header">
+            <h3>Upload Schedule</h3>
+            <button id="closeUpload" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Drag and Drop Zone -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone__icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <p class="drop-zone__text">
+                    Drag & drop your <strong>.json</strong> file here<br>
+                    <span style="color: var(--color-text-tertiary);">or click to browse</span>
+                </p>
+                <input type="file" id="fileInput" accept=".json" class="hidden">
+            </div>
+            
+            <!-- Selected File Display -->
+            <div id="selectedFile" class="hidden mt-4 p-3 rounded-lg flex items-center gap-3" style="background: var(--color-surface);">
+                <i class="fas fa-file-code" style="color: var(--color-primary);"></i>
+                <span id="selectedFileName" class="text-sm flex-1 truncate"></span>
+                <button id="clearFile" class="text-sm" style="color: var(--color-text-tertiary);">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button id="cancelUpload" class="btn btn-ghost">Cancel</button>
+            <button id="submitUpload" class="btn btn-primary">
+                <i class="fas fa-upload"></i>
+                Upload
+            </button>
+        </div>
+    </div>
+</div>

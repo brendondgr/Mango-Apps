@@ -1,0 +1,30 @@
+<!-- Schedule Editor Tab - Contains existing schedule editing functionality -->
+<div id="scheduleEditorTab" class="tab-content">
+    <!-- Timeline Controls -->
+    {% include 'parts/timeline_controls.html' %}
+    
+    <!-- Tags Row (above calendar) -->
+    <div class="tags-row flex justify-end overflow-x-auto sm:overflow-visible py-2 px-2 sm:px-0">
+        <div id="categoryLegend" class="legend-row flex-nowrap sm:flex-wrap overflow-x-auto sm:overflow-visible no-scrollbar">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+
+    <!-- Timeline View -->
+    <div class="schedule-wrapper">
+        <div id="scheduleContainer" class="schedule-grid"></div>
+    </div>
+
+    <!-- Summary Table View (Hidden by default) -->
+    <div id="statsContainer" class="hidden w-full flex items-start justify-center pb-20 sm:pb-0">
+        <div class="rounded-xl w-full max-w-3xl overflow-hidden fade-in m-2 sm:m-4" style="background: var(--color-surface-elevated); box-shadow: var(--shadow-lg);">
+            <div class="p-4 sm:p-6" style="background: var(--color-surface); border-bottom: 1px solid var(--color-border-light);">
+                <h2 class="text-xl font-bold" style="font-family: var(--font-heading); color: var(--color-text-primary);">Weekly Breakdown</h2>
+                <p class="text-sm" style="color: var(--color-text-secondary);">Total hours allocated per category</p>
+            </div>
+            <div class="p-4 sm:p-6 overflow-auto max-h-[calc(100vh-220px)] sm:max-h-[calc(100vh-280px)] custom-scrollbar">
+                {% include 'parts/summary_table.html' %}
+            </div>
+        </div>
+    </div>
+</div>

@@ -286,6 +286,13 @@ def _process_image_url(url):
     if not url or not url.startswith('http'):
         return url
         
+    # Check if it's a local static file (prevent self-download loop)
+    if 'static/images/recipes' in url:
+        # Extract relative path starting from /static
+        path_parts = url.split('static/images/recipes')
+        if len(path_parts) > 1:
+            return f"/static/images/recipes{path_parts[1]}"
+            
     try:
         # Create filename
         ext = os.path.splitext(url)[1].split('?')[0] or '.jpg'

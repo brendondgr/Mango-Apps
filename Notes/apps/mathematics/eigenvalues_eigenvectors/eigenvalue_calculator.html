@@ -6,6 +6,7 @@
     <title>Eigenvalue & Eigenvector Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -33,10 +34,9 @@
             margin: 20px 0;
             padding: 15px;
             background: #F8F5FC;
-            border-radius: 8px;
+            border-radius: 10px; /* Rounded brackets simulation */
             border-left: 2px solid #4C3BCF;
             border-right: 2px solid #4C3BCF;
-            border-radius: 10px; /* Rounded brackets simulation */
         }
 
         .matrix-grid input {
@@ -87,7 +87,7 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.2em;
             color: #4C3BCF;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -114,13 +114,15 @@
             margin-top: 10px;
             font-size: 1.1em;
             color: #333;
+            text-align: center;
         }
 
         @keyframes slideIn {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .vector-list { margin-top: 10px; padding-left: 20px; }
+        /* MathJax adjustments */
+        mjx-container { font-size: 110% !important; }
     </style>
 </head>
 <body>
@@ -147,6 +149,11 @@
     <script>
         let size = 2;
 
+        // Initialize MathJax
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+
         function setSize(s) {
             size = s;
             document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
@@ -159,9 +166,11 @@
             container.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
             container.innerHTML = '';
             
-            // Defualts
-            const def2 = [4, 1, 2, 3]; // Nice integers 5, 2
-            const def3 = [2, 0, 0, 0, 3, 4, 0, 4, 9]; // Block diagonal
+            // Defaults with nice integer eigenvalues for demonstration
+            // 2x2: (4-L)(3-L)-2 = 12-7L+L^2-2 = L^2-7L+10 = (L-5)(L-2) -> 5, 2
+            const def2 = [4, 1, 2, 3]; 
+            // 3x3: Block diagonal [2,0,0; 0,3,4; 0,4,9]
+            const def3 = [2, 0, 0, 0, 3, 4, 0, 4, 9]; 
             
             const defs = size === 2 ? def2 : def3;
 
@@ -180,153 +189,281 @@
             for(let r=0; r<size; r++) {
                 let row = [];
                 for(let c=0; c<size; c++) {
-                    row.push(parseFloat(document.getElementById(`m${r*size + c}`).value));
+                    const val = parseFloat(document.getElementById(`m${r*size + c}`).value);
+                    m.push(isNaN(val) ? 0 : val);
                 }
                 m.push(row);
             }
             return m;
         }
 
-        function formatVal(v) {
-            if (math.abs(math.round(v) - v) < 0.001) return Math.round(v);
-            return v.toFixed(3);
+        // --- Math Helpers ---
+
+        function toTex(n) {
+            if (Math.abs(n) < 1e-10) return "0";
+            if (math.abs(Math.round(n) - n) < 0.001) return Math.round(n).toString();
+            return n.toFixed(3);
         }
 
-        function calculate() {
+        function matrixTex(M) {
+            if (!M || M.length === 0) return "";
+            return "\\begin{bmatrix}" + 
+                M.map(row => row.map(v => toTex(v)).join(" & ")).join(" \\\\ ") + 
+                "\\end{bmatrix}";
+        }
+
+        function matrixPolyTex(M) {
+            // Render A - λI
+            return "\\begin{bmatrix}" + 
+                M.map((row, r) => row.map((v, c) => {
+                    let val = toTex(v);
+                    if (r === c) {
+                        return `(${val} - \\lambda)`;
+                    }
+                    return val;
+                }).join(" & ")).join(" \\\\ ") + 
+                "\\end{bmatrix}";
+        }
+
+        async function calculate() {
             const container = document.getElementById('output');
             container.innerHTML = '';
             
-            const M = getMatrix();
+            const M = getMatrix(); 
             const matrixObj = math.matrix(M);
 
-            // Step 1: Characteristic Equation Setup
-            let step1 = document.createElement('div');
-            step1.className = 'step-card';
-            step1.style.animationDelay = '0ms';
-            
-            let detStr = '';
-            if (size === 2) {
-                detStr = `((${M[0][0]} - λ) × (${M[1][1]} - λ)) - (${M[0][1]} × ${M[1][0]})`;
-            } else {
-                detStr = `det(A - λI)`; // Simplifying display for 3x3 to avoid massive string
-            }
-
-            step1.innerHTML = `
+            // --- Step 1: Characteristic Equation ---
+            let step1Html = `
                 <div class="step-title"><span class="step-number">1</span>Characteristic Equation</div>
-                <p>We solve for <code>det(A - λI) = 0</code>.</p>
+                <p>To find the eigenvalues, we solve the characteristic equation:</p>
                 <div class="math-block">
-                    A - λI = <br>
-                    ${renderLatexMatrix(M, true)}
+                    $$ \\det(A - \\lambda I) = 0 $$
+                </div>
+                <p>Substituting our matrix $A$:</p>
+                <div class="math-block">
+                    $$ \\det ${matrixPolyTex(M)} = 0 $$
                 </div>
             `;
-            container.appendChild(step1);
 
-            // Step 2: Simplified Polynomial
-            let step2 = document.createElement('div');
-            step2.className = 'step-card';
-            step2.style.animationDelay = '100ms';
+            let simplifiedPoly = "";
             
-            // Calculate polynomial coefficients manually for visualization or use library
-            // For 2x2: λ² - tr(A)λ + det(A) = 0
-            const tr = math.trace(matrixObj);
-            const det = math.det(matrixObj);
-            
-            let polyStr = '';
             if (size === 2) {
-                polyStr = `λ² - ${formatVal(tr)}λ + ${formatVal(det)} = 0`;
+                const a = M[0][0], b = M[0][1], c = M[1][0], d = M[1][1];
+                const trace = a + d;
+                const det = a*d - b*c;
+                const polyString = `(${toTex(a)} - \\lambda)(${toTex(d)} - \\lambda) - (${toTex(b)})(${toTex(c)})`;
+                simplifiedPoly = `\\lambda^2 - ${toTex(trace)}\\lambda + ${toTex(det)}`;
+                
+                step1Html += `
+                    <p>For a 2x2 matrix, determinant is $ad - bc$:</p>
+                    <div class="math-block">
+                        $$ ${polyString} = 0 $$
+                    </div>
+                    <p>Expanding and simplifying:</p>
+                    <div class="math-block">
+                        $$ ${simplifiedPoly} = 0 $$
+                    </div>
+                `;
             } else {
-                // 3x3: -λ^3 + tr*λ^2 + ... messy. 
-                // Let's just solve directly.
-                polyStr = "Polynomial calculation (p(λ) = 0)";
+                // 3x3 expansion logic
+                const [r0, r1, r2] = M;
+                step1Html += `
+                    <p>Expanding the determinant along the first row:</p>
+                    <div class="math-block" style="font-size: 0.9em">
+                        $$ (${toTex(r0[0])}-\\lambda) \\left| \\begin{matrix} ${toTex(r1[1])}-\\lambda & ${toTex(r1[2])} \\\\ ${toTex(r2[1])} & ${toTex(r2[2])}-\\lambda \\end{matrix} \\right| 
+                           - (${toTex(r0[1])}) \\left| \\begin{matrix} ${toTex(r1[0])} & ${toTex(r1[2])} \\\\ ${toTex(r2[0])} & ${toTex(r2[2])}-\\lambda \\end{matrix} \\right| 
+                           + (${toTex(r0[2])}) \\left| \\begin{matrix} ${toTex(r1[0])} & ${toTex(r1[1])} \\\\ ${toTex(r2[0])} & ${toTex(r2[1])} \\end{matrix} \\right|
+                           = 0 $$
+                    </div>
+                `;
+                
+                const trace = math.trace(matrixObj);
+                const det = math.det(matrixObj);
+                const m11 = M[1][1]*M[2][2] - M[1][2]*M[2][1];
+                const m22 = M[0][0]*M[2][2] - M[0][2]*M[2][0];
+                const m33 = M[0][0]*M[1][1] - M[0][1]*M[1][0];
+                const sumMinors = m11 + m22 + m33;
+                
+                const sTrace = trace < 0 ? `- ${toTex(Math.abs(trace))}` : `+ ${toTex(trace)}`;
+                // Note: The formula is -lambda^3 + trace*lambda^2 - ...
+                // But typically we solve lambda^3 - trace*lambda^2 + ... = 0 (multiplying by -1)
+                // Let's stick to standard det expansion: det(A-lI) usually starts with -l^3
+                
+                simplifiedPoly = `-\\lambda^3 + ${toTex(trace)}\\lambda^2 - ${toTex(sumMinors)}\\lambda + ${toTex(det)}`;
+                
+                step1Html += `
+                    <p>Simplifying gives the characteristic polynomial:</p>
+                    <div class="math-block">
+                        $$ ${simplifiedPoly} = 0 $$
+                    </div>
+                `;
             }
 
-            step2.innerHTML = `
-                <div class="step-title"><span class="step-number">2</span>Polynomial</div>
-                <div class="math-block">
-                    ${size === 2 ? polyStr : 'Finding roots of polynomial...'}
-                </div>
-            `;
-            container.appendChild(step2);
+            addStep(container, step1Html, 0);
 
-            // Step 3: Eigenvalues
-            let step3 = document.createElement('div');
-            step3.className = 'step-card';
-            step3.style.animationDelay = '200ms';
-            
+            // --- Step 2: Eigenvalues ---
             const eigs = math.eigs(matrixObj);
-            let vals = eigs.values;
+            const values = eigs.values;
             
-            // Clean up values
-            vals = vals.map(v => {
-                if(math.isComplex(v)) {
-                   return `${formatVal(v.re)} ${v.im >= 0 ? '+' : ''} ${formatVal(v.im)}i`;  
-                } 
-                return formatVal(v);
+            // Nice text formatting
+            const niceValues = values.map(v => {
+                if (math.isComplex(v)) {
+                    if (Math.abs(v.im) < 1e-10) return toTex(v.re);
+                    return `${toTex(v.re)} ${v.im >= 0 ? '+' : '-'} ${toTex(Math.abs(v.im))}i`;
+                }
+                return toTex(v);
             });
 
-            step3.innerHTML = `
-                <div class="step-title"><span class="step-number">3</span>Eigenvalues (λ)</div>
+            addStep(container, `
+                <div class="step-title"><span class="step-number">2</span>Eigenvalues</div>
+                <p>Solving the polynomial roots gives the eigenvalues:</p>
                 <div class="math-block">
-                    ${vals.map((v, i) => `λ_${i+1} = ${v}`).join('<br>')}
+                     $$ \\lambda \\in \\{ ${niceValues.join(', ')} \\} $$
                 </div>
-            `;
-            container.appendChild(step3);
+            `, 100);
 
-            // Step 4: Eigenvectors
-            let step4 = document.createElement('div');
-            step4.className = 'step-card';
-            step4.style.animationDelay = '300ms';
+            // --- Step 3: Eigenvectors ---
+            let eigStepHtml = `<div class="step-title"><span class="step-number">3</span>Eigenvectors</div>`;
             
-            let vecStr = '';
-            
-            // math.eigs returns vectors as columns in a matrix
-            // Note: math.js might return normalized vectors
-            const vectors = eigs.vectors; 
-            
-            for(let i=0; i<size; i++) {
-                // Extract column i
-                let col = [];
-                for(let r=0; r<size; r++) {
-                    let val = vectors.get([r, i]);
-                     if(math.isComplex(val)) {
-                        val = `${formatVal(val.re)}${val.im > 0 ? '+' : ''}${formatVal(val.im)}i`;
-                    } else {
-                        val = formatVal(val);
+            // Deduplicate for display
+            const uniqueLambdas = [];
+            values.forEach(v => {
+                let valToCheck = typeof v === 'number' ? v : v.re; // simplified check
+                // This complex check is simple; robust check would require full complex check
+                // For this demo, let's rely on string repr for uniqueness
+                let str = math.isComplex(v) && Math.abs(v.im) > 1e-10 ? `${toTex(v.re)}${v.im>=0?'+':''}${toTex(v.im)}i` : toTex(v);
+                
+                if(!uniqueLambdas.find(u => u.str === str)) {
+                    uniqueLambdas.push({ val: v, str: str });
+                }
+            });
+
+            for (let i = 0; i < uniqueLambdas.length; i++) {
+                const lambda = uniqueLambdas[i];
+                eigStepHtml += `<h3>For $\\lambda = ${lambda.str}$:</h3>`;
+                eigStepHtml += `<p>Solve $(A - ${lambda.str}I)\\mathbf{v} = \\mathbf{0}$. We reduce the augmented matrix:</p>`;
+
+                const isComplex = typeof lambda.val === 'object' && Math.abs(lambda.val.im) > 1e-10;
+                
+                if (isComplex) {
+                    eigStepHtml += `<p><em>(Showing simplified result for complex eigenvalue)</em></p>`;
+                    // Find vector
+                    const idx = values.findIndex(v => {
+                        if(typeof v === 'number') return false; 
+                        return Math.abs(v.re - lambda.val.re) < 0.001; 
+                    });
+                    
+                    let col = [];
+                    for(let r=0; r<size; r++) {
+                        let c = eigs.vectors.get([r, idx]);
+                        col.push(typeof c === 'object' ? `${toTex(c.re)}${c.im>=0?'+':''}${toTex(c.im)}i` : toTex(c));
                     }
-                    col.push(val);
+                    
+                    eigStepHtml += `
+                    <div class="math-block">
+                        $$ \\mathbf{v} \\approx \\begin{bmatrix} ${col.join(" \\\\ ")} \\end{bmatrix} $$
+                    </div><hr>`;
+                    continue;
+                }
+
+                // Real eigenvalue
+                const lambdaVal = typeof lambda.val === 'number' ? lambda.val : lambda.val.re;
+                let augM = M.map(row => row.map(v => v));
+                for(let k=0; k<size; k++) augM[k][k] -= lambdaVal;
+                
+                eigStepHtml += `
+                <div class="math-block">
+                    $$ \\left[ \\begin{array}{${'c'.repeat(size)}|c} 
+                    ${augM.map(row => row.map(v=>toTex(v)).join(' & ')).join(' \\\\ ')} & 0
+                    \\end{array} \\right] $$
+                </div>
+                `;
+                
+                // Perform RREF
+                const rrefRes = computedRref(augM);
+                const finalM = rrefRes.M;
+                
+                eigStepHtml += `<p>Row reducing to RREF:</p>
+                <div class="math-block">
+                    $$ \\sim \\left[ \\begin{array}{${'c'.repeat(size)}|c} 
+                    ${finalM.map(row => row.map(v=>toTex(v)).join(' & ')).join(' \\\\ ')} & 0
+                    \\end{array} \\right] $$
+                </div>`;
+
+                // Calculate vector from RREF (Visual only fallback to math.js vector for reliability)
+                // Doing the "free variable" logic fully robustly in JS for all edge cases is heavy.
+                // We will display the math.js vector as the "Solution".
+                
+                // Find matching vector from library result
+                let matchIdx = values.findIndex(v => Math.abs((typeof v==='number'?v:v.re) - lambdaVal) < 0.001);
+                let vec = [];
+                for(let r=0; r<size; r++) vec.push(eigs.vectors.get([r, matchIdx]));
+
+                // Normalize for display (integers preference)
+                let maxVal = 0;
+                vec.forEach(x => { if(Math.abs(x) > maxVal) maxVal = Math.abs(x); });
+                if (maxVal > 0) {
+                     // Normalize so largest is 1, then check if others are rational
+                     // Or just divide by smallest non-zero
+                     let minVal = Infinity;
+                     vec.forEach(x => { if(Math.abs(x)>1e-6 && Math.abs(x)<minVal) minVal=Math.abs(x); });
+                     let niceVec = vec.map(x => x/minVal);
+                     // Check if roundable
+                     if(niceVec.every(x => Math.abs(x - Math.round(x)) < 0.01)) {
+                         vec = niceVec.map(x => Math.round(x));
+                     }
                 }
                 
-                vecStr += `<div><strong>For λ = ${vals[i]}:</strong><br>v = [ ${col.join(', ')} ]</div><br>`;
+                eigStepHtml += `<p>The subspace is spanned by:</p>
+                    <div class="math-block">
+                        $$ \\mathbf{v} = \\begin{bmatrix} ${vec.map(c => toTex(c)).join(" \\\\ ")} \\end{bmatrix} $$
+                    </div><hr>
+                `;
             }
+            
+            addStep(container, eigStepHtml, 200);
 
-            step4.innerHTML = `
-                <div class="step-title"><span class="step-number">4</span>Eigenvectors</div>
-                <p>Solving (A - λI)v = 0 for each λ:</p>
-                <div class="math-block" style="font-size: 0.9em;">
-                    ${vecStr}
-                </div>
-            `;
-            container.appendChild(step4);
-
+            // Trigger MathJax
+            if (window.MathJax) {
+                 // MathJax 3 async typeset
+                 MathJax.typesetPromise([container]).catch((err) => console.log(err));
+            }
         }
 
-        function renderLatexMatrix(M, subtractLambda) {
-            let s = '<table style="display:inline-table; vertical-align:middle; border-left:2px solid; border-right:2px solid; padding:0 5px;">';
-            for(let row of M) {
-                s += '<tr>';
-                for(let val of row) {
-                    s += `<td style="padding:5px 10px;">${val}${subtractLambda ? (size==2 && val==M[0][0] || val==M[1][1] ? ' - λ' : '') : ''}</td>`;
+        function addStep(container, html, delay) {
+            const div = document.createElement('div');
+            div.className = 'step-card';
+            div.style.animationDelay = delay + 'ms';
+            div.innerHTML = html;
+            container.appendChild(div);
+        }
+
+        function computedRref(A) {
+            let M = A.map(row => [...row]);
+            let pivotRow = 0;
+            const rows = M.length;
+            const cols = M[0].length;
+
+            for (let c = 0; c < cols && pivotRow < rows; c++) {
+                let i = pivotRow;
+                while (i < rows && Math.abs(M[i][c]) < 1e-6) i++;
+                if (i === rows) continue; 
+
+                [M[pivotRow], M[i]] = [M[i], M[pivotRow]];
+
+                let pivotVal = M[pivotRow][c];
+                for (let j = c; j < cols; j++) M[pivotRow][j] /= pivotVal;
+
+                for (let r = 0; r < rows; r++) {
+                    if (r !== pivotRow) {
+                        let factor = M[r][c];
+                        for (let j = c; j < cols; j++) M[r][j] -= factor * M[pivotRow][j];
+                    }
                 }
-                s += '</tr>';
+                pivotRow++;
             }
-            s += '</table>';
-            return s; 
+            return { M: M };
         }
-        
-        // Improve styling of 3x3 minus lambda for diag
-        // Actually the subtractLambda logic in loop above is flawed for 3x3... 
-        // Let's keep it simple for now or fix it.
-        // It's only visual.
         
         renderInputs();
     </script>

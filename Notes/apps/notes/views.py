@@ -113,9 +113,9 @@ def topic_detail(request, topic_id):
     
     # Construct path to the topic's markdown file
     # Assuming topic.directory_path is relative to 'apps' or configured root
-    # Adjusting based on user request: BASE_DIR / 'apps' / 'Notes' / 'apps' / topic.directory_path
+    # Adjusting based on user request: BASE_DIR / 'apps' / topic.directory_path
     
-    topic_path = settings.BASE_DIR / 'apps' / 'Notes' / 'apps' / topic.directory_path.replace('\\', '/')
+    topic_path = settings.BASE_DIR / 'apps' / topic.directory_path.replace('\\', '/')
     
     metadata, _ = services.parse_topic_metadata(topic_path)
     entry_point = metadata.entry_point if metadata else 'example.md'
@@ -155,7 +155,7 @@ def topic_detail(request, topic_id):
 def serve_visualization(request, topic_id, filename):
     topic = get_object_or_404(Topic, id=topic_id)
     
-    topic_path = settings.BASE_DIR / 'apps' / 'Notes' / 'apps' / topic.directory_path.replace('\\', '/')
+    topic_path = settings.BASE_DIR / 'apps' / topic.directory_path.replace('\\', '/')
     file_path = (topic_path / filename).resolve()
     
     # Security check: Ensure the resolved path is within the topic directory
@@ -199,7 +199,7 @@ def subject_create(request):
         form = SubjectForm(request.POST, request.FILES)
         if form.is_valid():
             subject = form.save()
-            return redirect('subject_detail', slug=subject.slug)
+            return redirect('notes:subject_detail', slug=subject.slug)
     else:
         form = SubjectForm()
     return render(request, 'notes/subject_form.html', {'form': form, 'title': 'Create Subject'})
@@ -210,7 +210,7 @@ def subject_edit(request, slug):
         form = SubjectForm(request.POST, request.FILES, instance=subject)
         if form.is_valid():
             subject = form.save()
-            return redirect('subject_detail', slug=subject.slug)
+            return redirect('notes:subject_detail', slug=subject.slug)
     else:
         form = SubjectForm(instance=subject)
     return render(request, 'notes/subject_form.html', {'form': form, 'title': 'Edit Subject', 'subject': subject})
@@ -219,8 +219,8 @@ def subject_delete(request, slug):
     subject = get_object_or_404(Subject, slug=slug)
     if request.method == 'POST':
         subject.delete()
-        return redirect('index')
-    return render(request, 'notes/delete_confirm.html', {'object': subject, 'type': 'Subject', 'cancel_url': 'subject_detail', 'slug': slug})
+        return redirect('notes:index')
+    return render(request, 'notes/delete_confirm.html', {'object': subject, 'type': 'Subject', 'cancel_url': 'notes:subject_detail', 'slug': slug})
 
 # Course CRUD
 def course_create(request):
@@ -228,7 +228,7 @@ def course_create(request):
         form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
             course = form.save()
-            return redirect('course_detail', slug=course.slug)
+            return redirect('notes:course_detail', slug=course.slug)
     else:
         form = CourseForm()
     return render(request, 'notes/course_form.html', {'form': form, 'title': 'Create Course'})
@@ -239,7 +239,7 @@ def course_edit(request, slug):
         form = CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             course = form.save()
-            return redirect('course_detail', slug=course.slug)
+            return redirect('notes:course_detail', slug=course.slug)
     else:
         form = CourseForm(instance=course)
     return render(request, 'notes/course_form.html', {'form': form, 'title': 'Edit Course', 'course': course})
@@ -249,8 +249,8 @@ def course_delete(request, slug):
     subject_slug = course.subject.slug
     if request.method == 'POST':
         course.delete()
-        return redirect('subject_detail', slug=subject_slug)
-    return render(request, 'notes/delete_confirm.html', {'object': course, 'type': 'Course', 'cancel_url': 'course_detail', 'slug': slug})
+        return redirect('notes:subject_detail', slug=subject_slug)
+    return render(request, 'notes/delete_confirm.html', {'object': course, 'type': 'Course', 'cancel_url': 'notes:course_detail', 'slug': slug})
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -381,7 +381,7 @@ def topic_create(request):
             set_topic_courses(topic, courses)
             topic.save()
             
-            return redirect('topic_detail', topic_id=topic.id)
+            return redirect('notes:topic_detail', topic_id=topic.id)
     else:
         form = TopicCreateForm()
     
@@ -401,7 +401,7 @@ def topic_edit(request, topic_id):
             # Handle courses using helper for proper ordering
             courses = form.cleaned_data.get('courses', [])
             set_topic_courses(topic, courses)
-            return redirect('topic_detail', topic_id=topic.id)
+            return redirect('notes:topic_detail', topic_id=topic.id)
     else:
         form = TopicForm(instance=topic)
     return render(request, 'notes/topic_form.html', {'form': form, 'title': 'Edit Topic', 'topic': topic})
@@ -414,9 +414,9 @@ def topic_delete(request, topic_id):
         topic.delete()
         # Redirect to course if available, otherwise to index
         if first_course:
-            return redirect('course_detail', slug=first_course.slug)
-        return redirect('index')
-    return render(request, 'notes/delete_confirm.html', {'object': topic, 'type': 'Topic', 'cancel_url': 'topic_detail', 'topic_id': topic_id})
+            return redirect('notes:course_detail', slug=first_course.slug)
+        return redirect('notes:index')
+    return render(request, 'notes/delete_confirm.html', {'object': topic, 'type': 'Topic', 'cancel_url': 'notes:topic_detail', 'topic_id': topic_id})
 
 
 # AI Topic Generation
@@ -430,7 +430,7 @@ def settings_view(request):
         
         save_api_keys(gemini_key=gemini_key, perplexity_key=perplexity_key)
         messages.success(request, 'API keys saved successfully!')
-        return redirect('settings')
+        return redirect('notes:settings')
     
     keys = get_api_keys()
     valid = has_valid_keys()
@@ -458,7 +458,7 @@ def generate_topic_view(request):
     valid_keys = has_valid_keys()
     if not valid_keys['gemini'] and not valid_keys['perplexity']:
         messages.error(request, 'No API keys configured. Please add your API keys in Settings.')
-        return redirect('settings')
+        return redirect('notes:settings')
     
     courses = Course.objects.select_related('subject').all()
     
@@ -534,7 +534,7 @@ def generate_topic_view(request):
             add_topic_to_course(topic, course)
             
             messages.success(request, f'Topic "{topic.title}" generated successfully!')
-            return redirect('topic_detail', topic_id=topic.id)
+            return redirect('notes:topic_detail', topic_id=topic.id)
     
     context = {
         'courses': courses,
@@ -619,7 +619,7 @@ def generate_topic_stream_view(request):
                          
                          topic = await save_topic()
                          
-                         event['redirect_url'] = reverse('topic_detail', kwargs={'topic_id': topic.id})
+                         event['redirect_url'] = reverse('notes:topic_detail', kwargs={'topic_id': topic.id})
                          del event['data'] 
                      except Exception as e:
                          event['type'] = 'log'

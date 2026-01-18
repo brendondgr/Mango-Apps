@@ -1,0 +1,116 @@
+<!-- Event Editor Modal -->
+<div id="eventEditorModal" class="modal-backdrop">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2 id="eventEditorTitle" class="modal-title">
+                <i class="fas fa-calendar-plus"></i>
+                <span>New Event</span>
+            </h2>
+            <button id="closeEventEditor" class="btn btn-icon btn-ghost" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="eventEditorForm" class="modal-body">
+            <!-- Title -->
+            <div class="form-group">
+                <label for="eventTitle" class="form-label">Title <span class="required">*</span></label>
+                <input type="text" id="eventTitle" class="form-input" placeholder="Event title" required>
+            </div>
+            
+            <!-- Type + Sub Row -->
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label for="eventType" class="form-label">Type <span class="required">*</span></label>
+                    <div class="select-wrapper">
+                        <select id="eventType" class="form-select" required>
+                            <option value="">Select type...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group flex-1">
+                    <label for="eventSub" class="form-label">Sub-label</label>
+                    <input type="text" id="eventSub" class="form-input" placeholder="Optional subtitle">
+                </div>
+            </div>
+            
+            <!-- Color Selection -->
+            <div class="form-group">
+                <label class="form-label">Color for this type</label>
+                <div id="colorDropdown" class="color-dropdown">
+                    <button type="button" id="colorDropdownBtn" class="color-dropdown-btn">
+                        <span class="color-swatch-preview"></span>
+                        <span class="color-dropdown-text">Select color...</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="colorDropdownMenu" class="color-dropdown-menu">
+                        <!-- Options populated dynamically -->
+                    </div>
+                </div>
+                <input type="hidden" id="colorSelect" name="colorSelect">
+            </div>
+            
+            <!-- Timestamp Entries -->
+            <div class="form-group">
+                <label class="form-label">Time Slots <span class="required">*</span></label>
+                <div id="timestampEntries" class="timestamp-entries">
+                    <!-- Dynamic entries will be added here -->
+                </div>
+                <button type="button" id="addTimestampBtn" class="btn btn-ghost btn-sm btn-full-width mt-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Time Slot</span>
+                </button>
+            </div>
+            
+            <!-- Overwriteable Toggle -->
+            <div class="form-group toggle-group">
+                <label class="toggle-label">
+                    <span class="toggle-text">
+                        <span class="toggle-title">Overwriteable</span>
+                        <span class="toggle-desc">Allow this event to be visually split by overlapping events</span>
+                    </span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="eventOverwriteable">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" id="deleteEventBtn" class="btn btn-danger hidden">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+            </button>
+            <div class="modal-footer-right">
+                <button type="button" id="cancelEventEditor" class="btn btn-ghost">Cancel</button>
+                <button type="submit" form="eventEditorForm" id="saveEventBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span>Save Event</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal-backdrop">
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <h2 class="modal-title text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Delete Event?</span>
+            </h2>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this event? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="cancelDelete" class="btn btn-ghost">Cancel</button>
+            <button type="button" id="confirmDelete" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+<!-- Info Modal -->
+<div id="infoModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 640px;">
+        <div class="modal-header">
+            <h3>Schedule Generation Instructions</h3>
+            <button id="closeInfo" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body" style="max-height: 60vh;">
+            <div class="p-4 rounded-lg" style="background: var(--color-surface); border: 1px solid var(--color-border-light);">
+                <pre id="infoContent" class="whitespace-pre-wrap text-sm select-all" style="font-family: var(--font-mono); color: var(--color-text-secondary);"></pre>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="flex-direction: column; align-items: stretch; gap: var(--space-3);">
+            <p class="text-center text-xs" style="color: var(--color-text-tertiary);">
+                <i class="fas fa-magic mr-1"></i>
+                Copy the text above and use it with your favorite LLM (Claude, ChatGPT) to generate a valid JSON schedule.
+            </p>
+            <button id="copyInstructions" class="btn btn-secondary w-full">
+                <i class="fas fa-copy"></i>
+                Copy to Clipboard
+            </button>
+        </div>
+    </div>
+</div>

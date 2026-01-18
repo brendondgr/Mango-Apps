@@ -80,7 +80,52 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    
+    <!-- Global Header -->
+    <header class="site-header glass-panel">
+        <div class="site-header__container">
+            <!-- Logo/Name - clickable to home -->
+            <a href="{% url 'notes:index' %}" class="site-header__logo">
+                StudyHub
+            </a>
+
+            <!-- Right-aligned actions -->
+            <nav class="site-header__actions">
+                <!-- New Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-ghost dropdown__trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                        <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span>
+                        New
+                        <svg class="dropdown__caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="dropdown__menu">
+                        <a href="{% url 'notes:subject_create' %}" class="dropdown__item">
+                            <span class="icon-mask icon-mask--sm" style="-webkit-mask-image: url('{% static 'notes/svg/grid-2x2.svg' %}'); mask-image: url('{% static 'notes/svg/grid-2x2.svg' %}');"></span>
+                            New Subject
+                        </a>
+                        <a href="{% url 'notes:course_create' %}" class="dropdown__item">
+                            <span class="icon-mask icon-mask--sm" style="-webkit-mask-image: url('{% static 'notes/svg/import.svg' %}'); mask-image: url('{% static 'notes/svg/import.svg' %}');"></span>
+                            New Course
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Generate Topic -->
+                <a href="{% url 'notes:generate_topic' %}" class="btn btn-primary">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/sparkles.svg' %}'); mask-image: url('{% static 'notes/svg/sparkles.svg' %}');"></span>
+                    Generate Topic
+                </a>
+
+                <!-- Settings -->
+                <a href="{% url 'notes:settings' %}" class="btn btn-ghost" title="Settings">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/settings.svg' %}'); mask-image: url('{% static 'notes/svg/settings.svg' %}');"></span>
+                    Settings
+                </a>
+            </nav>
+        </div>
+    </header>
+
     <main style="flex: 1; position: relative;">
         {% block content %}
         {% endblock %}

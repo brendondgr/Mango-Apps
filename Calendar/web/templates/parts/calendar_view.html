@@ -1,0 +1,15 @@
+<!-- Calendar View Container -->
+<div id="calendarTab" class="tab-content active">
+    <div class="calendar-container">
+        <!-- Calendar Controls -->
+        {% include 'parts/calendar_controls.html' %}
+        
+        <!-- Calendar Grid Container - wraps schedule-wrapper for week view compatibility -->
+        <div class="calendar-grid-container">
+            <div class="schedule-wrapper" id="calendarWeekWrapper">
+                <div id="calendarGridContent" class="schedule-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+

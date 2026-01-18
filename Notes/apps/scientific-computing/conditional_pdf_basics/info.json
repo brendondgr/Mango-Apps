@@ -1,0 +1,5 @@
+{
+    "title": "Conditional Probability Density Functions",
+    "description": "An introductory guide to understanding how the probability distribution of one continuous variable changes when another variable's value is known.",
+    "entry_point": "conditional_pdf_basics.md"
+}

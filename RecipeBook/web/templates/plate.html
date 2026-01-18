@@ -179,12 +179,12 @@
                 
                 const handleConfirm = () => {
                     onConfirm();
-                    this.hide();
+                    Modal.hide();
                     cleanup();
                 };
                 
                 const handleCancel = () => {
-                    this.hide();
+                    Modal.hide();
                     cleanup();
                 };
 
@@ -233,10 +233,11 @@
                     async () => {
                         const id = deleteBtn.dataset.id;
                         try {
-                            const res = await fetch(`/delete-recipe/${id}`, { method: 'POST' });
+                            const deleteUrl = "{{ url_for('delete_recipe_route', recipe_id='0') }}".replace('0', id);
+                            const res = await fetch(deleteUrl, { method: 'POST' });
                             const data = await res.json();
                             if (data.success) {
-                                window.location.href = '/';
+                                window.location.href = "{{ url_for('index') }}";
                             } else {
                                 Modal.alert('Error', 'Failed to delete: ' + (data.error || 'Unknown error'));
                             }

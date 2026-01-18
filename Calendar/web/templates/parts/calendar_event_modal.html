@@ -1,0 +1,98 @@
+<!-- Direct Calendar Event Modal - Add/Edit Events -->
+<div id="calendarEventModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-calendar-plus mr-2"></i>Add Event
+            </h2>
+            <button type="button" class="modal-close" onclick="document.getElementById('calendarEventModal').classList.remove('active')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="calendarEventForm" class="modal-body">
+            <!-- Date -->
+            <div class="form-group mb-4">
+                <label for="eventDate" class="form-label">Date</label>
+                <input type="date" id="eventDate" class="form-input" required>
+            </div>
+            
+            <!-- Title -->
+            <div class="form-group mb-4">
+                <label for="eventTitle" class="form-label">Event Title</label>
+                <input type="text" id="eventTitle" class="form-input" placeholder="e.g., Doctor Appointment" required>
+            </div>
+            
+            <!-- Type -->
+            <div class="form-group mb-4">
+                <label for="eventType" class="form-label">Event Type</label>
+                <select id="eventType" class="form-input">
+                    <option value="other">Other</option>
+                    <option value="work">Work</option>
+                    <option value="study">Study</option>
+                    <option value="personal">Personal</option>
+                    <option value="health">Health</option>
+                    <option value="social">Social</option>
+                    <option value="exercise">Exercise</option>
+                    <option value="travel">Travel</option>
+                </select>
+            </div>
+            
+            <!-- Time Range -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="form-group">
+                    <label for="eventStart" class="form-label">Start Time</label>
+                    <input type="time" id="eventStart" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventEnd" class="form-label">End Time</label>
+                    <input type="time" id="eventEnd" class="form-input" required>
+                </div>
+            </div>
+            
+            <!-- Description/Sub -->
+            <div class="form-group mb-6">
+                <label for="eventSub" class="form-label">Description (Optional)</label>
+                <input type="text" id="eventSub" class="form-input" placeholder="Additional details...">
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex justify-between items-center">
+                <button type="button" id="eventDeleteBtn" class="btn btn-danger hidden" title="Delete Event">
+                    <i class="fas fa-trash mr-1"></i>Delete
+                </button>
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('calendarEventModal').classList.remove('active')">
+                        Cancel
+                    </button>
+                    <button type="submit" id="eventSubmitBtn" class="btn btn-primary">
+                        <i class="fas fa-check mr-1"></i>Add Event
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Direct Event Delete Confirmation Modal -->
+<div id="directEventDeleteModal" class="modal-backdrop">
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <h2 class="modal-title text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Delete Event?</span>
+            </h2>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this event? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="cancelDirectEventDelete" class="btn btn-ghost">Cancel</button>
+            <button type="button" id="confirmDirectEventDelete" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+            </button>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,57 @@
+<!-- Calendar Configuration Modal - Manage Schedule Mappings -->
+<div id="calendarConfigModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-cog mr-2"></i>Calendar Settings
+            </h2>
+            <button type="button" class="modal-close" onclick="document.getElementById('calendarConfigModal').classList.remove('active')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Existing Entries -->
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold mb-2" style="color: var(--color-text-secondary);">Schedule Mappings</h3>
+                <div id="calendarEntryList" class="calendar-entry-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Add/Edit Entry Form -->
+            <form id="calendarEntryForm" class="space-y-4">
+                <h3 class="text-sm font-semibold" style="color: var(--color-text-secondary);">Add New Mapping</h3>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="entryStartDate" class="form-label">Start Date</label>
+                        <input type="date" id="entryStartDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryEndDate" class="form-label">End Date</label>
+                        <input type="date" id="entryEndDate" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="entrySchedule" class="form-label">Schedule</label>
+                    <select id="entrySchedule" class="form-input" required>
+                        <option value="">Select a schedule...</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('calendarEntryForm').reset()">
+                        Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>Add Mapping
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

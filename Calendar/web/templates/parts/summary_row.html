@@ -1,0 +1,46 @@
+<!-- Category Card Template -->
+<template id="category-card-template">
+    <div class="category-card">
+        <div class="category-card__header">
+            <div class="category-card__info">
+                <i class="category-card__expand fas fa-chevron-right" style="color: var(--color-text-tertiary);"></i>
+                <span class="category-card__badge"></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="category-card__hours"></span>
+                <span class="category-card__percent"></span>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar__fill"></div>
+        </div>
+        <div class="category-card__details">
+            <div class="category-card__details-inner">
+                <table class="w-full text-sm">
+                    <thead style="color: var(--color-text-tertiary);">
+                        <tr class="text-xs">
+                            <th class="py-2 text-left font-medium">Activity</th>
+                            <th class="py-2 text-left font-medium">Day</th>
+                            <th class="py-2 text-right font-medium">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody class="details-body">
+                        <!-- Detail rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Category Detail Item Template -->
+<template id="category-detail-template">
+    <tr>
+        <td class="py-2" style="color: var(--color-text-primary);">
+            <span class="detail-title font-medium"></span> 
+            <span class="detail-sub text-xs ml-1" style="color: var(--color-text-tertiary);"></span>
+        </td>
+        <td class="detail-day py-2 text-xs" style="color: var(--color-text-secondary);"></td>
+        <td class="detail-duration py-2 text-right" style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-secondary);"></td>
+    </tr>
+</template>

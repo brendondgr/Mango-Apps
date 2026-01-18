@@ -1,0 +1,143 @@
+/* ==========================================================================
+   CSS Custom Properties - Vibrant Color Palette
+   ========================================================================== */
+
+:root {
+    /* Primary Colors */
+    --color-primary: #FF6B6B;
+    /* Electric Coral */
+    --color-primary-light: #FF8A8A;
+    --color-primary-dark: #E55555;
+
+    --color-secondary: #4C3BCF;
+    /* Deep Indigo */
+    --color-secondary-light: #6B5BD6;
+    --color-secondary-dark: #3A2BA8;
+
+    --color-tertiary: #00D9C0;
+    /* Vivid Teal */
+    --color-tertiary-light: #33E3CF;
+    --color-tertiary-dark: #00B39E;
+
+    /* Background & Surface */
+    --color-background: #FEFBF6;
+    /* Warm Off-White */
+    --color-surface: #FFF8F0;
+    /* Soft Cream */
+    --color-surface-elevated: #FFFFFF;
+
+    /* Text Colors */
+    --color-text-primary: #2D2A32;
+    /* Charcoal */
+    --color-text-secondary: #6B6770;
+    /* Slate */
+    --color-text-tertiary: #9B97A0;
+    --color-text-inverse: #FFFFFF;
+
+    /* Semantic Colors */
+    --color-success: #00D9C0;
+    /* Teal */
+    --color-error: #FF6B6B;
+    /* Coral */
+    --color-danger: #FF6B6B;
+    --color-danger-hover: #E55555;
+    --color-warning: #FFB347;
+    /* Amber */
+    --color-info: #4C3BCF;
+    /* Indigo */
+
+    /* Border & Divider */
+    --color-border: #E8E4DF;
+    --color-border-light: #F2EEE9;
+    --color-divider: #E0DCD7;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(45, 42, 50, 0.05);
+    --shadow-sm: 0 2px 4px rgba(45, 42, 50, 0.08);
+    --shadow-md: 0 4px 12px rgba(45, 42, 50, 0.12);
+    --shadow-lg: 0 8px 24px rgba(45, 42, 50, 0.16);
+    --shadow-xl: 0 16px 48px rgba(45, 42, 50, 0.2);
+
+    /* Glow Effects */
+    --glow-primary: 0 0 20px rgba(255, 107, 107, 0.3);
+    --glow-secondary: 0 0 20px rgba(76, 59, 207, 0.3);
+    --glow-tertiary: 0 0 20px rgba(0, 217, 192, 0.3);
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Spacing (using rem for accessibility) */
+    --space-1: 0.25rem;
+    /* 4px */
+    --space-2: 0.5rem;
+    /* 8px */
+    --space-3: 0.75rem;
+    /* 12px */
+    --space-4: 1rem;
+    /* 16px */
+    --space-5: 1.25rem;
+    /* 20px */
+    --space-6: 1.5rem;
+    /* 24px */
+    --space-8: 2rem;
+    /* 32px */
+    --space-10: 2.5rem;
+    /* 40px */
+    --space-12: 3rem;
+    /* 48px */
+
+    /* Typography */
+    --font-heading: 'Space Grotesk', 'Segoe UI', sans-serif;
+    --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.625;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+    --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Z-Index Scale */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal-backdrop: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+}
+
+/* Dark mode support (can be extended in the future)
+   @media (prefers-color-scheme: dark) {
+       :root {
+           --color-background: #1a1a2e;
+           ...additional dark mode overrides...
+       }
+   }
+*/

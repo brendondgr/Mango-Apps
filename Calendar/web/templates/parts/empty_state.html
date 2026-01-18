@@ -1,0 +1,16 @@
+<!-- Empty State Component -->
+<template id="empty-state-template">
+    <div class="empty-state">
+        <div class="empty-state__illustration">
+            <!-- CSS-based geometric illustration (defined in components.css) -->
+        </div>
+        <h3 class="empty-state__title">No Schedules Found</h3>
+        <p class="empty-state__description">
+            Get started by uploading your first schedule. Create a JSON file with your weekly activities or use our AI-powered generator.
+        </p>
+        <button class="btn btn-primary empty-state__cta" onclick="document.getElementById('uploadBtn').click()">
+            <i class="fas fa-upload"></i>
+            Upload Schedule
+        </button>
+    </div>
+</template>

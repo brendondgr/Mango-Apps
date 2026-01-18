@@ -1,0 +1,136 @@
+<!-- Timeline Controls - Thin Always-Visible Bar -->
+<div id="timelineControlsContainer" class="timeline-controls-bar">
+    <!-- Controls Row -->
+    <!-- Controls Row -->
+    <!-- Controls Row -->
+    <div class="controls-row flex flex-col sm:grid sm:grid-cols-3 items-center w-full gap-2 sm:gap-4">
+        <!-- Column 1: Left - Zoom / Time / Days -->
+        <div class="controls-left flex items-center flex-wrap gap-2 justify-center sm:justify-start w-full sm:w-auto">
+            <!-- Zoom Controls -->
+            <div class="control-group">
+                <span class="control-label hidden sm:inline">Zoom</span>
+                <div class="control-inline">
+                    <button id="zoomOutBtn" class="ctrl-btn" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="zoomLevelDisplay" class="zoom-display">1.00x</span>
+                    <button id="zoomInBtn" class="ctrl-btn" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-divider hidden sm:block"></div>
+
+            <!-- Time Range Controls -->
+            <div class="control-group">
+                <span class="control-label hidden sm:inline">Time</span>
+                <div class="control-inline">
+                    <select id="startHourInput" class="ctrl-select">
+                        <option value="">Auto</option>
+                        <option value="0">12AM</option>
+                        <option value="1">1AM</option>
+                        <option value="2">2AM</option>
+                        <option value="3">3AM</option>
+                        <option value="4">4AM</option>
+                        <option value="5">5AM</option>
+                        <option value="6">6AM</option>
+                        <option value="7">7AM</option>
+                        <option value="8">8AM</option>
+                        <option value="9">9AM</option>
+                        <option value="10">10AM</option>
+                        <option value="11">11AM</option>
+                        <option value="12">12PM</option>
+                        <option value="13">1PM</option>
+                        <option value="14">2PM</option>
+                        <option value="15">3PM</option>
+                        <option value="16">4PM</option>
+                        <option value="17">5PM</option>
+                        <option value="18">6PM</option>
+                        <option value="19">7PM</option>
+                        <option value="20">8PM</option>
+                        <option value="21">9PM</option>
+                        <option value="22">10PM</option>
+                        <option value="23">11PM</option>
+                    </select>
+                    <span class="sep">–</span>
+                    <select id="endHourInput" class="ctrl-select">
+                        <option value="">Auto</option>
+                        <option value="1">1AM</option>
+                        <option value="2">2AM</option>
+                        <option value="3">3AM</option>
+                        <option value="4">4AM</option>
+                        <option value="5">5AM</option>
+                        <option value="6">6AM</option>
+                        <option value="7">7AM</option>
+                        <option value="8">8AM</option>
+                        <option value="9">9AM</option>
+                        <option value="10">10AM</option>
+                        <option value="11">11AM</option>
+                        <option value="12">12PM</option>
+                        <option value="13">1PM</option>
+                        <option value="14">2PM</option>
+                        <option value="15">3PM</option>
+                        <option value="16">4PM</option>
+                        <option value="17">5PM</option>
+                        <option value="18">6PM</option>
+                        <option value="19">7PM</option>
+                        <option value="20">8PM</option>
+                        <option value="21">9PM</option>
+                        <option value="22">10PM</option>
+                        <option value="23">11PM</option>
+                        <option value="24">12AM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-divider hidden sm:block"></div>
+
+            <!-- Day Range Controls -->
+            <div class="control-group days-group">
+                <span class="control-label hidden sm:inline">Days</span>
+                <div class="days-row">
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="0" checked><span>M</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="1" checked><span>T</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="2" checked><span>W</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="3" checked><span>T</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="4" checked><span>F</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="5" checked><span>S</span></label>
+                    <label class="day-chip"><input type="checkbox" class="day-checkbox" data-day="6" checked><span>S</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Row 2: Toggle + Print + New Event -->
+        <div class="flex items-center justify-center gap-4 w-full sm:hidden mt-2">
+             <div class="flex-shrink-0">
+                 {% include 'parts/view_toggle.html' %}
+             </div>
+             <div class="flex-shrink-0">
+                <button id="printScheduleBtnMobile" class="btn btn-icon-square" title="Print to PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+             </div>
+             <div class="flex-shrink-0">
+                <button id="newEventBtnMobile" class="btn btn-icon-square btn-primary" title="Add Event">
+                    <i class="fas fa-calendar-plus"></i>
+                </button>
+             </div>
+        </div>
+
+        <!-- Desktop Columns 2 & 3 (Hidden on Mobile) -->
+         <div class="controls-center hidden sm:flex justify-center">
+             {% include 'parts/view_toggle.html' %}
+        </div>
+
+        <div class="controls-right hidden sm:flex items-center justify-end gap-2">
+            <button id="printScheduleBtn" class="btn btn-icon-square" title="Print to PDF">
+                <i class="fas fa-file-pdf"></i>
+            </button>
+            <button id="newEventBtnDesktop" class="btn btn-icon-square btn-primary" title="Add Event">
+                <i class="fas fa-calendar-plus"></i>
+            </button>
+        </div>
+    </div>
+</div>
+

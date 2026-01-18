@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Transformation Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #FEFBF6;
+            font-family: 'DM Sans', sans-serif;
+            color: #333;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        .controls {
+            width: 320px;
+            background: white;
+            padding: 24px;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        h1 { font-family: 'Space Grotesk', sans-serif; color: #4C3BCF; font-size: 1.5rem; }
+        p { font-size: 0.9rem; color: #666; line-height: 1.5; }
+
+        .matrix-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #F8F5FC;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #4C3BCF;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Space Grotesk', monospace;
+            text-align: center;
+        }
+
+        .vector-display {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .vector-val { font-family: monospace; font-weight: bold; }
+
+        .legend { margin-top: auto; font-size: 0.85rem; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            background: #fdfdfd;
+            cursor: crosshair;
+        }
+
+        #notification {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4C3BCF;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        #notification.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h1>Transformation</h1>
+        <p>Drag the <strong>Input Vector (v)</strong>. The <strong>Output Vector (Av)</strong> shows where the matrix sends it.</p>
+        
+        <div class="matrix-input">
+            <div class="input-group">
+                <label>a</label><input type="number" id="a" value="2" step="0.5">
+            </div>
+            <div class="input-group">
+                <label>b</label><input type="number" id="b" value="1" step="0.5">
+            </div>
+            <div class="input-group">
+                <label>c</label><input type="number" id="c" value="1" step="0.5">
+            </div>
+            <div class="input-group">
+                <label>d</label><input type="number" id="d" value="2" step="0.5">
+            </div>
+        </div>
+
+        <div class="vector-display">
+            <div style="margin-bottom:8px; font-size:0.8rem; color:#15803d; text-transform:uppercase; font-weight:bold;">Current Vector</div>
+            <div>v = <span class="vector-val" id="v_disp">[1.0, 0.0]</span></div>
+            <div style="margin-top:4px;">Av = <span class="vector-val" id="Av_disp">[2.0, 1.0]</span></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background:#3b82f6"></div> Input Vector (v)</div>
+            <div class="legend-item"><div class="dot" style="background:#ef4444"></div> Transformed (Av)</div>
+            <div class="legend-item"><div class="dot" style="border:2px dashed #9333ea"></div> Eigenvectors</div>
+        </div>
+    </div>
+
+    <div class="canvas-area">
+        <div id="notification">It's an Eigenvector!</div>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let matrix = { a: 2, b: 1, c: 1, d: 2 };
+        let vector = { x: 1, y: 0 }; // Input vector
+        let isDragging = false;
+
+        // Resize
+        function resize() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+            draw();
+        }
+        window.addEventListener('resize', resize);
+
+        // Interaction
+        canvas.addEventListener('mousedown', e => {
+            updateVectorFromEvent(e);
+            isDragging = true;
+        });
+        window.addEventListener('mousemove', e => {
+            if(isDragging) updateVectorFromEvent(e);
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // Inputs
+        ['a','b','c','d'].forEach(id => {
+            document.getElementById(id).addEventListener('input', e => {
+                matrix[id] = parseFloat(e.target.value) || 0;
+                draw();
+            });
+        });
+
+        function updateVectorFromEvent(e) {
+            const rect = canvas.getBoundingClientRect();
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const scale = 40; // pixels per unit
+
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            // Convert screen to grid
+            // Grid y is inverted
+            let vx = (mx - cx) / scale;
+            let vy = -(my - cy) / scale;
+
+            // Snap to nice integers if close? Nah, smooth is better.
+            
+            // Limit magnitude to keep on screen reasonably
+            const mag = Math.sqrt(vx*vx + vy*vy);
+            if(mag > 6) { vx = (vx/mag)*6; vy = (vy/mag)*6; }
+            if(mag < 0.1) { vx = 0; vy = 0; } // Avoid zero mess
+
+            vector.x = vx;
+            vector.y = vy;
+            draw();
+        }
+
+        function calculateEigenvectors() {
+            const {a, b, c, d} = matrix;
+            const tr = a + d;
+            const det = a*d - b*c;
+            const disc = tr*tr - 4*det;
+            
+            if(disc < 0) return []; // Complex
+
+            const l1 = (tr + Math.sqrt(disc)) / 2;
+            const l2 = (tr - Math.sqrt(disc)) / 2;
+            
+            const getVec = (lambda) => {
+                if(Math.abs(b) > 0.0001) return [1, (lambda-a)/b];
+                if(Math.abs(c) > 0.0001) return [(lambda-d)/c, 1];
+                if(Math.abs(a-lambda) < 0.0001) return [1, 0];
+                return [0, 1];
+            };
+
+            const v1 = getVec(l1);
+            const v2 = getVec(l2);
+            
+            // Return normalized for drawing lines
+            const norm = (v) => {
+                const m = Math.sqrt(v[0]*v[0] + v[1]*v[1]);
+                return [v[0]/m, v[1]/m];
+            };
+
+            let res = [norm(v1)];
+            if(Math.abs(l1 - l2) > 0.001) res.push(norm(v2));
+            return res;
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const scale = 40;
+
+            ctx.clearRect(0,0,w,h);
+
+            // Grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x=cx%scale; x<w; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+            for(let y=cy%scale; y<h; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+            ctx.stroke();
+
+            // Axes
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, cy); ctx.lineTo(w, cy);
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
+            ctx.stroke();
+
+            // Eigenvectors (dashed lines)
+            const eigVecs = calculateEigenvectors();
+            let isAligning = false;
+            
+            ctx.save();
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#a855f7'; // Purple
+            
+            eigVecs.forEach(v => {
+                // Check alignment
+                const dot = (vector.x * v[0] + vector.y * v[1]);
+                const vMag = Math.sqrt(vector.x*vector.x + vector.y*vector.y);
+                const cosTheta = Math.abs(dot / (vMag || 1));
+                
+                if(vMag > 0.1 && cosTheta > 0.99) isAligning = true;
+
+                // Draw line across screen
+                const lineLen = 1000;
+                ctx.beginPath();
+                ctx.moveTo(cx - v[0]*lineLen, cy - -(v[1]*lineLen* -1)); // * -1 for y flip
+                // Wait, screen y is inverted.
+                // v[1] is math y. Screen y = cy - v[1]*scale.
+                // So line from (cx - vx, cy + vy) to (cx + vx, cy - vy)
+                const sx = v[0] * lineLen;
+                const sy = v[1] * lineLen;
+                ctx.moveTo(cx - sx, cy + sy);
+                ctx.lineTo(cx + sx, cy - sy);
+                ctx.stroke();
+            });
+            ctx.restore();
+
+            // Alignment Notification
+            const notif = document.getElementById('notification');
+            if(isAligning) notif.classList.add('show');
+            else notif.classList.remove('show');
+
+            // Av Calculation
+            const Avx = matrix.a * vector.x + matrix.b * vector.y;
+            const Avy = matrix.c * vector.x + matrix.d * vector.y;
+
+            // Update text
+            document.getElementById('v_disp').textContent = `[${vector.x.toFixed(2)}, ${vector.y.toFixed(2)}]`;
+            document.getElementById('Av_disp').textContent = `[${Avx.toFixed(2)}, ${Avy.toFixed(2)}]`;
+
+            // Draw Vectors
+            function drawArrow(x, y, color, label) {
+                const sx = cx + x * scale;
+                const sy = cy - y * scale;
+                
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 3;
+                
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(sx, sy);
+                ctx.stroke();
+
+                // Head
+                const angle = Math.atan2(-y, x); // Screen coords angle... wait
+                // Math angle: atan2(y, x). Screen angle: atan2(-y, x) is correct.
+                const headLen = 10;
+                ctx.beginPath();
+                ctx.moveTo(sx, sy);
+                ctx.lineTo(sx - headLen * Math.cos(angle - Math.PI/6), sy - headLen * Math.sin(angle - Math.PI/6));
+                ctx.lineTo(sx - headLen * Math.cos(angle + Math.PI/6), sy - headLen * Math.sin(angle + Math.PI/6));
+                ctx.fill();
+            }
+
+            // Draw Av (Red)
+            drawArrow(Avx, Avy, '#ef4444');
+
+            // Draw v (Blue)
+            drawArrow(vector.x, vector.y, '#3b82f6');
+            
+            // Draw handle for v
+            ctx.beginPath();
+            ctx.arc(cx + vector.x*scale, cy - vector.y*scale, 8, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+        }
+
+        setTimeout(resize, 100);
+    </script>
+</body>
+</html>

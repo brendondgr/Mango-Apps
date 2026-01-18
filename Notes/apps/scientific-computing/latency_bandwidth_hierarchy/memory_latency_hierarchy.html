@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Latency Hierarchy Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #FEFBF6;
+            font-family: 'DM Sans', sans-serif;
+            color: #333;
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #4C3BCF;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .controls-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 32px;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .slider-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4C3BCF;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4C3BCF;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-primary {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+
+        .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .presets {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-preset {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-preset:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-preset.active {
+            background: #4C3BCF;
+            color: white;
+            border-color: #4C3BCF;
+        }
+
+        .visualization-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .info-card {
+            background: #f8f7f4;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+
+        .info-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .multiplier-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: #4C3BCF;
+            font-size: 24px;
+        }
+        
+        .explanation {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Memory Latency Hierarchy</h1>
+            <p class="subtitle">Experience the relative speed of memory tiers by slowing down time.</p>
+        </header>
+
+        <div class="controls-wrapper">
+            <div class="controls-header">
+                <div>
+                    <div style="font-size: 12px; text-transform: uppercase; color: #666; margin-bottom: 4px;">Time Dilation Factor</div>
+                    <div class="multiplier-display" id="multiplierDisplay">10,000x</div>
+                    <div class="explanation">1 nanosecond ≈ <span id="timeEquiv">10 µs</span> in simulation</div>
+                </div>
+                <button class="btn-primary" id="startBtn">Start Race</button>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Speed Up (10⁴x)</span>
+                        <span>Human Scale (10⁹x)</span>
+                    </div>
+                    <input type="range" id="dilationSlider" min="4" max="9" step="0.1" value="4">
+                    <div class="presets">
+                        <button class="btn-preset active" onclick="setPreset(4)">Fast (10⁴x)</button>
+                        <button class="btn-preset" onclick="setPreset(6)">Medium (10⁶x)</button>
+                        <button class="btn-preset" onclick="setPreset(7.5)">Slow (10⁷·⁵x)</button>
+                        <button class="btn-preset" onclick="setPreset(9)">Human Scale (10⁹x)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization-wrapper">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="info-grid" id="infoGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <script>
+        const memoryTiers = [
+            { name: 'L1 Cache', latencyNs: 4, color: '#3b82f6' },
+            { name: 'L2 Cache', latencyNs: 10, color: '#3b82f6' },
+            { name: 'L3 Cache', latencyNs: 40, color: '#3b82f6' },
+            { name: 'Main Memory (RAM)', latencyNs: 100, color: '#a855f7' },
+            { name: 'SSD (NVMe)', latencyNs: 100000, color: '#14b8a6' }, // 100 us
+            { name: 'HDD', latencyNs: 10000000, color: '#f97316' }    // 10 ms
+        ];
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const slider = document.getElementById('dilationSlider');
+        const multiplierDisplay = document.getElementById('multiplierDisplay');
+        const timeEquivDisplay = document.getElementById('timeEquiv');
+        const presets = document.querySelectorAll('.btn-preset');
+
+        let isRunning = false;
+        let startTime = 0;
+        let scaleExp = 4; // 10^4
+        let animationId;
+        
+        // Configuration
+        const trackHeight = 60;
+        const padding = { left: 180, right: 150, top: 40, bottom: 20 };
+        
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            canvas.width = wrapper.clientWidth;
+            canvas.height = padding.top + padding.bottom + (memoryTiers.length * trackHeight);
+            if (!isRunning) draw();
+        }
+
+        function getMultiplier() {
+            return Math.pow(10, scaleExp);
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 0.000001) return `${(seconds * 1e9).toFixed(0)} ns`;
+            if (seconds < 0.001) return `${(seconds * 1e6).toFixed(0)} µs`;
+            if (seconds < 1) return `${(seconds * 1e3).toFixed(1)} ms`;
+            if (seconds < 60) return `${seconds.toFixed(2)} s`;
+            if (seconds < 3600) return `${(seconds / 60).toFixed(1)} min`;
+            if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} hr`;
+            return `${(seconds / 86400).toFixed(1)} days`;
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+            return num;
+        }
+
+        function updateUI() {
+            scaleExp = parseFloat(slider.value);
+            const mult = getMultiplier();
+            multiplierDisplay.textContent = `${formatNumber(mult)}x`;
+            
+            // 1ns * multiplier = simulated seconds
+            const simSecondsFor1ns = 1e-9 * mult;
+            timeEquivDisplay.textContent = formatTime(simSecondsFor1ns);
+
+            presets.forEach(btn => {
+                // Approximate match for presets
+                const val = parseFloat(btn.getAttribute('onclick').match(/\d+(\.\d+)?/)[0]);
+                if (Math.abs(val - scaleExp) < 0.1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            
+            if (!isRunning) draw();
+        }
+
+        function setPreset(val) {
+            slider.value = val;
+            updateUI();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Headers
+            ctx.font = 'bold 12px "Space Grotesk"';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'right';
+            ctx.fillText('MEMORY TIER', padding.left - 20, 20);
+            ctx.textAlign = 'left';
+            ctx.fillText('DATA STREAM', padding.left, 20);
+            ctx.textAlign = 'right';
+            ctx.fillText('SIMULATED TIME', canvas.width - 20, 20);
+
+            const trackWidth = canvas.width - padding.left - padding.right;
+            const now = isRunning ? (performance.now() - startTime) / 1000 : 0; // Real seconds elapsed
+            const multiplier = getMultiplier();
+
+            memoryTiers.forEach((tier, i) => {
+                const y = padding.top + (i * trackHeight) + (trackHeight / 2);
+                
+                // Draw Tier Label
+                ctx.textAlign = 'right';
+                ctx.font = 'bold 14px "DM Sans"';
+                ctx.fillStyle = tier.color;
+                ctx.fillText(tier.name, padding.left - 20, y - 5);
+                
+                ctx.font = '12px "DM Sans"';
+                ctx.fillStyle = '#666';
+                ctx.fillText(`${formatTime(tier.latencyNs * 1e-9).replace('s', 's').replace('µ', 'μ')}`, padding.left - 20, y + 12);
+
+                // Draw Track
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + trackWidth, y);
+                ctx.strokeStyle = '#eee';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Calculate Progress
+                // Real Latency (s) = tier.latencyNs * 1e-9
+                // Simulated Duration (s) = Real Latency (s) * Multiplier
+                // Progress = Real Elapsed Time / Simulated Duration
+                // Wait, no. 
+                // We want the visual to move at a speed such that it covers the track in "Simulated Duration" IF we were watching in real time?
+                // No. "Time Dilation" means we are slowing down the universe.
+                // So if Multiplier is 10^9 (1s real = 1ns sim? No that's speeding up).
+                // "Slow Multiplier" -> 10^9x SLOWER.
+                // So an event that takes 1ns takes 1s to watch.
+                // Virtual Duration = Latency * Multiplier.
+                // We watch for 'now' seconds.
+                // pct = now / (Latency * 1e-9 * Multiplier)
+                
+                const neededTime = (tier.latencyNs * 1e-9) * multiplier;
+                const pct = Math.min(1, now / neededTime);
+                
+                // Draw Progress Line
+                if (pct > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(padding.left + (trackWidth * pct), y);
+                    ctx.strokeStyle = tier.color; // + '40'; // Transparent
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                }
+
+                // Draw Red Circle (Data)
+                const cx = padding.left + (trackWidth * pct);
+                ctx.beginPath();
+                ctx.arc(cx, y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#FF6B6B';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw Time Label at the end
+                ctx.textAlign = 'right';
+                ctx.font = 'bold 15px "Space Grotesk"';
+                ctx.fillStyle = pct >= 1 ? tier.color : '#333';
+                
+                let displayTime = 0;
+                if (pct >= 1) {
+                    displayTime = neededTime; // Finished
+                } else {
+                    displayTime = now; // Current elapsed time
+                }
+                
+                ctx.fillText(formatTime(displayTime), canvas.width - 20, y + 5);
+                
+                // Status tick
+                if (pct >= 1) {
+                    ctx.font = '16px serif';
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillText('✓', canvas.width - 5, y + 5);
+                }
+            });
+        }
+
+        function animate() {
+            if (!isRunning) return;
+            draw();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (isRunning) {
+                // Reset
+                isRunning = false;
+                cancelAnimationFrame(animationId);
+                startBtn.textContent = 'Start Race';
+                draw(); // Reset to 0
+            } else {
+                // Start
+                isRunning = true;
+                startTime = performance.now();
+                startBtn.textContent = 'Reset';
+                animate();
+            }
+        });
+
+        slider.addEventListener('input', updateUI);
+        window.addEventListener('resize', resizeCanvas);
+
+        // Init
+        resizeCanvas();
+        updateUI();
+    </script>
+</body>
+</html>

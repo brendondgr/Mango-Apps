@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Characteristic Polynomial Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #FEFBF6; font-family: 'DM Sans', sans-serif; color: #333; padding: 16px; min-height: 100vh; }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 { font-family: 'Space Grotesk', sans-serif; color: #4C3BCF; font-size: 24px; margin-bottom: 8px; }
+        p { line-height: 1.6; margin-bottom: 16px; font-size: 15px; color: #555; }
+        
+        .explanation-box {
+            background: #F0EBF8;
+            border-left: 4px solid #4C3BCF;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .matrix-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: #F8F5FC;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .input-wrapper { display: flex; flex-direction: column; }
+        label { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 4px; text-transform: uppercase; }
+        input {
+            padding: 10px;
+            border: 2px solid #E5E0F0;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 16px;
+            text-align: center;
+        }
+        input:focus { outline: none; border-color: #4C3BCF; }
+
+        .equation-display {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 18px;
+            text-align: center;
+            padding: 16px;
+            background: #fff;
+            border-radius: 8px;
+            border: 2px solid #eee;
+            color: #4C3BCF;
+            margin-bottom: 16px;
+        }
+
+        canvas { width: 100%; height: 400px; background: white; border-radius: 12px; }
+        
+        .highlight { color: #4C3BCF; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Controls -->
+        <div class="panel">
+            <h1>Eigenvalue Explorer</h1>
+            <p>Why do we graph this parabola?</p>
+            
+            <div class="explanation-box">
+                <p>The curve represents the <strong>determinant</strong> of the shifted matrix:</p>
+                <p style="text-align:center; font-family:'Space Grotesk'; margin:10px 0;">y = det(A - λI)</p>
+                <p>Think of the determinant as a "scaling factor" for area.</p>
+                <ul style="padding-left:20px; font-size:14px;">
+                    <li><strong>y ≠ 0</strong>: The matrix stretches space normally. Only the zero vector stays zero.</li>
+                    <li><strong>y = 0</strong>: The matrix "squishes" space into a lower dimension. This allows non-zero vectors (Eigenvectors!) to land on zero.</li>
+                </ul>
+            </div>
+
+            <div class="matrix-inputs">
+                <div class="input-wrapper">
+                    <label>A₁₁</label>
+                    <input type="number" id="a" value="3" step="0.5">
+                </div>
+                <div class="input-wrapper">
+                    <label>A₁₂</label>
+                    <input type="number" id="b" value="1" step="0.5">
+                </div>
+                <div class="input-wrapper">
+                    <label>A₂₁</label>
+                    <input type="number" id="c" value="1" step="0.5">
+                </div>
+                <div class="input-wrapper">
+                    <label>A₂₂</label>
+                    <input type="number" id="d" value="3" step="0.5">
+                </div>
+            </div>
+
+            <button onclick="scramble()" style="width:100%; padding:12px; background:#4C3BCF; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Random Matrix</button>
+        </div>
+
+        <!-- Main Graph -->
+        <div class="panel">
+            <div class="equation-display" id="polyEq">λ² - 6λ + 8 = 0</div>
+            <canvas id="graph" width="800" height="500"></canvas>
+            <p style="text-align:center; margin-top:10px; font-size:0.9em; color:#888;">The x-intercepts (orange dots) are the Eigenvalues λ</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+        const inputs = ['a', 'b', 'c', 'd'].map(id => document.getElementById(id));
+
+        function getM() {
+            return {
+                a: parseFloat(inputs[0].value) || 0,
+                b: parseFloat(inputs[1].value) || 0,
+                c: parseFloat(inputs[2].value) || 0,
+                d: parseFloat(inputs[3].value) || 0
+            };
+        }
+
+        function draw() {
+            const m = getM();
+            const trace = m.a + m.d;
+            const det = m.a * m.d - m.b * m.c;
+            
+            // Polynomial coefficients for lambda^2 + p*lambda + q
+            const p = -trace;
+            const q = det;
+
+            // Update text equation
+            const signP = p >= 0 ? '-' : '+'; // displayed as - trace
+            const signQ = q >= 0 ? '+' : '-';
+            document.getElementById('polyEq').innerHTML = `λ² ${signP} ${Math.abs(p).toFixed(2)}λ ${signQ} ${Math.abs(q).toFixed(2)} = 0`;
+
+            // Canvas Setup
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fcfcfc'; // Light gray background
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const scaleX = 40; // pixels per unit
+            const scaleY = 40;
+
+            // Draw Axes
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            
+            // Grid
+            ctx.beginPath();
+            for(let x = cx % scaleX; x < w; x+=scaleX) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+            for(let y = cy % scaleY; y < h; y+=scaleY) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+            ctx.stroke();
+
+            // Main Axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, cy); ctx.lineTo(w, cy);
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
+            ctx.stroke();
+
+            // Draw Parabola
+            ctx.strokeStyle = '#4C3BCF';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            
+            let hasRoots = false;
+            
+            for(let sx = 0; sx < w; sx+=2) {
+                // Convert screen x to graph x (lambda)
+                const lambda = (sx - cx) / scaleX;
+                const value = lambda*lambda + p*lambda + q;
+                const sy = cy - value * scaleY;
+                
+                if(sx===0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+
+            // Draw Roots
+            const discriminant = p*p - 4*q;
+            if(discriminant >= 0) {
+                const r1 = (-p + Math.sqrt(discriminant)) / 2;
+                const r2 = (-p - Math.sqrt(discriminant)) / 2;
+
+                [r1, r2].forEach(r => {
+                    const rx = cx + r * scaleX;
+                    const ry = cy; // intercepts are at y=0
+                    
+                    ctx.fillStyle = '#ff8c00'; // Dark Orange
+                    ctx.beginPath();
+                    ctx.arc(rx, ry, 8, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    // Values
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 14px DM Sans';
+                    ctx.fillText(r.toFixed(2), rx - 15, ry + 25);
+                });
+            } else {
+                ctx.fillStyle = '#666';
+                ctx.font = 'italic 16px DM Sans';
+                ctx.fillText("Complex roots (No real x-intercepts)", 20, 30);
+            }
+        }
+
+        function scramble() {
+            inputs.forEach(inp => inp.value = (Math.random()*6 - 3).toFixed(1));
+            draw();
+        }
+
+        inputs.forEach(i => i.addEventListener('input', draw));
+        window.addEventListener('resize', () => {
+             // In real production we'd handle resizing better
+             draw();
+        });
+        
+        draw();
+    </script>
+</body>
+</html>

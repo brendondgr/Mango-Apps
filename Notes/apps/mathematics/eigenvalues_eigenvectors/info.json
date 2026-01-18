@@ -1,0 +1,5 @@
+{
+    "title": "Eigenvalues and Eigenvectors",
+    "description": "An exploration of how linear transformations scale specific vectors, uncovering the fundamental 'DNA' of matrices.",
+    "entry_point": "eigenvalues_eigenvectors.md"
+}

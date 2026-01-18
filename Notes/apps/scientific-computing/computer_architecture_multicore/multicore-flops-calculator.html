@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multicore FLOPS Calculator - Computer Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #FEFBF6;
+      color: #1f2937;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4C3BCF 0%, #6B5ACF 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      opacity: 0.95;
+    }
+
+    .content {
+      padding: 40px;
+      padding-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      
+      .content {
+        padding: 25px;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .input-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+
+    .input-card:focus-within {
+      border-color: #4C3BCF;
+      box-shadow: 0 0 0 4px rgba(76, 59, 207, 0.1);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 0.95rem;
+      min-width: 140px;
+      flex-shrink: 0;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      min-width: 200px;
+      height: 8px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #4C3BCF;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(76, 59, 207, 0.3);
+    }
+
+    input[type="number"] {
+      width: 100px;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #4C3BCF;
+      box-shadow: 0 0 0 3px rgba(76, 59, 207, 0.1);
+    }
+
+    .range-value {
+      font-weight: 600;
+      color: #4C3BCF;
+      font-size: 1.1rem;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .results-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 30px;
+    }
+
+    .peak-flops {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .flops-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #059669);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .formula-viz {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 12px;
+      padding: 25px;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .formula {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .formula-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      font-size: 1rem;
+    }
+
+    .breakdown-item {
+      text-align: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .breakdown-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .benchmark-compare {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .benchmark-item {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .benchmark-name {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .benchmark-flops {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .info-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 30px;
+    }
+
+    .info-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .updating {
+      animation: pulse 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>**FLOPS Calculator**</h1>
+      <p class="subtitle">Theoretical Peak Performance for Multicore Processors</p>
+    </div>
+
+    <div class="content">
+      <div class="grid">
+        <div class="input-group">
+          <div class="input-card">
+            <div class="input-row">
+              <label>Clock Speed</label>
+              <input type="range" id="clockSpeed" min="1" max="6" step="0.1" value="3.5">
+              <input type="number" id="clockSpeedNum" min="0.1" max="10" step="0.1" value="3.5">
+              <span class="range-value" id="clockSpeedVal">3.5 GHz</span>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="input-row">
+              <label>Cores</label>
+              <input type="range" id="cores" min="1" max="128" step="1" value="16">
+              <input type="number" id="coresNum" min="1" max="256" step="1" value="16">
+              <span class="range-value" id="coresVal">16</span>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="input-row">
+              <label>FLOPs/Cycle</label>
+              <input type="range" id="flopsPerCycle" min="1" max="64" step="1" value="16">
+              <input type="number" id="flopsPerCycleNum" min="1" max="128" step="1" value="16">
+              <span class="range-value" id="flopsPerCycleVal">16</span>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="input-row">
+              <label>Hyperthreading</label>
+              <input type="range" id="hyperthreading" min="1" max="4" step="0.5" value="2">
+              <input type="number" id="hyperthreadingNum" min="1" max="8" step="0.5" value="2">
+              <span class="range-value" id="hyperthreadingVal">2x</span>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="input-row">
+              <label>SIMD Width</label>
+              <input type="range" id="simdWidth" min="1" max="4" step="1" value="2">
+              <input type="number" id="simdWidthNum" min="1" max="8" step="1" value="2">
+              <span class="range-value" id="simdWidthVal">2x</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="peak-flops">
+            <div class="flops-value" id="peakFlops">0 TFLOPS</div>
+            <div style="font-size: 1.1rem; color: #6b7280; margin-top: 5px;">Theoretical Peak Performance</div>
+          </div>
+
+          <div class="formula-viz">
+            <div class="formula" id="formulaDisplay">
+              FLOPS = Cores × Clock × FLOPs/cycle × HT × SIMD
+            </div>
+            <div class="formula-breakdown">
+              <div class="breakdown-item">
+                <span class="breakdown-value" id="breakdownCores">16</span>
+                Cores
+              </div>
+              <div class="breakdown-item">
+                <span class="breakdown-value" id="breakdownClock">3.5</span>
+                GHz
+              </div>
+              <div class="breakdown-item">
+                <span class="breakdown-value" id="breakdownFlopsCycle">16</span>
+                FLOPs/cycle
+              </div>
+              <div class="breakdown-item">
+                <span class="breakdown-value" id="breakdownHT">2</span>
+                HT
+              </div>
+              <div class="breakdown-item">
+                <span class="breakdown-value" id="breakdownSIMD">2</span>
+                SIMD
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 25px;">
+            <h3 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Real-World Comparison</h3>
+            <div class="benchmark-compare" id="benchmarkCompare">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-title">📚 How FLOPS Works</div>
+        <p><strong>FLOPS</strong> (Floating Point Operations Per Second) measures a processor's ability to perform floating-point arithmetic[1][2][3]. The theoretical peak is calculated as:</p>
+        <p style="margin-top: 12px;"><code>FLOPS = Cores × Clock Speed (GHz) × FLOPs per Cycle × Hyperthreading × SIMD Width × 10<sup>9</sup></code></p>
+        <p style="margin-top: 15px; font-size: 0.95rem; color: #6b7280;">Real performance is typically 20-50% of theoretical peak due to memory bandwidth, cache efficiency, and Amdahl's Law limitations.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Vibrant UI Colors (hardcoded for robustness)
+    const COLORS = {
+      primary: '#4C3BCF',
+      accent: '#FF6B6B',
+      success: '#10b981',
+      blue: '#3b82f6',
+      purple: '#a855f7',
+      teal: '#14b8a6',
+      orange: '#f97316',
+      green: '#10b981'
+    };
+
+    // Benchmark data
+    const BENCHMARKS = [
+      { name: 'Modern Laptop CPU', flops: 0.5, unit: 'TFLOPS', color: '#3b82f6' },
+      { name: 'Gaming Desktop CPU', flops: 2.5, unit: 'TFLOPS', color: '#10b981' },
+      { name: 'Gaming GPU (RTX 4090)', flops: 80, unit: 'TFLOPS', color: '#f97316' },
+      { name: 'HPC CPU (EPYC 128-core)', flops: 15, unit: 'TFLOPS', color: '#a855f7' },
+      { name: 'AI Accelerator (A100)', flops: 312, unit: 'TFLOPS', color: '#14b8a6' }
+    ];
+
+    let isUpdating = false;
+
+    function formatFlops(flops) {
+      if (flops >= 1e15) return (flops / 1e15).toFixed(2) + ' EFLOPS';
+      if (flops >= 1e12) return (flops / 1e12).toFixed(2) + ' PFLOPS';
+      if (flops >= 1e9) return (flops / 1e9).toFixed(2) + ' TFLOPS';
+      if (flops >= 1e6) return (flops / 1e6).toFixed(0) + ' GFLOPS';
+      return flops.toFixed(0) + ' MFLOPS';
+    }
+
+    function calculateFlops() {
+      if (isUpdating) return;
+      
+      isUpdating = true;
+      
+      const clockSpeed = parseFloat(document.getElementById('clockSpeed').value);
+      const cores = parseInt(document.getElementById('cores').value);
+      const flopsPerCycle = parseInt(document.getElementById('flopsPerCycle').value);
+      const hyperthreading = parseFloat(document.getElementById('hyperthreading').value);
+      const simdWidth = parseInt(document.getElementById('simdWidth').value);
+
+      // FLOPS = cores * clock * flops_per_cycle * hyperthreading * simd * 1e9
+      const peakFlops = cores * clockSpeed * flopsPerCycle * hyperthreading * simdWidth * 1e9;
+      
+      document.getElementById('peakFlops').textContent = formatFlops(peakFlops);
+      
+      // Update formula breakdown
+      document.getElementById('breakdownCores').textContent = cores;
+      document.getElementById('breakdownClock').textContent = clockSpeed;
+      document.getElementById('breakdownFlopsCycle').textContent = flopsPerCycle;
+      document.getElementById('breakdownHT').textContent = hyperthreading;
+      document.getElementById('breakdownSIMD').textContent = simdWidth;
+      
+      // Update benchmark comparison
+      updateBenchmarkComparison(peakFlops);
+      
+      isUpdating = false;
+    }
+
+    function updateBenchmarkComparison(peakFlops) {
+      const container = document.getElementById('benchmarkCompare');
+      container.innerHTML = BENCHMARKS.map(b => {
+        const percent = ((peakFlops / (b.flops * (b.unit === 'TFLOPS' ? 1e12 : 1e15))) * 100).toFixed(0);
+        const comparison = peakFlops > (b.flops * 1e12) ? '↑' : '↓';
+        return `
+          <div class="benchmark-item" style="background: linear-gradient(135deg, ${b.color}, ${adjustBrightness(b.color, -20)})">
+            <div class="benchmark-name">${b.name}</div>
+            <div class="benchmark-flops">${b.flops} ${b.unit}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px;">${percent}% ${comparison}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function adjustBrightness(hex, percent) {
+      // Simple hex brightness adjustment for gradients
+      const num = parseInt(hex.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = (num >> 16) + amt;
+      const G = (num >> 8 & 0x00FF) + amt;
+      const B = (num & 0x0000FF) + amt;
+      return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+    }
+
+    function updateRangeDisplays() {
+      const sliders = ['clockSpeed', 'cores', 'flopsPerCycle', 'hyperthreading', 'simdWidth'];
+      
+      sliders.forEach(id => {
+        const slider = document.getElementById(id);
+        const numInput = document.getElementById(id + 'Num');
+        const valDisplay = document.getElementById(id + 'Val');
+        
+        function update() {
+          const value = parseFloat(slider.value);
+          numInput.value = value;
+          
+          if (id === 'clockSpeed') {
+            valDisplay.textContent = value + ' GHz';
+          } else if (id === 'hyperthreading' || id === 'simdWidth') {
+            valDisplay.textContent = value + 'x';
+          } else {
+            valDisplay.textContent = value;
+          }
+          
+          calculateFlops();
+        }
+        
+        slider.addEventListener('input', update);
+        numInput.addEventListener('input', () => {
+          const newVal = parseFloat(numInput.value);
+          if (!isNaN(newVal)) {
+            if (newVal >= parseFloat(slider.min) && newVal <= parseFloat(slider.max)) {
+              slider.value = newVal;
+              update();
+            }
+          }
+        });
+      });
+    }
+
+    function init() {
+      updateRangeDisplays();
+      calculateFlops(); // Initial calculation
+      
+      // Throttle rapid inputs
+      let timeout;
+      document.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(calculateFlops, 50);
+      }, true);
+    }
+
+    // Initialize immediately (iframe-safe)
+    init();
+  </script>
+</body>
+</html>

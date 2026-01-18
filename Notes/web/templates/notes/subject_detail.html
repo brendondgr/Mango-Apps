@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ subject.name }} | Notetaking System{% endblock %}
+
+{% block content %}
+<div class="container page--themed" 
+     style="padding-top: 2rem; padding-bottom: 0; --theme-bg: var(--tone-{{ subject.color_tone }}-bg); --theme-border: var(--tone-{{ subject.color_tone }}-border); --theme-text: var(--tone-{{ subject.color_tone }}-text);">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__current">{{ subject.name }}</span>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header page-header--themed animate-fade-in" style="margin-bottom: 1rem;">
+        {% if subject.icon_svg %}
+            <div class="page-header__icon svg-icon--xl svg-icon--tinted" style="-webkit-mask-image: url('{{ subject.icon_svg.url }}'); mask-image: url('{{ subject.icon_svg.url }}'); background-color: var(--theme-border);"></div>
+        {% elif subject.icon_image %}
+            <img src="{{ subject.icon_image.url }}" alt="" class="page-header__icon" style="object-fit: contain;">
+        {% else %}
+            <div class="page-header__icon">📚</div>
+        {% endif %}
+        <div class="page-header__content">
+            <h1 class="page-header__title">{{ subject.name }}</h1>
+            <p class="page-header__subtitle">Select a course or topic to start learning.</p>
+        </div>
+        <div class="page-header__actions">
+            <a href="{% url 'subject_edit' subject.slug %}" class="btn-icon btn-icon--edit" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                </svg>
+            </a>
+            <a href="{% url 'subject_delete' subject.slug %}" class="btn-icon btn-icon--delete" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <!-- Courses Section -->
+    <section class="section section--themed" style="padding-top: 0.5rem;">
+        <div class="section-header" style="margin-bottom: 0.5rem;">
+            <h2 class="section-title">Courses</h2>
+            <a href="{% url 'course_create' %}?subject={{ subject.id }}" class="btn btn--themed">
+                <span>+</span> New Course
+            </a>
+        </div>
+        {% if courses %}
+        <div class="bento-grid bento-grid--wide">
+            {% for course in courses %}
+            <a href="{% url 'course_detail' course.slug %}" class="topic-card topic-card--themed animate-fade-in">
+                <div class="topic-card__icon">
+                    {% if course.icon_svg %}
+                        <div class="svg-icon--tinted" style="-webkit-mask-image: url('{{ course.icon_svg.url }}'); mask-image: url('{{ course.icon_svg.url }}'); width: 32px; height: 32px; background-color: var(--theme-border);"></div>
+                    {% elif course.icon_image %}
+                        <img src="{{ course.icon_image.url }}" style="width: 32px; height: 32px; object-fit: contain;" alt="">
+                    {% else %}
+                        📖
+                    {% endif %}
+                </div>
+                <h3 class="topic-card__title">{{ course.name }}</h3>
+                <p class="topic-card__description" style="-webkit-line-clamp: 1;">
+                    {{ course.topics.count }} Topics available
+                </p>
+                <div class="topic-card__cta">
+                    View Course <span class="topic-card__cta-arrow">→</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state empty-state--themed">
+            <div class="empty-state__icon">📖</div>
+            <h3 class="empty-state__title">No courses yet</h3>
+            <p class="empty-state__text">Create your first course in this subject.</p>
+            <a href="{% url 'course_create' %}?subject={{ subject.id }}" class="btn btn--themed">Create Course</a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- All Topics Section -->
+    <section class="section section--alt">
+        <div class="section-header">
+            <h2 class="section-title">All Topics</h2>
+        </div>
+        {% if topics %}
+        <div class="list-container animate-slide-up">
+            {% for topic in topics %}
+            <a href="{% url 'topic_detail' topic.id %}" class="list-item"
+               style="--item-color: var(--tone-{{ subject.color_tone }}-border); --item-bg: var(--tone-{{ subject.color_tone }}-bg);">
+                <div class="list-item__icon">
+                    {% if topic.icon_svg.name %}
+                        <div class="svg-icon--tinted" style="-webkit-mask-image: url('{{ topic.icon_svg.url }}'); mask-image: url('{{ topic.icon_svg.url }}');"></div>
+                    {% elif topic.icon_image.name %}
+                        <img src="{{ topic.icon_image.url }}" style="width: 28px; height: 28px; object-fit: contain;" alt="">
+                    {% else %}
+                        📝
+                    {% endif %}
+                </div>
+                <div class="list-item__content">
+                    <h3 class="list-item__title">{{ topic.title }}</h3>
+                    <span class="list-item__meta">{% for course in topic.courses.all %}{{ course.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                </div>
+                <span class="list-item__arrow">→</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state empty-state--themed">
+            <div class="empty-state__icon">📝</div>
+            <h3 class="empty-state__title">No topics available</h3>
+            <p class="empty-state__text">Topics will appear once courses are populated.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

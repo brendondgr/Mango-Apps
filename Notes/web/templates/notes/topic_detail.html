@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ topic.title }} | Notetaking System{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 0;">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs">
+        <a href="{% url 'index' %}">Home</a>
+        <span class="breadcrumbs__separator">/</span>
+        <a href="{% url 'subject_detail' subject.slug %}">{{ subject.name }}</a>
+        <span class="breadcrumbs__separator">/</span>
+        <a href="{% url 'course_detail' course.slug %}">{{ course.name }}</a>
+        <span class="breadcrumbs__separator">/</span>
+        <span class="breadcrumbs__current">{{ topic.title }}</span>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header page-header--compact animate-fade-in">
+        {% if topic.icon_svg %}
+            <img src="{{ topic.icon_svg.url }}" class="page-header__icon" style="object-fit: contain;">
+        {% elif topic.icon_image %}
+            <img src="{{ topic.icon_image.url }}" class="page-header__icon" style="object-fit: contain;">
+        {% else %}
+            <div class="page-header__icon" style="background: var(--color-primary-100); color: var(--color-primary);">
+                📝
+            </div>
+        {% endif %}
+        <div class="page-header__content">
+            <h1 class="page-header__title">{{ topic.title }}</h1>
+            {% if topic.description %}
+            <p class="page-header__subtitle">{{ topic.description }}</p>
+            {% endif %}
+            <div class="page-header__meta">
+                <span title="{{ topic.created_at }}">📅 Created {{ topic.created_at|date:"M j, Y" }}</span>
+                <span class="meta-separator">•</span>
+                <span title="{{ topic.updated_at }}">🔄 Last updated {{ topic.updated_at|timesince }} ago</span>
+            </div>
+        </div>
+        <div class="page-header__actions">
+            <a href="{% url 'topic_edit' topic.id %}" class="btn-icon btn-icon--edit" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                </svg>
+            </a>
+            <a href="{% url 'topic_delete' topic.id %}" class="btn-icon btn-icon--delete" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </a>
+        </div>
+    </header>
+
+
+
+    <!-- Content Section -->
+    <section class="section section--compact animate-slide-up" style="animation-delay: 0.1s;">
+        <div class="content-panel" style="position: relative;">
+            <!-- Copy Button Widget -->
+            <div class="copy-widget" id="copyWidget">
+                <div class="copy-dropdown" id="copyDropdown">
+                    <label class="copy-option">
+                        <input type="checkbox" id="includeHtml" checked>
+                        <span>Include HTML/Visualizations</span>
+                    </label>
+                    <label class="copy-option">
+                        <input type="checkbox" id="includeRefs" checked>
+                        <span>Include References</span>
+                    </label>
+                    <button class="btn btn-primary btn-sm btn-block" id="confirmCopyBtn" style="margin-top: 0.5rem; width: 100%;">
+                        Copy Markdown
+                    </button>
+                    <!-- Hidden textarea for raw content -->
+                    <textarea id="rawContent" style="display: none;">{{ raw_content }}</textarea>
+                </div>
+                <button class="btn-icon btn-icon--copy" id="toggleCopyBtn" title="Copy Markdown">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="markdown-content">
+                {{ rendered_content|safe }}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const iframes = document.querySelectorAll('.markdown-content iframe');
+        
+        iframes.forEach(iframe => {
+            iframe.addEventListener('load', function() {
+                try {
+                    const height = iframe.contentWindow.document.body.scrollHeight;
+                    iframe.style.height = (height + 30) + 'px';
+                } catch (e) {
+                    console.warn('Could not auto-resize iframe (likely cross-origin):', e);
+                }
+            });
+        });
+
+        // --- Alert Transformation ---
+        const markdownContent = document.querySelector('.markdown-content');
+        if (markdownContent) {
+            const blockquotes = markdownContent.querySelectorAll('blockquote');
+            blockquotes.forEach(bq => {
+                const firstP = bq.querySelector('p:first-child');
+                if (firstP) {
+                    const content = firstP.innerHTML;
+                    if (content.includes('[!IMPORTANT]')) {
+                        firstP.innerHTML = content.replace('[!IMPORTANT]', '<strong class="important-label">IMPORTANT:</strong>');
+                        bq.classList.add('alert', 'alert--important');
+                    } else if (content.includes('[!WARNING]')) {
+                        firstP.innerHTML = content.replace('[!WARNING]', '<strong class="warning-label">WARNING:</strong>');
+                        bq.classList.add('alert', 'alert--warning');
+                    } else if (content.includes('[!NOTE]')) {
+                        firstP.innerHTML = content.replace('[!NOTE]', '<strong class="note-label">NOTE:</strong>');
+                        bq.classList.add('alert', 'alert--note');
+                    }
+                }
+            });
+        }
+
+        // --- Copy Button Logic ---
+        const copyWidget = document.getElementById('copyWidget');
+        const toggleCopyBtn = document.getElementById('toggleCopyBtn');
+        const copyDropdown = document.getElementById('copyDropdown');
+        const confirmCopyBtn = document.getElementById('confirmCopyBtn');
+        const rawContentArea = document.getElementById('rawContent');
+        const includeHtmlCheckbox = document.getElementById('includeHtml');
+        const includeRefsCheckbox = document.getElementById('includeRefs');
+        
+        if (copyWidget && toggleCopyBtn && copyDropdown) {
+            
+            // Toggle dropdown
+            toggleCopyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyWidget.classList.toggle('active');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!copyWidget.contains(e.target)) {
+                    copyWidget.classList.remove('active');
+                }
+            });
+
+            // Stop propagation inside dropdown
+            copyDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // Process content logic (Async)
+            async function processContent(content) {
+                let processed = content;
+                
+                // HTML/Visualization Logic
+                if (includeHtmlCheckbox.checked) {
+                    // Replace iframes with their actual source content
+                    // Regex to capture src attribute. 
+                    // Note: This matches simple <iframe src="..."> pattern common in this app
+                    const iframeRegex = /<iframe[^>]+src=["']([^"']+)["'][^>]*>(?:<\/iframe>)?/i;
+                    
+                    // We loop until no more iframes are found to process
+                    // We must be careful not to infinite loop if replacement fails, but here we replace with code block so it's safe
+                    let match;
+                    while ((match = iframeRegex.exec(processed)) !== null) {
+                        const fullTag = match[0];
+                        const src = match[1];
+                        
+                        try {
+                            const response = await fetch(src);
+                            if (response.ok) {
+                                const html = await response.text();
+                                // Create markdown code block
+                                const codeBlock = "```html\n" + html + "\n```";
+                                processed = processed.replace(fullTag, codeBlock);
+                            } else {
+                                console.warn("Failed to fetch iframe src:", src);
+                                // If fetch fails, maybe just leave it or comment it out? 
+                                // For now, let's leave the iframe tag but warn, or remove it?
+                                // Let's keep the tag if we can't get content, or maybe add a comment.
+                                // To avoid infinite loop since we didn't replace the tag with something that doesn't match:
+                                // We replace it with itself? No, that causes loop.
+                                // We must replace it. Let's comment it out.
+                                processed = processed.replace(fullTag, `<!-- Failed to fetch: ${src} -->`);
+                            }
+                        } catch (e) {
+                            console.warn("Error fetching iframe src:", src, e);
+                            processed = processed.replace(fullTag, `<!-- Error fetching: ${src} -->`);
+                        }
+                    }
+
+                } else {
+                    // Remove iframes: <iframe ...></iframe> or <iframe .../>
+                    processed = processed.replace(/<iframe[^>]*>(?:<\/iframe>)?/gi, '');
+                }
+
+                // Filter References if unchecked
+                if (!includeRefsCheckbox.checked) {
+                    // Remove usage citations: [^1], [^2]
+                    processed = processed.replace(/\[\^\d+\]/g, '');
+                    
+                    // Remove definitions: [^1]: ...
+                    processed = processed.replace(/^\[\^\d+\]:.*$/gm, '');
+                    
+                    // Remove References section header
+                    processed = processed.replace(/^#{1,3}\s+References\s*$/gm, '');
+                }
+
+                // Clean up extra newlines
+                return processed.replace(/\n{3,}/g, '\n\n').trim();
+            }
+
+            // Copy Action
+            confirmCopyBtn.addEventListener('click', async () => {
+                const originalText = confirmCopyBtn.textContent;
+                
+                // Show loading state
+                confirmCopyBtn.disabled = true;
+                confirmCopyBtn.textContent = 'Processing...';
+                
+                try {
+                    const rawText = rawContentArea.value;
+                    const textToCopy = await processContent(rawText);
+                    
+                    await navigator.clipboard.writeText(textToCopy);
+                    
+                    // Visual feedback
+                    confirmCopyBtn.textContent = 'Copied!';
+                    confirmCopyBtn.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        confirmCopyBtn.textContent = originalText;
+                        confirmCopyBtn.classList.remove('btn-success');
+                        confirmCopyBtn.disabled = false;
+                        copyWidget.classList.remove('active');
+                    }, 2000);
+                    
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    confirmCopyBtn.textContent = 'Error!';
+                    setTimeout(() => {
+                        confirmCopyBtn.textContent = originalText;
+                        confirmCopyBtn.disabled = false;
+                    }, 2000);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

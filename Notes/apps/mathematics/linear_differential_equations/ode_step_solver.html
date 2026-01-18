@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First-Order Linear ODE Solver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary-color: #4C3BCF;
+            --accent-color: #FF6B6B;
+            --text-color: #2D3436;
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            
+            /* Visualization Palette */
+            --viz-blue: #3b82f6;
+            --viz-purple: #a855f7;
+            --viz-teal: #14b8a6;
+            --viz-orange: #f97316;
+            --viz-green: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-family: 'DM Sans', monospace;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .equation-display {
+            background: #F8F9FA;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            background-color: #3b2eb0;
+        }
+
+        .derivation-container {
+            margin-top: 25px;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #EEE;
+        }
+
+        .step-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-title span {
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .plot-container {
+            position: sticky;
+            top: 20px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background: white;
+            border-radius: 8px;
+            touch-action: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--accent-color);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            background: #EEE;
+            color: #444;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            width: auto;
+        }
+
+        .preset-btn:hover {
+            background: #DDD;
+        }
+
+        #error-msg {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ODE Step-Solver</h1>
+    <p>Visualize the solution process for First-Order Linear Differential Equations</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <div class="input-group">
+            <label for="input-p">Coefficient P(x)</label>
+            <input type="text" id="input-p" value="1" placeholder="e.g., 2/x, sin(x), 1">
+            <div class="hint">Function of x multiplied by y</div>
+        </div>
+        <div class="input-group">
+            <label for="input-q">Coefficient Q(x)</label>
+            <input type="text" id="input-q" value="x" placeholder="e.g., x^2, exp(x), 0">
+            <div class="hint">The non-homogeneous term</div>
+        </div>
+
+        <div class="equation-display" id="equation-tex">
+            \[ \frac{dy}{dx} + (1)y = x \]
+        </div>
+
+        <button id="calculate-btn">Calculate & Plot</button>
+        <div id="error-msg">Could not parse equations. Please check your syntax.</div>
+
+        <div class="preset-buttons">
+            <button class="preset-btn" onclick="setPreset('1', 'x')">y' + y = x</button>
+            <button class="preset-btn" onclick="setPreset('2/x', 'x^2')">y' + (2/x)y = x²</button>
+            <button class="preset-btn" onclick="setPreset('-1', 'exp(2x)')">y' - y = e²ˣ</button>
+            <button class="preset-btn" onclick="setPreset('sin(x)', 'sin(x)')">y' + sin(x)y = sin(x)</button>
+        </div>
+
+        <div class="derivation-container" id="derivation">
+            <!-- Steps injected here -->
+        </div>
+    </div>
+
+    <div class="card plot-container">
+        <canvas id="plotCanvas"></canvas>
+        
+        <div class="controls">
+            <div class="slider-group">
+                <label>Constant C</label>
+                <input type="range" id="c-slider" min="-5" max="5" step="0.1" value="1">
+                <span id="c-value">1.0</span>
+            </div>
+            <p class="hint">Adjust C to see how the initial condition shifts the integral curve.</p>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <div class="step-title" style="font-size: 1rem;">Method Summary</div>
+            <p style="font-size: 0.85rem; color: #555;">
+                We use the <strong>Integrating Factor Method</strong>. 
+                For the equation \( y' + P(x)y = Q(x) \), we find 
+                \( \mu(x) = e^{\int P(x)dx} \). 
+                The general solution is then 
+                \( y(x) = \frac{1}{\mu(x)} \left[ \int \mu(x)Q(x)dx + C \right] \).
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const COLORS = {
+        primary: '#4C3BCF',
+        accent: '#FF6B6B',
+        blue: '#3b82f6',
+        purple: '#a855f7',
+        teal: '#14b8a6',
+        orange: '#f97316',
+        green: '#10b981',
+        grid: '#E0E0E0',
+        text: '#2D3436'
+    };
+
+    const canvas = document.getElementById('plotCanvas');
+    const ctx = canvas.getContext('2d');
+    const pInput = document.getElementById('input-p');
+    const qInput = document.getElementById('input-q');
+    const cSlider = document.getElementById('c-slider');
+    const cValueDisplay = document.getElementById('c-value');
+    const derivationDiv = document.getElementById('derivation');
+    const eqTex = document.getElementById('equation-tex');
+    const calcBtn = document.getElementById('calculate-btn');
+    const errorMsg = document.getElementById('error-msg');
+
+    let pFunc, qFunc;
+    let width, height;
+    const padding = 40;
+    const xRange = [-5, 5];
+    const yRange = [-5, 5];
+
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        calcBtn.addEventListener('click', solve);
+        cSlider.addEventListener('input', () => {
+            cValueDisplay.textContent = parseFloat(cSlider.value).toFixed(1);
+            draw();
+        });
+
+        solve();
+    }
+
+    function resize() {
+        const container = canvas.parentElement;
+        width = container.clientWidth - 48;
+        height = Math.min(width, 400);
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        draw();
+    }
+
+    function setPreset(p, q) {
+        pInput.value = p;
+        qInput.value = q;
+        solve();
+    }
+
+    function solve() {
+        errorMsg.style.display = 'none';
+        try {
+            const pText = pInput.value || "0";
+            const qText = qInput.value || "0";
+            
+            pFunc = math.compile(pText);
+            qFunc = math.compile(qText);
+            
+            updateEquationDisplay(pText, qText);
+            generateDerivation(pText, qText);
+            draw();
+        } catch (e) {
+            console.error(e);
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    function updateEquationDisplay(p, q) {
+        eqTex.innerHTML = `\\[ \\frac{dy}{dx} + (${p})y = ${q} \\]`;
+        if (window.MathJax) MathJax.typesetPromise([eqTex]);
+    }
+
+    function generateDerivation(p, q) {
+        derivationDiv.innerHTML = `
+            <div class="step">
+                <div class="step-title"><span>1</span> Identify P(x) and Q(x)</div>
+                <p>\\[ P(x) = ${p}, \\quad Q(x) = ${q} \\]</p>
+            </div>
+            <div class="step">
+                <div class="step-title"><span>2</span> Calculate Integrating Factor &mu;(x)</div>
+                <p>\\[ \\mu(x) = e^{\\int (${p}) dx} \\]</p>
+            </div>
+            <div class="step">
+                <div class="step-title"><span>3</span> Multiply Equation by &mu;(x)</div>
+                <p>\\[ \\mu(x)y' + \\mu(x)P(x)y = \\mu(x)Q(x) \\]</p>
+                <p>\\[ \\frac{d}{dx}[\\mu(x)y] = \\mu(x)Q(x) \\]</p>
+            </div>
+            <div class="step">
+                <div class="step-title"><span>4</span> Integrate both sides</div>
+                <p>\\[ \\mu(x)y = \\int \\mu(x)Q(x) dx + C \\]</p>
+            </div>
+            <div class="step">
+                <div class="step-title"><span>5</span> Solve for y(x)</div>
+                <p>\\[ y(x) = \\frac{1}{\\mu(x)} \\left( \\int \\mu(x)Q(x) dx + C \\right) \\]</p>
+            </div>
+        `;
+        if (window.MathJax) MathJax.typesetPromise([derivationDiv]);
+    }
+
+    // Numerical Integration Helper (Trapezoidal)
+    function integrateNumerical(fn, start, end, steps = 100) {
+        let sum = 0;
+        const dx = (end - start) / steps;
+        for (let i = 0; i < steps; i++) {
+            const x1 = start + i * dx;
+            const x2 = start + (i + 1) * dx;
+            sum += (fn(x1) + fn(x2)) / 2 * dx;
+        }
+        return sum;
+    }
+
+    function getSolutionValue(xTarget, C) {
+        try {
+            // mu(x) = exp(integral of P from 0 to x)
+            const mu = (x) => Math.exp(integrateNumerical((t) => pFunc.evaluate({x: t}), 0, x, 50));
+            
+            const muVal = mu(xTarget);
+            // integral of mu(t)*Q(t) from 0 to x
+            const integralPart = integrateNumerical((t) => {
+                const muT = mu(t);
+                const qT = qFunc.evaluate({x: t});
+                return muT * qT;
+            }, 0, xTarget, 100);
+
+            return (1 / muVal) * (integralPart + C);
+        } catch (e) {
+            return NaN;
+        }
+    }
+
+    function screenX(x) {
+        return padding + (x - xRange[0]) * (width - 2 * padding) / (xRange[1] - xRange[0]);
+    }
+
+    function screenY(y) {
+        return height - (padding + (y - yRange[0]) * (height - 2 * padding) / (yRange[1] - yRange[0]));
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw Grid
+        ctx.strokeStyle = COLORS.grid;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = xRange[0]; i <= xRange[1]; i++) {
+            ctx.moveTo(screenX(i), screenY(yRange[0]));
+            ctx.lineTo(screenX(i), screenY(yRange[1]));
+        }
+        for (let i = yRange[0]; i <= yRange[1]; i++) {
+            ctx.moveTo(screenX(xRange[0]), screenY(i));
+            ctx.lineTo(screenX(xRange[1]), screenY(i));
+        }
+        ctx.stroke();
+
+        // Draw Axes
+        ctx.strokeStyle = COLORS.text;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // X axis
+        ctx.moveTo(screenX(xRange[0]), screenY(0));
+        ctx.lineTo(screenX(xRange[1]), screenY(0));
+        // Y axis
+        ctx.moveTo(screenX(0), screenY(yRange[0]));
+        ctx.lineTo(screenX(0), screenY(yRange[1]));
+        ctx.stroke();
+
+        // Draw other integral curves (faded)
+        const currentC = parseFloat(cSlider.value);
+        [-4, -2, 0, 2, 4].forEach(c => {
+            if (Math.abs(c - currentC) > 0.5) {
+                drawCurve(c, COLORS.viz_blue + "44", 1.5);
+            }
+        });
+
+        // Draw active curve
+        drawCurve(currentC, COLORS.accent, 3);
+
+        // Labels
+        ctx.fillStyle = COLORS.text;
+        ctx.font = '12px DM Sans';
+        ctx.fillText('x', width - 20, screenY(0.3));
+        ctx.fillText('y', screenX(0.2), 20);
+    }
+
+    function drawCurve(C, color, lineWidth) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+
+        let first = true;
+        const segments = 60;
+        for (let i = 0; i <= segments; i++) {
+            const x = xRange[0] + (i / segments) * (xRange[1] - xRange[0]);
+            const y = getSolutionValue(x, C);
+
+            if (isNaN(y) || !isFinite(y)) {
+                first = true;
+                continue;
+            }
+
+            const sx = screenX(x);
+            const sy = screenY(y);
+
+            if (sy < -100 || sy > height + 100) {
+                first = true;
+                continue;
+            }
+
+            if (first) {
+                ctx.moveTo(sx, sy);
+                first = false;
+            } else {
+                ctx.lineTo(sx, sy);
+            }
+        }
+        ctx.stroke();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

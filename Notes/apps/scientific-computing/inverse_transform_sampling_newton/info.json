@@ -1,0 +1,5 @@
+{
+    "title": "Inverse Transform Sampling via Newton's Method",
+    "description": "A guide on generating random variables from a target distribution by combining Inverse Transform Sampling with numerical root-finding techniques.",
+    "entry_point": "inverse_transform_sampling_newton.md"
+}

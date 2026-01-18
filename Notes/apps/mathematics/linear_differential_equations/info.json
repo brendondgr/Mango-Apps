@@ -1,0 +1,5 @@
+{
+    "title": "First-Order Linear Differential Equations",
+    "description": "An introduction to differential equations focusing on the standard form and the integrating factor method for solving first-order linear equations.",
+    "entry_point": "linear_differential_equations.md"
+}

@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Settings - Visualizers{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <header class="page-header animate-fade-in">
+        <h1 class="page-header__title">⚙️ Settings</h1>
+        <p class="page-header__subtitle">Configure your API keys for AI-powered topic generation</p>
+    </header>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert--{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="card card--elevated animate-slide-up">
+        <h2 class="card__title">🔑 API Keys</h2>
+        <p class="card__description">Enter your API keys to enable AI topic generation. Keys are stored locally in a <code>.env</code> file.</p>
+
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="gemini_key">
+                    <span>Gemini API Key</span>
+                    {% if gemini_valid %}
+                    <span class="badge badge--success">✓ Configured</span>
+                    {% else %}
+                    <span class="badge badge--muted">Not Set</span>
+                    {% endif %}
+                </label>
+                <input type="password" 
+                       class="form-input form-input--mono"
+                       id="gemini_key" 
+                       name="gemini_key" 
+                       placeholder="{% if gemini_valid %}{{ gemini_key_masked }}{% else %}Enter your Gemini API key{% endif %}"
+                       autocomplete="off">
+                <small class="form-hint">Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="link">Google AI Studio</a></small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="perplexity_key">
+                    <span>Perplexity API Key</span>
+                    {% if perplexity_valid %}
+                    <span class="badge badge--success">✓ Configured</span>
+                    {% else %}
+                    <span class="badge badge--muted">Not Set</span>
+                    {% endif %}
+                </label>
+                <input type="password" 
+                       class="form-input form-input--mono"
+                       id="perplexity_key" 
+                       name="perplexity_key" 
+                       placeholder="{% if perplexity_valid %}{{ perplexity_key_masked }}{% else %}Enter your Perplexity API key{% endif %}"
+                       autocomplete="off">
+                <small class="form-hint">Get your key from <a href="https://www.perplexity.ai/settings/api" target="_blank" class="link">Perplexity Settings</a></small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/save.svg' %}'); mask-image: url('{% static 'notes/svg/save.svg' %}');"></span>
+                    Save Keys
+                </button>
+                <a href="{% url 'index' %}" class="btn btn-secondary">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/arrow-left.svg' %}'); mask-image: url('{% static 'notes/svg/arrow-left.svg' %}');"></span>
+                    Back to Home
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="card animate-slide-up" style="animation-delay: 0.1s;">
+        <h3 class="card__title">ℹ️ About AI Topic Generation</h3>
+        <p class="card__description">With valid API keys, you can automatically generate educational topics with:</p>
+        <ul class="feature-list">
+            <li><strong>Research</strong> — Perplexity searches for up-to-date information</li>
+            <li><strong>Content</strong> — Gemini synthesizes research into Markdown with LaTeX</li>
+            <li><strong>Visualizations</strong> — Interactive HTML apps are generated automatically</li>
+        </ul>
+        <a href="{% url 'generate_topic' %}" class="btn btn-primary">
+            <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/rocket.svg' %}'); mask-image: url('{% static 'notes/svg/rocket.svg' %}');"></span>
+            Generate Topic
+        </a>
+    </section>
+</div>
+
+<style>
+.settings-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--spacing-8) var(--spacing-6);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+}
+
+.page-header__title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.page-header__subtitle {
+    font-family: var(--font-body);
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+
+.messages-container {
+    margin-bottom: var(--spacing-6);
+}
+
+.alert {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-3);
+    font-weight: 500;
+}
+
+.alert--success {
+    background: var(--tone-green-bg);
+    color: var(--tone-green-text);
+    border: 1px solid var(--tone-green-border);
+}
+
+.alert--error {
+    background: var(--tone-red-bg);
+    color: var(--tone-red-text);
+    border: 1px solid var(--tone-red-border);
+}
+
+.card {
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6) var(--spacing-8);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.card--elevated {
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-md);
+}
+
+.card__title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-2);
+}
+
+.card__description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-6);
+    line-height: 1.6;
+}
+
+.card__description code {
+    font-family: var(--font-mono);
+    background: var(--tone-muted-gray-bg);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
+}
+
+.form-group {
+    margin-bottom: var(--spacing-6);
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard);
+}
+
+.form-input--mono {
+    font-family: var(--font-mono);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px var(--color-secondary-glow);
+}
+
+.form-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.form-hint {
+    display: block;
+    margin-top: var(--spacing-2);
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+}
+
+.link {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+.badge--success {
+    background: var(--tone-green-bg);
+    color: var(--tone-green-text);
+}
+
+.badge--muted {
+    background: var(--tone-muted-gray-bg);
+    color: var(--tone-muted-gray-text);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-4);
+    margin-top: var(--spacing-8);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+}
+
+.btn-secondary {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-surface);
+    transform: translateY(-1px);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--spacing-4) 0 var(--spacing-6);
+}
+
+.feature-list li {
+    padding: var(--spacing-2) 0;
+    padding-left: var(--spacing-6);
+    position: relative;
+    color: var(--color-text-secondary);
+}
+
+.feature-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--color-tertiary);
+    font-weight: bold;
+}
+
+.feature-list li strong {
+    color: var(--color-text-primary);
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s var(--ease-standard) forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s var(--ease-spring) forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+</style>
+{% endblock %}

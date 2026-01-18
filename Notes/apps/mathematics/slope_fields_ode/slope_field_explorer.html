@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Field Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary-color: #4C3BCF;
+            --accent-color: #FF6B6B;
+            --text-color: #2D3436;
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            
+            /* Viz Colors */
+            --viz-blue: #3b82f6;
+            --viz-purple: #a855f7;
+            --viz-teal: #14b8a6;
+            --viz-orange: #f97316;
+            --viz-green: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .viz-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .controls-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+        }
+
+        .equation-display {
+            background: #f0eeff;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', monospace;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--accent-color);
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.secondary {
+            background-color: #636e72;
+        }
+
+        .instruction {
+            font-size: 0.85rem;
+            color: #636e72;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .legend {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Slope Field Explorer</h1>
+        <p class="subtitle">Visualize the geometry of First-Order Differential Equations</p>
+    </header>
+
+    <div class="container">
+        <div class="viz-card" id="canvasContainer">
+            <canvas id="slopeCanvas"></canvas>
+        </div>
+
+        <div class="controls-card">
+            <div class="equation-display" id="equationLabel">
+                dy/dx = 1.0x + 0.0y
+            </div>
+
+            <div class="control-group">
+                <label>Coefficient a <span id="valA">1.0</span></label>
+                <input type="range" id="paramA" min="-2" max="2" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>Coefficient b <span id="valB">0.0</span></label>
+                <input type="range" id="paramB" min="-2" max="2" step="0.1" value="0.0">
+            </div>
+
+            <p class="instruction">Tap or click the grid to plot a solution curve.</p>
+
+            <button id="clearBtn">Clear Solution Curves</button>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="dot" style="background: #4C3BCF;"></div>
+                    <span>Slope field vectors</span>
+                </div>
+                <div class="legend-item">
+                    <div class="dot" style="background: #FF6B6B;"></div>
+                    <span>Numerical solutions (RK4)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            bg: '#FEFBF6',
+            grid: '#e0e0e0',
+            text: '#2D3436',
+            vizColors: ['#3b82f6', '#a855f7', '#14b8a6', '#f97316', '#10b981']
+        };
+
+        const canvas = document.getElementById('slopeCanvas');
+        const ctx = canvas.getContext('2d');
+        const paramA = document.getElementById('paramA');
+        const paramB = document.getElementById('paramB');
+        const valA = document.getElementById('valA');
+        const valB = document.getElementById('valB');
+        const eqLabel = document.getElementById('equationLabel');
+        const clearBtn = document.getElementById('clearBtn');
+
+        let width, height;
+        let scale = 40; // pixels per unit
+        let a = 1.0;
+        let b = 0.0;
+        let curves = [];
+        let rangeX = 10; // units visible from center
+        let rangeY = 10;
+
+        function init() {
+            resize();
+            window.addEventListener('resize', resize);
+            
+            paramA.addEventListener('input', updateParams);
+            paramB.addEventListener('input', updateParams);
+            clearBtn.addEventListener('click', () => {
+                curves = [];
+                draw();
+            });
+
+            canvas.addEventListener('mousedown', handleInteraction);
+            canvas.addEventListener('touchstart', handleInteraction, { passive: false });
+
+            updateParams();
+            draw();
+        }
+
+        function updateParams() {
+            a = parseFloat(paramA.value);
+            b = parseFloat(paramB.value);
+            valA.textContent = a.toFixed(1);
+            valB.textContent = b.toFixed(1);
+            
+            let aStr = a === 0 ? "" : (a === 1 ? "x" : (a === -1 ? "-x" : a.toFixed(1) + "x"));
+            let bStr = b === 0 ? "" : (b > 0 ? " + " + (b === 1 ? "y" : b.toFixed(1) + "y") : " - " + (Math.abs(b) === 1 ? "y" : Math.abs(b).toFixed(1) + "y"));
+            
+            if (a === 0 && b === 0) eqLabel.textContent = "dy/dx = 0";
+            else eqLabel.textContent = `dy/dx = ${aStr}${bStr}`;
+            
+            draw();
+        }
+
+        function resize() {
+            const container = document.getElementById('canvasContainer');
+            width = container.clientWidth - 40;
+            height = width; // maintain square
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            // Adjust scale based on size
+            scale = width / (rangeX * 2);
+            draw();
+        }
+
+        function handleInteraction(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const xPx = clientX - rect.left;
+            const yPx = clientY - rect.top;
+            
+            // Convert to math coordinates
+            const mathX = (xPx - width / 2) / scale;
+            const mathY = -(yPx - height / 2) / scale;
+            
+            curves.push({
+                x0: mathX,
+                y0: mathY,
+                color: CONFIG.vizColors[curves.length % CONFIG.vizColors.length]
+            });
+            
+            draw();
+        }
+
+        function f(x, y) {
+            return a * x + b * y;
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = CONFIG.grid;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            
+            // Vertical lines
+            for (let x = -rangeX; x <= rangeX; x++) {
+                const px = width/2 + x * scale;
+                ctx.moveTo(px, 0);
+                ctx.lineTo(px, height);
+            }
+            
+            // Horizontal lines
+            for (let y = -rangeY; y <= rangeY; y++) {
+                const py = height/2 - y * scale;
+                ctx.moveTo(0, py);
+                ctx.lineTo(width, py);
+            }
+            ctx.stroke();
+
+            // Axes
+            ctx.strokeStyle = '#95a5a6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#95a5a6';
+            ctx.font = '10px DM Sans';
+            ctx.fillText('x', width - 15, height/2 - 5);
+            ctx.fillText('y', width/2 + 5, 15);
+        }
+
+        function drawSlopeField() {
+            const step = 0.8; // Grid density in units
+            const length = 0.4; // Half length of segment
+
+            ctx.strokeStyle = CONFIG.primary;
+            ctx.lineWidth = 1.5;
+
+            for (let x = -rangeX; x <= rangeX; x += step) {
+                for (let y = -rangeY; y <= rangeY; y += step) {
+                    const slope = f(x, y);
+                    const angle = Math.atan(slope);
+                    
+                    const dx = Math.cos(angle) * length;
+                    const dy = Math.sin(angle) * length;
+
+                    const x1 = width/2 + (x - dx) * scale;
+                    const y1 = height/2 - (y - dy) * scale;
+                    const x2 = width/2 + (x + dx) * scale;
+                    const y2 = height/2 - (y + dy) * scale;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    // Optional: arrowhead to show direction of flow
+                    const headLen = 0.1 * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(x2, y2);
+                    ctx.lineTo(x2 - headLen * Math.cos(angle - 0.5), y2 + headLen * Math.sin(angle - 0.5));
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function solveRK4(x0, y0, direction = 1) {
+            const points = [{x: x0, y: y0}];
+            const h = 0.05 * direction;
+            const steps = 300;
+            let cx = x0;
+            let cy = y0;
+
+            for (let i = 0; i < steps; i++) {
+                const k1 = f(cx, cy);
+                const k2 = f(cx + h/2, cy + h * k1/2);
+                const k3 = f(cx + h/2, cy + h * k2/2);
+                const k4 = f(cx + h, cy + h * k3);
+                
+                cy = cy + (h/6) * (k1 + 2*k2 + 2*k3 + k4);
+                cx = cx + h;
+
+                if (Math.abs(cy) > rangeY * 2 || Math.abs(cx) > rangeX * 2) break;
+                points.push({x: cx, y: cy});
+            }
+            return points;
+        }
+
+        function drawCurve(curve) {
+            const forward = solveRK4(curve.x0, curve.y0, 1);
+            const backward = solveRK4(curve.x0, curve.y0, -1);
+            
+            ctx.strokeStyle = curve.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            // Draw backward points
+            for (let i = backward.length - 1; i >= 0; i--) {
+                const px = width/2 + backward[i].x * scale;
+                const py = height/2 - backward[i].y * scale;
+                if (i === backward.length - 1) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+
+            // Draw forward points
+            for (let i = 0; i < forward.length; i++) {
+                const px = width/2 + forward[i].x * scale;
+                const py = height/2 - forward[i].y * scale;
+                ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Initial point marker
+            ctx.fillStyle = curve.color;
+            ctx.beginPath();
+            ctx.arc(width/2 + curve.x0 * scale, height/2 - curve.y0 * scale, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+            drawSlopeField();
+            curves.forEach(drawCurve);
+        }
+
+        init();
+    </script>
+</body>
+</html>

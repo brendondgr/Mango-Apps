@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivatives of Linear Functions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary-color: #4C3BCF;
+            --accent-color: #FF6B6B;
+            --text-color: #2D3436;
+            --card-bg: #FFFFFF;
+            --grid-color: #E0E0E0;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --teal: #14b8a6;
+            --orange: #f97316;
+            --green: #10b981;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'DM Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #636e72;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .value-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .viz-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .equation-box {
+            background: #F1F2F6;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .math-variable {
+            color: var(--primary-color);
+        }
+
+        .math-derivative {
+            color: var(--accent-color);
+        }
+
+        .explanation {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .explanation h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            vertical-align: middle;
+            margin-right: 5px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Linear Derivatives</h1>
+        <p class="subtitle">Visualizing the constant rate of change in linear functions.</p>
+    </header>
+
+    <div class="container">
+        <div class="controls-panel">
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slope">Slope (m)</label>
+                    <span id="m-val" class="value-display">1.0</span>
+                </div>
+                <input type="range" id="slope" min="-4" max="4" step="0.1" value="1">
+                <p style="font-size: 0.8rem; color: #666; margin-top: 4px;">Controls the steepness and the derivative value.</p>
+            </div>
+
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="intercept">Y-Intercept (b)</label>
+                    <span id="b-val" class="value-display">0.0</span>
+                </div>
+                <input type="range" id="intercept" min="-3" max="3" step="0.1" value="0">
+                <p style="font-size: 0.8rem; color: #666; margin-top: 4px;">Shifts the line up or down without changing its slope.</p>
+            </div>
+
+            <div class="equation-box">
+                f(x) = <span id="eq-m" class="math-variable">1.0</span>x + <span id="eq-b" class="math-variable">0.0</span>
+            </div>
+            
+            <div class="equation-box" style="border-left: 4px solid var(--accent-color);">
+                f'(x) = <span id="eq-deriv" class="math-derivative">1.0</span>
+            </div>
+        </div>
+
+        <div class="viz-panel">
+            <div class="canvas-container">
+                <div style="position: absolute; top: 10px; left: 10px; font-family: 'Space Grotesk'; font-size: 0.8rem; color: #999; z-index: 10;">FUNCTION f(x)</div>
+                <canvas id="functionCanvas"></canvas>
+            </div>
+            <div style="height: 1px; background: #eee;"></div>
+            <div class="canvas-container">
+                <div style="position: absolute; top: 10px; left: 10px; font-family: 'Space Grotesk'; font-size: 0.8rem; color: #999; z-index: 10;">DERIVATIVE f'(x)</div>
+                <canvas id="derivativeCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h2>Why is the derivative constant?</h2>
+        <p>
+            For any linear function <strong>y = mx + b</strong>, the "slope" describes how much <strong>y</strong> changes for every unit increase in <strong>x</strong>. 
+            Because a straight line never curves, this rate of change is <strong>constant</strong> across the entire line. 
+            The derivative <strong>f'(x)</strong> is simply a mathematical way of asking "what is the slope right here?". 
+            Since the slope is the same everywhere on a line, the derivative is always just the value <strong>m</strong>.
+        </p>
+    </div>
+
+    <script>
+        const state = {
+            m: 1.0,
+            b: 0.0,
+            colors: {
+                primary: '#4C3BCF',
+                accent: '#FF6B6B',
+                grid: '#E0E0E0',
+                text: '#2D3436',
+                blue: '#3b82f6',
+                teal: '#14b8a6',
+                orange: '#f97316'
+            },
+            range: 6, // units from center to edge
+        };
+
+        const fCanvas = document.getElementById('functionCanvas');
+        const dCanvas = document.getElementById('derivativeCanvas');
+        const fCtx = fCanvas.getContext('2d');
+        const dCtx = dCanvas.getContext('2d');
+
+        const mSlider = document.getElementById('slope');
+        const bSlider = document.getElementById('intercept');
+        const mDisplay = document.getElementById('m-val');
+        const bDisplay = document.getElementById('b-val');
+        const eqM = document.getElementById('eq-m');
+        const eqB = document.getElementById('eq-b');
+        const eqDeriv = document.getElementById('eq-deriv');
+
+        function resize() {
+            const container = fCanvas.parentElement;
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            
+            // Adjust for DPI
+            const dpr = window.devicePixelRatio || 1;
+            fCanvas.width = w * dpr;
+            fCanvas.height = h * dpr;
+            dCanvas.width = w * dpr;
+            dCanvas.height = h * dpr;
+            
+            fCtx.scale(dpr, dpr);
+            dCtx.scale(dpr, dpr);
+            
+            fCanvas.style.width = w + 'px';
+            fCanvas.style.height = h + 'px';
+            dCanvas.style.width = w + 'px';
+            dCanvas.style.height = h + 'px';
+            
+            draw();
+        }
+
+        function toScreen(ctx, x, y) {
+            const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+            const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+            const centerX = w / 2;
+            const centerY = h / 2;
+            const scale = w / (state.range * 2);
+            
+            return {
+                x: centerX + x * scale,
+                y: centerY - y * scale
+            };
+        }
+
+        function drawGrid(ctx) {
+            const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+            const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+            const range = state.range;
+            
+            ctx.strokeStyle = state.colors.grid;
+            ctx.lineWidth = 1;
+            
+            for (let i = -range; i <= range; i++) {
+                // Vertical lines
+                const p1 = toScreen(ctx, i, -range);
+                const p2 = toScreen(ctx, i, range);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+                
+                // Horizontal lines
+                const p3 = toScreen(ctx, -range, i);
+                const p4 = toScreen(ctx, range, i);
+                ctx.beginPath();
+                ctx.moveTo(p3.x, p3.y);
+                ctx.lineTo(p4.x, p4.y);
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#b2bec3';
+            ctx.lineWidth = 2;
+            const ox1 = toScreen(ctx, -range, 0);
+            const ox2 = toScreen(ctx, range, 0);
+            ctx.beginPath();
+            ctx.moveTo(ox1.x, ox1.y);
+            ctx.lineTo(ox2.x, ox2.y);
+            ctx.stroke();
+            
+            const oy1 = toScreen(ctx, 0, -range);
+            const oy2 = toScreen(ctx, 0, range);
+            ctx.beginPath();
+            ctx.moveTo(oy1.x, oy1.y);
+            ctx.lineTo(oy2.x, oy2.y);
+            ctx.stroke();
+        }
+
+        function drawFunction() {
+            fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
+            drawGrid(fCtx);
+            
+            const range = state.range;
+            const p1 = toScreen(fCtx, -range, state.m * -range + state.b);
+            const p2 = toScreen(fCtx, range, state.m * range + state.b);
+            
+            // Draw the line
+            fCtx.strokeStyle = state.colors.primary;
+            fCtx.lineWidth = 4;
+            fCtx.beginPath();
+            ctxLine(fCtx, p1, p2);
+            fCtx.stroke();
+            
+            // Slope Triangle (Rise/Run)
+            // Position it centered-ish
+            const tx = 1;
+            const ty = state.m * tx + state.b;
+            const tr1 = toScreen(fCtx, tx, ty);
+            const tr2 = toScreen(fCtx, tx + 1, ty); // Run
+            const tr3 = toScreen(fCtx, tx + 1, ty + state.m); // Rise
+            
+            // Draw run
+            fCtx.setLineDash([5, 3]);
+            fCtx.strokeStyle = state.colors.teal;
+            fCtx.beginPath();
+            ctxLine(fCtx, tr1, tr2);
+            fCtx.stroke();
+            
+            // Draw rise
+            fCtx.strokeStyle = state.colors.accent;
+            fCtx.beginPath();
+            ctxLine(fCtx, tr2, tr3);
+            fCtx.stroke();
+            fCtx.setLineDash([]);
+            
+            // Points
+            fCtx.fillStyle = state.colors.primary;
+            circle(fCtx, tr1.x, tr1.y, 4);
+            circle(fCtx, tr3.x, tr3.y, 4);
+
+            // Labels for triangle
+            fCtx.font = "bold 12px DM Sans";
+            fCtx.fillStyle = state.colors.teal;
+            fCtx.fillText("run = 1", tr1.x + 10, tr1.y + 15);
+            
+            fCtx.fillStyle = state.colors.accent;
+            const riseText = "rise = " + state.m.toFixed(1);
+            fCtx.fillText(riseText, tr2.x + 5, tr2.y - (state.m * 15));
+        }
+
+        function drawDerivative() {
+            dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+            drawGrid(dCtx);
+            
+            const range = state.range;
+            const p1 = toScreen(dCtx, -range, state.m);
+            const p2 = toScreen(dCtx, range, state.m);
+            
+            // Derivative line
+            dCtx.strokeStyle = state.colors.accent;
+            dCtx.lineWidth = 4;
+            dCtx.beginPath();
+            ctxLine(dCtx, p1, p2);
+            dCtx.stroke();
+            
+            // Highlight point on Y axis
+            const py = toScreen(dCtx, 0, state.m);
+            dCtx.fillStyle = state.colors.accent;
+            circle(dCtx, py.x, py.y, 6);
+            
+            // Label
+            dCtx.font = "bold 14px Space Grotesk";
+            dCtx.fillText(`f'(x) = ${state.m.toFixed(1)}`, py.x + 10, py.y - 10);
+        }
+
+        function ctxLine(ctx, p1, p2) {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+        }
+
+        function circle(ctx, x, y, r) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function update() {
+            state.m = parseFloat(mSlider.value);
+            state.b = parseFloat(bSlider.value);
+            
+            mDisplay.innerText = state.m.toFixed(1);
+            bDisplay.innerText = state.b.toFixed(1);
+            
+            eqM.innerText = state.m.toFixed(1);
+            eqB.innerText = state.b >= 0 ? ` + ${state.b.toFixed(1)}` : ` - ${Math.abs(state.b).toFixed(1)}`;
+            eqDeriv.innerText = state.m.toFixed(1);
+            
+            draw();
+        }
+
+        function draw() {
+            drawFunction();
+            drawDerivative();
+        }
+
+        function init() {
+            window.addEventListener('resize', resize);
+            mSlider.addEventListener('input', update);
+            bSlider.addEventListener('input', update);
+            
+            // Initial call
+            resize();
+            update();
+        }
+
+        // Call init immediately at the end of script
+        init();
+    </script>
+</body>
+</html>

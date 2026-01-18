@@ -1,0 +1,10 @@
+{
+    "name": "Vectors",
+    "description": "Vectors in are mathematical objects that have both magnitude and direction, often represented as arrows in space.",
+    "folder": "vectors",
+    "question": "Put In-Depth Inquiry Here. This will be sent to PerplexityAPI",
+    "visualizations": [
+        "Description of Interactable Visualization 1",
+        "Description of Interactable Visualization 2"
+    ]
+}

@@ -1,0 +1,5 @@
+{
+    "title": "Latency and Bandwidth in Memory and Storage Hierarchies",
+    "description": "An exploration of data transfer metrics across hardware tiers, comparing the speed and delay characteristics of Cache, RAM, UMA/NUMA architectures, and persistent storage.",
+    "entry_point": "latency_bandwidth_hierarchy.md"
+}

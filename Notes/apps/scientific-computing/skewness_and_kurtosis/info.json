@@ -1,0 +1,5 @@
+{
+    "title": "Skewness and Kurtosis Basics",
+    "description": "An introductory guide to the three types of skewness and kurtosis, explaining how they describe the symmetry and tail behavior of probability distributions.",
+    "entry_point": "skewness_and_kurtosis.md"
+}

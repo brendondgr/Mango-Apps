@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amdahl's Law Interactive Visualization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #FEFBF6;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4C3BCF 0%, #a855f7 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            min-height: 600px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            height: 500px;
+            position: relative;
+        }
+
+        #chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .control-group {
+            background: #FEFBF6;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #f0e7ff;
+        }
+
+        .control-group h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            color: #4C3BCF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-label {
+            font-weight: 500;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #e5d7ff;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            touch-action: pan-x;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4C3BCF;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(76, 59, 207, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #4C3BCF;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(76, 59, 207, 0.4);
+        }
+
+        .slider-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: #4C3BCF;
+            font-size: 1.3rem;
+            text-align: center;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .metrics {
+            background: linear-gradient(135deg, #10b981, #14b8a6);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric {
+            margin-bottom: 16px;
+        }
+
+        .metric-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .formula {
+            background: rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .examples {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .example-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .example-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .example-btn.active {
+            background: white;
+            color: #10b981;
+        }
+
+        .info {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info h4 {
+            color: #d97706;
+            margin-bottom: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>**Amdahl's Law**</h1>
+            <p>Interactive visualization of multicore scaling limits. Adjust parameters to see why perfect parallel speedup is impossible.</p>
+        </div>
+        
+        <div class="content">
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🧮 **Serial Fraction (Fs)**</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">0.00 (100% parallel) → 1.00 (100% serial)</div>
+                        <input type="range" id="fsSlider" min="0" max="0.5" step="0.01" value="0.05">
+                        <div class="slider-value" id="fsValue">0.05</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>💻 **Processors (P)**</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">1 → 1024 cores</div>
+                        <input type="range" id="pSlider" min="1" max="1024" step="1" value="64">
+                        <div class="slider-value" id="pValue">64</div>
+                    </div>
+                </div>
+                
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="speedupValue">15.6x</div>
+                        <div class="metric-label">**Theoretical Speedup**</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="limitValue">20.0x</div>
+                        <div class="metric-label">**Max Possible Speedup**</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚡ **Quick Examples**</h3>
+                    <div class="examples">
+                        <button class="example-btn" data-fs="0.05">**Fs=0.05**<br>~167x @ 1024P</button>
+                        <button class="example-btn" data-fs="0.10">**Fs=0.10**<br>~9.1x max</button>
+                        <button class="example-btn" data-fs="0.25">**Fs=0.25**<br>~1.33x max</button>
+                        <button class="example-btn active" data-fs="0.05">**Realistic**<br>5% serial</button>
+                    </div>
+                </div>
+                
+                <div class="formula">
+                    Speedup = <strong>1 / (Fs + (1-Fs)/P)</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h4>🎓 **Key Insight**</h4>
+            <p>Even with <strong>5% serial code (Fs=0.05)</strong>, you can never exceed <strong>20x speedup</strong> no matter how many processors you add. This is the fundamental limit of <strong>strong scaling</strong> in parallel computing.</p>
+        </div>
+    </div>
+
+    <script>
+        // Vibrant UI Colors - Hardcoded for robustness
+        const COLORS = {
+            background: '#FEFBF6',
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            blue: '#3b82f6',
+            purple: '#a855f7',
+            teal: '#14b8a6',
+            orange: '#f97316',
+            green: '#10b981',
+            gray: '#6b7280',
+            lightGray: '#f3f4f6'
+        };
+
+        // Amdahl's Law formula
+        function amdahlSpeedup(fs, p) {
+            return 1 / (fs + (1 - fs) / p);
+        }
+
+        // DOM elements
+        const fsSlider = document.getElementById('fsSlider');
+        const pSlider = document.getElementById('pSlider');
+        const fsValue = document.getElementById('fsValue');
+        const pValue = document.getElementById('pValue');
+        const speedupValue = document.getElementById('speedupValue');
+        const limitValue = document.getElementById('limitValue');
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+
+        let fs = 0.05;
+        let p = 64;
+        let chartData = [];
+        const MAX_P = 1024;
+
+        // Initialize canvas
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            drawChart();
+        }
+
+        // Generate chart data
+        function generateChartData() {
+            chartData = [];
+            for (let processors = 1; processors <= MAX_P; processors *= 2) {
+                chartData.push({
+                    p: processors,
+                    speedup: amdahlSpeedup(fs, processors),
+                    limit: 1 / fs
+                });
+            }
+        }
+
+        // Draw chart
+        function drawChart() {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Grid
+            ctx.strokeStyle = COLORS.lightGray;
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = height * (1 - i/10);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = COLORS.gray;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(60, height - 40);
+            ctx.lineTo(width - 20, height - 40);
+            ctx.lineTo(width - 20, 40);
+            ctx.stroke();
+            
+            // Chart line
+            ctx.strokeStyle = COLORS.green;
+            ctx.lineWidth = 4;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(16, 185, 129, 0.3)';
+            ctx.shadowBlur = 10;
+            
+            ctx.beginPath();
+            const marginLeft = 80;
+            const marginBottom = 60;
+            const xScale = (width - marginLeft - 40) / Math.log2(MAX_P);
+            const yScale = (height - 40 - marginBottom) / Math.max(20, 1/fs);
+            
+            chartData.forEach((point, i) => {
+                const x = marginLeft + xScale * Math.log2(point.p);
+                const y = height - marginBottom - point.speedup * yScale;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                // Data points
+                ctx.fillStyle = COLORS.green;
+                ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.shadowBlur = 0;
+            
+            // Limit line (dashed)
+            const maxSpeedup = 1 / fs;
+            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = COLORS.orange;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(marginLeft, height - marginBottom - maxSpeedup * yScale);
+            ctx.lineTo(width - 20, height - marginBottom - maxSpeedup * yScale);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Current point highlight
+            const currentX = marginLeft + xScale * Math.log2(p);
+            const currentY = height - marginBottom - amdahlSpeedup(fs, p) * yScale;
+            ctx.fillStyle = COLORS.primary;
+            ctx.shadowColor = COLORS.primary;
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Labels
+            ctx.fillStyle = COLORS.gray;
+            ctx.font = 'bold 14px Space Grotesk';
+            ctx.textAlign = 'center';
+            ctx.fillText('Processors (log scale)', width/2, height - 10);
+            
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Speedup', 50, height/2);
+            
+            // Axis labels
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let i = 0; i <= 10; i += 2) {
+                const y = height - marginBottom - (i/10) * yScale * Math.max(20, 1/fs);
+                ctx.fillText(`${(i/10 * Math.max(20, 1/fs)).toFixed(0)}x`, 55, y);
+            }
+            
+            ctx.textBaseline = 'bottom';
+            const labels = ['1', '2', '4', '8', '16', '32', '64', '128', '256', '512', '1024'];
+            labels.forEach((label, i) => {
+                const x = marginLeft + xScale * i;
+                ctx.fillText(label + 'P', x, height - 35);
+            });
+        }
+
+        // Update UI
+        function updateUI() {
+            fsValue.textContent = fs.toFixed(2);
+            pValue.textContent = p.toString();
+            
+            const speedup = amdahlSpeedup(fs, p);
+            const limit = 1 / fs;
+            
+            speedupValue.textContent = speedup.toFixed(1) + 'x';
+            limitValue.textContent = limit.toFixed(1) + 'x';
+            
+            generateChartData();
+            drawChart();
+        }
+
+        // Event listeners
+        fsSlider.addEventListener('input', (e) => {
+            fs = parseFloat(e.target.value);
+            updateUI();
+        });
+
+        pSlider.addEventListener('input', (e) => {
+            p = parseInt(e.target.value);
+            updateUI();
+        });
+
+        // Example buttons
+        document.querySelectorAll('.example-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                fs = parseFloat(btn.dataset.fs);
+                fsSlider.value = fs;
+                document.querySelectorAll('.example-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateUI();
+            });
+        });
+
+        // Touch-friendly enhancements
+        let isDragging = false;
+        [fsSlider, pSlider].forEach(slider => {
+            slider.addEventListener('touchstart', () => isDragging = true);
+            slider.addEventListener('touchend', () => {
+                isDragging = false;
+                setTimeout(updateUI, 50);
+            });
+        });
+
+        // Initialization
+        function init() {
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            updateUI();
+        }
+
+        // Immediate initialization
+        init();
+    </script>
+</body>
+</html>

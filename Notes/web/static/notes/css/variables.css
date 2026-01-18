@@ -1,0 +1,186 @@
+:root {
+  /* -------------------------------------------------------------------------
+   * BRAND COLORS
+   * ------------------------------------------------------------------------- */
+  --color-primary: #ff6b6b; /* Electric Coral */
+  --color-secondary: #4c3bcf; /* Deep Indigo */
+  --color-tertiary: #00d9c0; /* Vivid Teal */
+
+  /* -------------------------------------------------------------------------
+   * NEUTRAL COLORS
+   * ------------------------------------------------------------------------- */
+  --color-bg-base: #fefbf6; /* Warm Off-White */
+  --color-bg-surface: #fff8f0; /* Soft Cream */
+  --color-bg-elevated: #ffffff; /* Pure White */
+
+  /* -------------------------------------------------------------------------
+   * TEXT COLORS
+   * ------------------------------------------------------------------------- */
+  --color-text-primary: #1f2937;   /* Dark gray for headings */
+  --color-text-secondary: #6b7280; /* Medium gray for body */
+  --color-text-tertiary: #9ca3af;  /* Light gray for metadata */
+
+  /* -------------------------------------------------------------------------
+   * SURFACE COLORS (Layered backgrounds)
+   * ------------------------------------------------------------------------- */
+  --color-surface-100: #fff8f0; /* Lightest - same as bg-surface */
+  --color-surface-200: #f3ebe0; /* Slightly darker */
+  --color-surface-300: #e8ddd0; /* More contrast */
+
+  /* -------------------------------------------------------------------------
+   * DANGER/DESTRUCTIVE COLORS
+   * ------------------------------------------------------------------------- */
+  --color-danger: #ef4444;       /* Base red - same as tone-red-border */
+  --color-danger-100: #fef2f2;   /* Very light red bg */
+  --color-danger-200: #fecaca;   /* Light red border */
+  --color-danger-hover: #dc2626; /* Darker on hover */
+
+  /* -------------------------------------------------------------------------
+   * PRIMARY VARIANTS
+   * ------------------------------------------------------------------------- */
+  --color-primary-100: #fff1f1;  /* Very light coral bg */
+  --color-primary-hover: #ff5252; /* Darker coral on hover */
+  --color-primary-glow: rgba(255, 107, 107, 0.4);
+
+  /* -------------------------------------------------------------------------
+   * SECONDARY VARIANTS
+   * ------------------------------------------------------------------------- */
+  --color-secondary-100: #eef2ff; /* Very light indigo bg */
+  --color-secondary-hover: #3d2eb8; /* Darker indigo on hover */
+  --color-secondary-glow: rgba(76, 59, 207, 0.3);
+
+  /* -------------------------------------------------------------------------
+   * BORDER COLORS
+   * ------------------------------------------------------------------------- */
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.15);
+
+  /* -------------------------------------------------------------------------
+   * CATEGORIZATION TONES (16 Sets)
+   * usage: var(--tone-{name}-bg), var(--tone-{name}-border), var(--tone-{name}-text)
+   * ------------------------------------------------------------------------- */
+
+  /* Yellow Orange */
+  --tone-yellow-orange-bg: #fef3c7;
+  --tone-yellow-orange-border: #f59e0b;
+  --tone-yellow-orange-text: #78350f;
+
+  /* Yellow */
+  --tone-yellow-bg: #fef9c3;
+  --tone-yellow-border: #eab308;
+  --tone-yellow-text: #713f12;
+
+  /* Orange */
+  --tone-orange-bg: #ffedd5;
+  --tone-orange-border: #f97316;
+  --tone-orange-text: #7c2d12;
+
+  /* Red */
+  --tone-red-bg: #fee2e2;
+  --tone-red-border: #ef4444;
+  --tone-red-text: #7f1d1d;
+
+  /* Blue */
+  --tone-blue-bg: #dbeafe;
+  --tone-blue-border: #3b82f6;
+  --tone-blue-text: #1e3a8a;
+
+  /* Purple */
+  --tone-purple-bg: #f3e8ff;
+  --tone-purple-border: #a855f7;
+  --tone-purple-text: #581c87;
+
+  /* Teal */
+  --tone-teal-bg: #ccfbf1;
+  --tone-teal-border: #14b8a6;
+  --tone-teal-text: #134e4a;
+
+  /* Light Purple */
+  --tone-light-purple-bg: #ede9fe;
+  --tone-light-purple-border: #8b5cf6;
+  --tone-light-purple-text: #4c1d95;
+
+  /* Light Blue */
+  --tone-light-blue-bg: #e0f2fe;
+  --tone-light-blue-border: #0ea5e9;
+  --tone-light-blue-text: #0c4a6e;
+
+  /* Green */
+  --tone-green-bg: #d1fae5;
+  --tone-green-border: #10b981;
+  --tone-green-text: #064e3b;
+
+  /* Black */
+  --tone-black-bg: #1f2937;
+  --tone-black-border: #111827;
+  --tone-black-text: #ffffff;
+
+  /* Muted Gray */
+  --tone-muted-gray-bg: #e2e8f0;
+  --tone-muted-gray-border: #64748b;
+  --tone-muted-gray-text: #0f172a;
+
+  /* Brown */
+  --tone-brown-bg: #fde68a;
+  --tone-brown-border: #b45309;
+  --tone-brown-text: #78350f;
+
+  /* Light Pink */
+  --tone-light-pink-bg: #fce7f3;
+  --tone-light-pink-border: #f472b6;
+  --tone-light-pink-text: #831843;
+
+  /* Kiwi */
+  --tone-kiwi-bg: #ecfccb;
+  --tone-kiwi-border: #84cc16;
+  --tone-kiwi-text: #365314;
+
+  /* Rose */
+  --tone-rose-bg: #ffe4e6;
+  --tone-rose-border: #f43f5e;
+  --tone-rose-text: #881337;
+
+  /* -------------------------------------------------------------------------
+   * TYPOGRAPHY
+   * ------------------------------------------------------------------------- */
+  --font-heading: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* -------------------------------------------------------------------------
+   * SHADOWS (Elevation)
+   * ------------------------------------------------------------------------- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* -------------------------------------------------------------------------
+   * BORDER RADIUS
+   * ------------------------------------------------------------------------- */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1.5rem; /* 24px */
+
+  /* -------------------------------------------------------------------------
+   * ANIMATION CURVES
+   * ------------------------------------------------------------------------- */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -------------------------------------------------------------------------
+   * SPACING (Simple Scale)
+   * ------------------------------------------------------------------------- */
+  /* This is a simple base scale, extensive spacing usually handled by util classes */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+}

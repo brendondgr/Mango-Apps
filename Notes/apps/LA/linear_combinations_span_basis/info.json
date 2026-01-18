@@ -1,0 +1,5 @@
+{
+    "title": "Linear Combinations, Spans, and Bases",
+    "description": "An exploration of how vectors combine to fill space and the fundamental sets of vectors that define those spaces.",
+    "entry_point": "linear_combinations_span_basis.md"
+}

@@ -1,0 +1,821 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generate Topic - Visualizers{% endblock %}
+
+{% block content %}
+<div class="generate-container">
+    <header class="page-header animate-fade-in">
+        <h1 class="page-header__title">Topic Generator</h1>
+        <p class="page-header__subtitle">Automatically create educational content with interactive visualizations</p>
+    </header>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert--{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <section class="card card--error animate-slide-up">
+        <h3 class="card__title card__title--error">❌ Generation Failed</h3>
+        <div class="error-details">
+            <p><strong>Stage:</strong> {{ error.stage }}</p>
+            <p><strong>Error:</strong> {{ error.message }}</p>
+            {% if error.retries_attempted %}
+            <p class="error-retries">Attempted {{ error.retries_attempted }} retries before failing.</p>
+            {% endif %}
+        </div>
+        <button onclick="document.querySelector('.generate-form').scrollIntoView({behavior: 'smooth'})" class="btn btn-secondary">
+            <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/refresh-cw.svg' %}'); mask-image: url('{% static 'notes/svg/refresh-cw.svg' %}');"></span>
+            Try Again
+        </button>
+    </section>
+    {% endif %}
+
+    {% if preview %}
+    <section class="card card--success animate-slide-up">
+        <h3 class="card__title card__title--success">📋 Preview: {{ preview.name }}</h3>
+        <div class="preview-details">
+            <p><strong>Description:</strong> {{ preview.description }}</p>
+            <p><strong>Folder:</strong> <code>{{ preview.folder }}</code></p>
+            
+            {% if preview.visualizations %}
+            <div class="preview-viz">
+                <strong>Planned Visualizations:</strong>
+                <ul>
+                    {% for viz in preview.visualizations %}
+                    <li>{{ viz }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        <form method="post" class="preview-actions">
+            {% csrf_token %}
+            <input type="hidden" name="inquiry" value="{{ inquiry }}">
+            <input type="hidden" name="course_id" value="{{ course_id }}">
+            <input type="hidden" name="action" value="generate">
+            <button type="submit" class="btn btn-primary btn--large">
+                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/sparkles.svg' %}'); mask-image: url('{% static 'notes/svg/sparkles.svg' %}');"></span>
+                Generate Full Topic
+            </button>
+            <p class="preview-note">This will research, write content, and create visualizations</p>
+        </form>
+    </section>
+    {% endif %}
+
+    <section class="card card--elevated animate-slide-up" id="generate-section">
+        <h2 class="card__title">📝 New Topic</h2>
+        
+        <form method="post" class="generate-form form" id="generate-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="course_id">Course</label>
+                <select class="form-select" id="course_id" name="course_id" required>
+                    <option value="">Select a course...</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if course_id == course.id|stringformat:"s" %}selected{% endif %}>
+                        {{ course.subject.name }} → {{ course.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if not courses %}
+                <small class="form-hint form-hint--warning">No courses found. <a href="{% url 'course_create' %}" class="link">Create one first</a>.</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="inquiry">Learning Inquiry</label>
+                <textarea class="form-textarea"
+                          id="inquiry" 
+                          name="inquiry" 
+                          rows="4" 
+                          placeholder="What would you like to learn about? E.g., 'Explain eigenvectors and eigenvalues with geometric intuition'"
+                          required>{{ inquiry|default:'' }}</textarea>
+                <small class="form-hint">Be specific! The AI will research this topic and create content with visualizations.</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" name="action" value="preview" class="btn btn-secondary">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/eye.svg' %}'); mask-image: url('{% static 'notes/svg/eye.svg' %}');"></span>
+                    Preview Plan
+                </button>
+                <button type="submit" name="action" value="generate" class="btn btn-primary" id="btn-generate">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/rocket.svg' %}'); mask-image: url('{% static 'notes/svg/rocket.svg' %}');"></span>
+                    Generate Topic
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Terminal / Status Section (Hidden by default) -->
+    <!-- Wizard Status Section (Hidden by default) -->
+    <section id="generation-status" class="card card--elevated animate-slide-up" style="display: none;">
+        <h3 class="card__title">🚀 Generating Topic...</h3>
+        
+        <div class="steps-container">
+            <!-- Step 1: Planning -->
+            <div class="step-item" id="step-planning">
+                <div class="step-icon">1</div>
+                <div class="step-content">
+                    <h4 class="step-title">Planning Topic Structure</h4>
+                    <p class="step-description">Analyzing inquiry and outlining content...</p>
+                </div>
+                <div class="step-status"></div>
+            </div>
+
+            <!-- Step 2: Research -->
+            <div class="step-item" id="step-research">
+                <div class="step-icon">2</div>
+                <div class="step-content">
+                    <h4 class="step-title">Conducting Research</h4>
+                    <p class="step-description">Gathering information and verifying facts...</p>
+                </div>
+                <div class="step-status"></div>
+            </div>
+
+            <!-- Step 3: Visualization & Content -->
+            <div class="step-item" id="step-visualization">
+                <div class="step-icon">3</div>
+                <div class="step-content">
+                    <h4 class="step-title">Generating Visualizations</h4>
+                    <p class="step-description">Creating interactive HTML components...</p>
+                </div>
+                <div class="step-status"></div>
+            </div>
+
+            <div class="step-item" id="step-content">
+                <div class="step-icon">4</div>
+                <div class="step-content">
+                    <h4 class="step-title">Writing Content</h4>
+                    <p class="step-description">Synthesizing research into educational markdown...</p>
+                </div>
+                <div class="step-status"></div>
+            </div>
+
+            <!-- Step 4: Publishing -->
+            <div class="step-item" id="step-publishing">
+                <div class="step-icon">5</div>
+                <div class="step-content">
+                    <h4 class="step-title">Publishing Topic</h4>
+                    <p class="step-description">Saving files and updating database...</p>
+                </div>
+                <div class="step-status"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overlay for Preview Loading -->
+    <div id="preview-loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Generating Plan...</h3>
+            <p>Please wait while we outline your topic.</p>
+        </div>
+    </div>
+
+    <section class="card card--muted animate-slide-up" style="animation-delay: 0.1s;">
+        <h3 class="card__title">🔌 API Status</h3>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="status-label">Gemini</span>
+                {% if valid_keys.gemini %}
+                <span class="badge badge--success">Ready</span>
+                {% else %}
+                <span class="badge badge--muted">Not Configured</span>
+                {% endif %}
+            </div>
+            <div class="status-item">
+                <span class="status-label">Perplexity</span>
+                {% if valid_keys.perplexity %}
+                <span class="badge badge--success">Ready</span>
+                {% else %}
+                <span class="badge badge--muted">Not Configured</span>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'settings' %}" class="btn btn-link">
+            <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/settings.svg' %}'); mask-image: url('{% static 'notes/svg/settings.svg' %}');"></span>
+            Configure API Keys
+        </a>
+    </section>
+</div>
+
+<style>
+.generate-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--spacing-8) var(--spacing-6);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+}
+
+.page-header__title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.page-header__subtitle {
+    font-family: var(--font-body);
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+
+.messages-container {
+    margin-bottom: var(--spacing-6);
+}
+
+.alert {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-3);
+    font-weight: 500;
+}
+
+.alert--success {
+    background: var(--tone-green-bg);
+    color: var(--tone-green-text);
+    border: 1px solid var(--tone-green-border);
+}
+
+.alert--error {
+    background: var(--tone-red-bg);
+    color: var(--tone-red-text);
+    border: 1px solid var(--tone-red-border);
+}
+
+.card {
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6) var(--spacing-8);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.card--elevated {
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-md);
+}
+
+.card--muted {
+    background: var(--color-bg-base);
+}
+
+.card--error {
+    border: 2px solid var(--tone-red-border);
+    background: linear-gradient(135deg, var(--tone-red-bg) 0%, var(--color-bg-surface) 100%);
+}
+
+.card--success {
+    border: 2px solid var(--tone-green-border);
+    background: linear-gradient(135deg, var(--tone-green-bg) 0%, var(--color-bg-surface) 100%);
+}
+
+.card__title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-4);
+}
+
+.card__title--error {
+    color: var(--tone-red-text);
+}
+
+.card__title--success {
+    color: var(--tone-green-text);
+}
+
+.error-details, .preview-details {
+    margin-bottom: var(--spacing-6);
+    line-height: 1.8;
+}
+
+.error-details p, .preview-details p {
+    margin: var(--spacing-2) 0;
+}
+
+.error-retries {
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+}
+
+.preview-details code {
+    font-family: var(--font-mono);
+    background: rgba(255, 255, 255, 0.6);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
+}
+
+.preview-viz {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-lg);
+}
+
+.preview-viz ul {
+    margin: var(--spacing-2) 0 0;
+    padding-left: var(--spacing-6);
+}
+
+.preview-viz li {
+    margin: var(--spacing-2) 0;
+    color: var(--color-text-secondary);
+}
+
+.preview-actions {
+    text-align: center;
+}
+
+.preview-note {
+    margin-top: var(--spacing-2);
+    color: var(--color-text-tertiary);
+    font-size: 0.875rem;
+}
+
+.form-group {
+    margin-bottom: var(--spacing-6);
+}
+
+.form-label {
+    display: block;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    transition: border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px var(--color-secondary-glow);
+}
+
+.form-hint {
+    display: block;
+    margin-top: var(--spacing-2);
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+}
+
+.form-hint--warning {
+    color: var(--tone-orange-text);
+}
+
+.link {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-4);
+    margin-top: var(--spacing-8);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+}
+
+.btn--large {
+    padding: var(--spacing-4) var(--spacing-8);
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+}
+
+.btn-secondary {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-surface);
+    transform: translateY(-1px);
+}
+
+.btn-link {
+    background: transparent;
+    color: var(--color-secondary);
+    padding: var(--spacing-2);
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.status-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.status-label {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    padding: 0.25em 0.75em;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+.badge--success {
+    background: var(--tone-green-bg);
+    color: var(--tone-green-text);
+}
+
+.badge--muted {
+    background: var(--tone-muted-gray-bg);
+    color: var(--tone-muted-gray-text);
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s var(--ease-standard) forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s var(--ease-spring) forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Wizard Styles */
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s var(--ease-standard);
+}
+
+.step-item.active {
+    border-color: var(--color-primary);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-item.completed {
+    border-color: var(--tone-green-border);
+    background: var(--tone-green-bg);
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    color: var(--color-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: var(--spacing-4);
+    font-family: var(--font-heading);
+    border: 2px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.step-item.active .step-icon {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.step-item.completed .step-icon {
+    background: var(--tone-green-text);
+    color: white;
+    border-color: var(--tone-green-text);
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+}
+
+.step-description {
+    margin: var(--spacing-1) 0 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.step-status {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--spacing-4);
+}
+
+/* Spinner */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(var(--color-primary-rgb), 0.3);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Checkmark */
+.checkmark {
+    width: 24px;
+    height: 24px;
+    color: var(--tone-green-text);
+    /* Basic CSS checkmark tick */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    background: white;
+    padding: var(--spacing-8);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+    border: 1px solid var(--color-border);
+}
+
+.loading-content .spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto var(--spacing-4);
+    border-width: 4px;
+}
+
+.loading-content h3 {
+    margin: 0 0 var(--spacing-2);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+}
+
+.loading-content p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('generate-form');
+    const generateSection = document.getElementById('generate-section');
+    const statusSection = document.getElementById('generation-status');
+    const overlay = document.getElementById('preview-loading-overlay');
+    
+    // Add logic for preview forms if they exist (e.g. "Generate Full Topic" button from preview)
+    const previewForms = document.querySelectorAll('.preview-actions');
+    
+    function setStepStatus(stepId, status) {
+        const stepEl = document.getElementById(stepId);
+        if (!stepEl) return;
+        
+        const iconEl = stepEl.querySelector('.step-icon');
+        const statusEl = stepEl.querySelector('.step-status');
+        
+        stepEl.classList.remove('active', 'completed');
+        statusEl.innerHTML = '';
+        
+        if (status === 'active') {
+            stepEl.classList.add('active');
+            statusEl.innerHTML = '<div class="spinner"></div>';
+        } else if (status === 'completed') {
+            stepEl.classList.add('completed');
+            statusEl.innerHTML = '<div class="checkmark"></div>';
+            iconEl.textContent = '✓';
+        } else if (status === 'pending') {
+            // reset
+            iconEl.textContent = stepEl.querySelector('.step-icon').getAttribute('data-original-text') || iconEl.textContent;
+        }
+    }
+    
+    // Initial setup to save original numbers
+    document.querySelectorAll('.step-item').forEach(el => {
+        const icon = el.querySelector('.step-icon');
+        icon.setAttribute('data-original-text', icon.textContent);
+    });
+
+    async function handleGeneration(formData) {
+         // Switch UI
+        generateSection.style.display = 'none';
+        
+        // Hide preview card if visible
+        const previewCard = document.querySelector('.card--success');
+        if (previewCard) previewCard.style.display = 'none';
+        
+        statusSection.style.display = 'block';
+        
+        // Reset steps
+        ['planning', 'research', 'visualization', 'content', 'publishing'].forEach(step => {
+            setStepStatus('step-' + step, 'pending');
+        });
+
+        addLog = (msg) => console.log(msg); // fallback logger
+
+        try {
+            const response = await fetch("{% url 'generate_topic_stream' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let readResult;
+
+            while (!(readResult = await reader.read()).done) {
+                const chunk = decoder.decode(readResult.value, {stream: true});
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    
+                    try {
+                        const event = JSON.parse(line);
+                        
+                        if (event.type === 'step_start') {
+                            setStepStatus('step-' + event.step, 'active');
+                        } else if (event.type === 'step_complete') {
+                            setStepStatus('step-' + event.step, 'completed');
+                        } else if (event.type === 'limit') { 
+                            // visualization loop inside
+                        } else if (event.type === 'result') {
+                            if (event.redirect_url) {
+                                // All done
+                                window.location.href = event.redirect_url;
+                            }
+                        } else if (event.error) {
+                             alert("Error: " + event.error.message);
+                        }
+                    } catch (parseError) {
+                        console.error('JSON Parse Error', parseError);
+                    }
+                }
+            }
+        } catch (err) {
+            alert(`Network Error: ${err.message}`);
+        }
+    }
+
+    form.addEventListener('submit', function(e) {
+        const submitter = e.submitter;
+        const action = submitter ? submitter.value : 'generate';
+        
+        if (action === 'preview') {
+            // Ssimple loading overlay
+            overlay.style.display = 'flex';
+            // Allow default submission
+            return; 
+        }
+
+        if (action === 'generate') {
+            e.preventDefault();
+            const formData = new FormData(form);
+            formData.append('action', 'generate'); // Ensure action is set
+            handleGeneration(formData);
+        }
+    });
+    
+    // Handle the "Generate Full Topic" button from the preview block
+    previewForms.forEach(pForm => {
+        pForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(pForm);
+            handleGeneration(formData);
+        });
+    });
+});
+</script>
+{% endblock %}

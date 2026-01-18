@@ -1,0 +1,6 @@
+{
+    "title": "Vectors",
+    "description": "Vectors in are mathematical objects that have both magnitude and direction, often represented as arrows in space.",
+    "icon": "icon.svg",
+    "entry_point": "vectors.md"
+}

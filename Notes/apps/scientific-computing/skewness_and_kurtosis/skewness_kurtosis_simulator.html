@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skewness and Kurtosis Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary: #4C3BCF;
+            --accent: #FF6B6B;
+            --text-main: #2D3436;
+            --text-secondary: #636E72;
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            
+            /* Data Palette */
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --teal: #14b8a6;
+            --orange: #f97316;
+            --green: #10b981;
+            --grey: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 10px auto 0;
+        }
+
+        .viz-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            header h1 { font-size: 1.8rem; }
+            .canvas-container { height: 280px; }
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .value-badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .status-item {
+            padding: 12px;
+            border-radius: var(--border-radius);
+            background: #F8F9FA;
+            border: 1px solid #EDF2F7;
+        }
+
+        .status-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .dashed-box {
+            width: 12px;
+            height: 2px;
+            background: var(--grey);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 650px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary);
+        }
+
+        .info-card.accent {
+            border-top-color: var(--accent);
+        }
+
+        .info-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-card p {
+            font-size: 0.9rem;
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .math {
+            font-family: serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Distribution Explorer</h1>
+        <p>Interact with the sliders to see how Skewness and Kurtosis reshape the probability density of a distribution compared to a normal curve.</p>
+    </header>
+
+    <div class="viz-card">
+        <div class="canvas-container" id="canvas-host">
+            <canvas id="distCanvas"></canvas>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="color-box" style="background: var(--primary);"></div> Active Distribution</div>
+            <div class="legend-item"><div class="dashed-box"></div> Normal Reference</div>
+            <div class="legend-item"><div class="color-box" style="background: var(--accent);"></div> Mode</div>
+            <div class="legend-item"><div class="color-box" style="background: var(--teal);"></div> Median</div>
+            <div class="legend-item"><div class="color-box" style="background: var(--orange);"></div> Mean</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-label">
+                    Skewness <span class="value-badge" id="skew-val">0.0</span>
+                </div>
+                <input type="range" id="skew-slider" min="-5" max="5" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+                <div class="control-label">
+                    Kurtosis <span class="value-badge" id="kurt-val">0.0</span>
+                </div>
+                <input type="range" id="kurt-slider" min="-1.5" max="5" step="0.1" value="0">
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <div class="status-item">
+                <div class="status-title">Skewness Type</div>
+                <div class="status-value" id="skew-type">Symmetric</div>
+            </div>
+            <div class="status-item">
+                <div class="status-title">Kurtosis Type</div>
+                <div class="status-value" id="kurt-type">Mesokurtic</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <h3>Skewness</h3>
+            <p>Measures the asymmetry of the probability distribution. In a perfectly symmetric distribution, Mean = Median = Mode. <strong>Positive skew</strong> pulls the tail to the right, while <strong>Negative skew</strong> pulls it to the left.</p>
+        </div>
+        <div class="info-card accent">
+            <h3>Kurtosis</h3>
+            <p>Measures the "tailedness" of the distribution. <strong>Leptokurtic</strong> (>0) distributions have heavy tails and a sharp peak. <strong>Platykurtic</strong> (<0) distributions have thin tails and a flatter peak.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * SHAPE MATH CONSTANTS
+     */
+    const COLORS = {
+        primary: '#4C3BCF',
+        accent: '#FF6B6B',
+        teal: '#14b8a6',
+        orange: '#f97316',
+        grey: '#94a3b8',
+        bg: '#FEFBF6'
+    };
+
+    const canvas = document.getElementById('distCanvas');
+    const ctx = canvas.getContext('2d');
+    const skewSlider = document.getElementById('skew-slider');
+    const kurtSlider = document.getElementById('kurt-slider');
+    const skewValLabel = document.getElementById('skew-val');
+    const kurtValLabel = document.getElementById('kurt-val');
+    const skewTypeLabel = document.getElementById('skew-type');
+    const kurtTypeLabel = document.getElementById('kurt-type');
+
+    let width, height;
+    const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+
+    function init() {
+        window.addEventListener('resize', resize);
+        resize();
+
+        skewSlider.addEventListener('input', update);
+        kurtSlider.addEventListener('input', update);
+        
+        update();
+    }
+
+    function resize() {
+        const container = document.getElementById('canvas-host');
+        const dpr = window.devicePixelRatio || 1;
+        width = container.clientWidth;
+        height = container.clientHeight;
+        
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+        
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        
+        update();
+    }
+
+    // Standard Normal PDF
+    function normalPDF(x, mu = 0, sigma = 1) {
+        const exponent = -0.5 * Math.pow((x - mu) / sigma, 2);
+        return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+    }
+
+    // Standard Normal CDF approximation
+    function normalCDF(x) {
+        const t = 1 / (1 + 0.2316419 * Math.abs(x));
+        const d = 0.3989423 * Math.exp(-x * x / 2);
+        let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+        if (x > 0) p = 1 - p;
+        return 1 - p;
+    }
+
+    // Skew-Normal Distribution PDF
+    // f(x) = 2 * phi(x) * Phi(alpha * x)
+    function skewNormalPDF(x, alpha, kurtosisOffset) {
+        // We modify sigma to simulate kurtosis visually
+        // Positive excess kurtosis -> smaller sigma (taller peak)
+        // Negative excess kurtosis -> larger sigma (flatter peak)
+        const sigma = 1 / (1 + kurtosisOffset * 0.4);
+        const z = x / sigma;
+        const pdf = (2 / sigma) * normalPDF(z) * normalCDF(alpha * z);
+        return pdf;
+    }
+
+    function update() {
+        const skew = parseFloat(skewSlider.value);
+        const kurt = parseFloat(kurtSlider.value);
+
+        skewValLabel.textContent = skew.toFixed(1);
+        kurtValLabel.textContent = kurt.toFixed(1);
+
+        // Update Labels
+        if (skew > 0.5) skewTypeLabel.textContent = "Positive Skew";
+        else if (skew < -0.5) skewTypeLabel.textContent = "Negative Skew";
+        else skewTypeLabel.textContent = "Symmetric";
+
+        if (kurt > 0.5) kurtTypeLabel.textContent = "Leptokurtic";
+        else if (kurt < -0.5) kurtTypeLabel.textContent = "Platykurtic";
+        else kurtTypeLabel.textContent = "Mesokurtic";
+
+        draw(skew, kurt);
+    }
+
+    function draw(skew, kurt) {
+        ctx.clearRect(0, 0, width, height);
+
+        const xScale = (x) => margin.left + (x + 6) * (width - margin.left - margin.right) / 12;
+        const yScale = (y) => (height - margin.bottom) - y * (height - margin.top - margin.bottom) * 1.5;
+
+        // Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#E2E8F0';
+        ctx.lineWidth = 2;
+        ctx.moveTo(margin.left, height - margin.bottom);
+        ctx.lineTo(width - margin.right, height - margin.bottom);
+        ctx.stroke();
+
+        // 1. Draw Reference Normal
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = COLORS.grey;
+        ctx.lineWidth = 1.5;
+        for (let x = -6; x <= 6; x += 0.1) {
+            const y = normalPDF(x);
+            if (x === -6) ctx.moveTo(xScale(x), yScale(y));
+            else ctx.lineTo(xScale(x), yScale(y));
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 2. Draw Active Distribution
+        const points = [];
+        ctx.beginPath();
+        ctx.strokeStyle = COLORS.primary;
+        ctx.lineWidth = 3;
+        
+        let maxVal = -1;
+        let modeX = 0;
+        let sumX = 0;
+        let sumY = 0;
+
+        for (let x = -6; x <= 6; x += 0.05) {
+            const y = skewNormalPDF(x, skew, kurt);
+            points.push({x, y});
+            if (y > maxVal) {
+                maxVal = y;
+                modeX = x;
+            }
+            sumX += x * y;
+            sumY += y;
+            
+            if (x === -6) ctx.moveTo(xScale(x), yScale(y));
+            else ctx.lineTo(xScale(x), yScale(y));
+        }
+        ctx.stroke();
+
+        // Create Gradient Fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0.3, 'rgba(76, 59, 207, 0.15)');
+        gradient.addColorStop(1, 'rgba(76, 59, 207, 0)');
+        ctx.lineTo(xScale(6), yScale(0));
+        ctx.lineTo(xScale(-6), yScale(0));
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Statistical Markers
+        const mean = sumX / sumY;
+        
+        // Simple Median approximation for visualization purposes
+        // Median is between mean and mode, roughly 2/3 from mode
+        const median = modeX + (mean - modeX) * 0.65;
+
+        drawMarker(xScale(modeX), yScale(maxVal), COLORS.accent, "Mode");
+        drawMarker(xScale(median), yScale(skewNormalPDF(median, skew, kurt)), COLORS.teal, "Median");
+        drawMarker(xScale(mean), yScale(skewNormalPDF(mean, skew, kurt)), COLORS.orange, "Mean");
+    }
+
+    function drawMarker(x, y, color, label) {
+        // Vertical line
+        ctx.beginPath();
+        ctx.setLineDash([2, 2]);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, height - margin.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Point
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Label handle
+        ctx.font = "bold 10px 'Space Grotesk'";
+        ctx.textAlign = "center";
+        // ctx.fillText(label, x, height - margin.bottom + 15);
+    }
+
+    init();
+</script>
+
+</body>
+</html>

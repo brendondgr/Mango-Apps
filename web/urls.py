@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from . import views
 
 urlpatterns = [
@@ -16,6 +16,9 @@ urlpatterns = [
     
     # ProjectManager Flask App (mounted at /pr/projects/)
     re_path(r'^pr/projects/(?P<path>.*)$', views.flask_proxy, name='flask_projectmanager'),
+    
+    # Notes Django App (mounted at /pr/notes/)
+    path('pr/notes/', include('apps.Notes.apps.notes.urls')),
     
     # Configuration API
     path('api/config', views.api_config, name='api_config'),

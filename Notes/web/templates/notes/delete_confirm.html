@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ type }} | Notetaking System{% endblock %}
+
+{% block content %}
+<div class="container" style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+    <div class="card card--elevated animate-scale-in" style="max-width: 480px; width: 100%; text-align: center; border: 2px solid var(--color-danger-200); padding: 3rem;">
+        <!-- Warning Icon -->
+        <div style="width: 72px; height: 72px; background: var(--color-danger-100); border-radius: 50%; color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; box-shadow: 0 0 30px rgba(239,68,68,0.2);">
+            ⚠️
+        </div>
+        
+        <!-- Title -->
+        <h1 style="font-size: 1.75rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+            Delete {{ type }}?
+        </h1>
+        
+        <!-- Description -->
+        <p style="color: var(--color-text-secondary); margin-bottom: 2rem; line-height: 1.6;">
+            Are you sure you want to delete <strong style="color: var(--color-text-primary);">{{ object }}</strong>? 
+            This action cannot be undone.
+            {% if type == 'Subject' or type == 'Course' %}
+            <br><span style="color: var(--color-danger); font-size: 0.875rem; margin-top: 0.5rem; display: inline-block;">
+                ⚠️ All associated content will also be permanently deleted.
+            </span>
+            {% endif %}
+        </p>
+        
+        <!-- Actions -->
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="javascript:history.back()" class="btn btn-ghost">
+                    Cancel
+                </a>
+                <button type="submit" class="btn-icon btn-icon--delete btn-lg" title="Confirm Delete" style="width: auto; padding: 0 2rem; gap: 0.75rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                    Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

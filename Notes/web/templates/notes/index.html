@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notetaking System | Home{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 0;">
+    <!-- Hero Header -->
+    <header class="page-header animate-fade-in" style="text-align: center; flex-direction: column; margin-bottom: 1rem;">
+        <h1 class="page-header__title" style="color: var(--color-primary); font-size: 3rem; margin-bottom: 0.75rem;">
+            Notetaking System
+        </h1>
+        <p class="page-header__subtitle" style="font-size: 1.25rem; max-width: 600px; margin: 0 auto;">
+            A powerful system for organizing your studies through structured subjects, courses, and interactive notes.
+        </p>
+        <nav class="quick-actions" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'generate_topic' %}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/sparkles.svg' %}'); mask-image: url('{% static 'notes/svg/sparkles.svg' %}');"></span>
+                AI Generate Topic
+            </a>
+            <a href="{% url 'settings' %}" class="btn btn-outline-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/settings.svg' %}'); mask-image: url('{% static 'notes/svg/settings.svg' %}');"></span>
+                Settings
+            </a>
+        </nav>
+    </header>
+
+    <!-- Subjects Section -->
+    <section class="section" style="padding-top: 0.5rem;">
+        <div class="section-header">
+            <h2 class="section-title">Subjects</h2>
+            <a href="{% url 'subject_create' %}" class="btn btn-primary">
+                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span> New Subject
+            </a>
+        </div>
+        {% if subjects %}
+        <div class="bento-grid">
+            {% for subject in subjects %}
+            <a href="{% url 'subject_detail' subject.slug %}" 
+               class="subject-card animate-fade-in" 
+               style="--card-bg: var(--tone-{{ subject.color_tone }}-bg); --card-border: var(--tone-{{ subject.color_tone }}-border); --card-text: var(--tone-{{ subject.color_tone }}-text);">
+                {% if subject.icon_svg %}
+                    <div class="svg-icon--tinted svg-icon--lg" 
+                         style="-webkit-mask-image: url('{{ subject.icon_svg.url }}'); mask-image: url('{{ subject.icon_svg.url }}'); background-color: var(--card-border);"></div>
+                {% elif subject.icon_image %}
+                    <img src="{{ subject.icon_image.url }}" alt="{{ subject.name }}" 
+                         style="width: 72px; height: 72px; margin-bottom: 1rem; object-fit: contain; border-radius: var(--radius-md);">
+                {% else %}
+                    <div class="subject-icon-wrapper" style="color: var(--card-text);">
+                        📚
+                    </div>
+                {% endif %}
+                <h3>{{ subject.name }}</h3>
+                <span class="subject-card__count">{{ subject.courses.count }} Courses</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state animate-fade-in">
+            <div class="empty-state__icon">📚</div>
+            <h3 class="empty-state__title">No subjects yet</h3>
+            <p class="empty-state__text">Create your first subject to start organizing your learning materials.</p>
+            <a href="{% url 'subject_create' %}" class="btn btn-primary">Create First Subject</a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Courses Section -->
+    <section class="section section--alt">
+        <div class="section-header">
+            <h2 class="section-title">All Courses</h2>
+            <a href="{% url 'course_create' %}" class="btn btn-outline-secondary">
+                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span> New Course
+            </a>
+        </div>
+        {% if courses %}
+        <div class="list-container animate-slide-up">
+            {% for course in courses %}
+            <a href="{% url 'course_detail' course.slug %}" class="list-item" 
+               style="--item-color: var(--tone-{{ course.subject.color_tone }}-border); --item-bg: var(--tone-{{ course.subject.color_tone }}-bg);">
+                <div class="list-item__icon">
+                    {% if course.icon_svg %}
+                        <div class="svg-icon--tinted" style="-webkit-mask-image: url('{{ course.icon_svg.url }}'); mask-image: url('{{ course.icon_svg.url }}');"></div>
+                    {% elif course.icon_image %}
+                        <img src="{{ course.icon_image.url }}" style="width: 28px; height: 28px; object-fit: contain;" alt="">
+                    {% else %}
+                        📖
+                    {% endif %}
+                </div>
+                <div class="list-item__content">
+                    <h3 class="list-item__title">{{ course.name }}</h3>
+                    <span class="list-item__meta">{{ course.subject.name }} • {{ course.topics.count }} Topics</span>
+                </div>
+                <span class="list-item__arrow">→</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state__icon">📖</div>
+            <h3 class="empty-state__title">No courses available</h3>
+            <p class="empty-state__text">Courses will appear here once you create them.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

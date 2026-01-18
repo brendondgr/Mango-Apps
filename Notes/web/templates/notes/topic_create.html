@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Notetaking System{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px; padding: 4rem 0;">
+    <div class="form-panel animate-fade-in">
+        <div class="form-panel__header">
+            <h1 class="form-panel__title">{{ title }}</h1>
+            <p class="form-panel__subtitle">Import a topic from an existing folder or upload a ZIP file. Metadata is automatically extracted from <code>info.json</code>.</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {# Display non-field errors (validation errors from services) #}
+            {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}
+                <div class="form-error-item">
+                    <span>⚠️ {{ error }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {# Courses selection #}
+            <div class="form-group">
+                <label class="form-label">
+                    Courses <span style="color: var(--color-danger);">*</span>
+                </label>
+                <div class="form-checkbox-wrapper">
+                    {{ form.courses }}
+                </div>
+                {% if form.courses.help_text %}
+                <p class="form-hint">{{ form.courses.help_text }}</p>
+                {% endif %}
+                {% if form.courses.errors %}
+                <div class="form-error">
+                    {% for error in form.courses.errors %}
+                    <span>⚠️ {{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            {# Import Mode #}
+            <div class="form-group">
+                <label class="form-label">
+                    Import Method <span style="color: var(--color-danger);">*</span>
+                </label>
+                <div class="import-mode-wrapper">
+                    {{ form.import_mode }}
+                </div>
+                {% if form.import_mode.help_text %}
+                <p class="form-hint">{{ form.import_mode.help_text }}</p>
+                {% endif %}
+            </div>
+            
+            {# Directory Path (shown for folder mode) #}
+            <div class="form-group import-field" id="folder-field">
+                <label for="{{ form.directory_path.id_for_label }}" class="form-label">
+                    Directory Path
+                </label>
+                {{ form.directory_path }}
+                {% if form.directory_path.help_text %}
+                <p class="form-hint">{{ form.directory_path.help_text }}</p>
+                {% endif %}
+                {% if form.directory_path.errors %}
+                <div class="form-error">
+                    {% for error in form.directory_path.errors %}
+                    <span>⚠️ {{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            {# ZIP File Upload (shown for zip mode) #}
+            <div class="form-group import-field" id="zip-field" style="display: none;">
+                <label for="{{ form.zip_file.id_for_label }}" class="form-label">
+                    ZIP File
+                </label>
+                {{ form.zip_file }}
+                {% if form.zip_file.help_text %}
+                <p class="form-hint">{{ form.zip_file.help_text }}</p>
+                {% endif %}
+                {% if form.zip_file.errors %}
+                <div class="form-error">
+                    {% for error in form.zip_file.errors %}
+                    <span>⚠️ {{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            {# Info box about required structure #}
+            <div class="form-info-box">
+                <h4>📁 Required Topic Structure</h4>
+                <ul>
+                    <li><code>info.json</code> - Contains title, description, and <code>entry_point</code> (optional)</li>
+                    <li>Markdown file - Main content (name specified in <code>entry_point</code>, defaults to <code>example.md</code>)</li>
+                    <li><code>icon.svg</code> or image file (optional) - Topic icon</li>
+                    <li><code>*.html</code> + <code>static/</code> (optional) - Visualization files</li>
+                </ul>
+            </div>
+            
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn btn-ghost">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/import.svg' %}'); mask-image: url('{% static 'notes/svg/import.svg' %}');"></span>
+                    Import Topic
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-errors {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-danger, #ef4444);
+    border-radius: var(--radius-md, 8px);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-error-item {
+    color: var(--color-danger, #ef4444);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-error-item:last-child {
+    margin-bottom: 0;
+}
+
+.form-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--color-surface, #FFF8F0);
+    border-radius: var(--radius-md, 8px);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.form-checkbox-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.form-checkbox-wrapper input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+}
+
+.import-mode-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem;
+    background-color: var(--color-surface, #FFF8F0);
+    border-radius: var(--radius-md, 8px);
+}
+
+.import-mode-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.import-mode-wrapper input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+}
+
+.form-info-box {
+    background: linear-gradient(135deg, rgba(76, 59, 207, 0.08), rgba(0, 217, 192, 0.08));
+    border: 1px solid rgba(76, 59, 207, 0.2);
+    border-radius: var(--radius-md, 8px);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.form-info-box h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    color: var(--color-secondary, #4C3BCF);
+}
+
+.form-info-box ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.form-info-box li {
+    font-size: 0.875rem;
+    margin-bottom: 0.35rem;
+    color: var(--color-text-secondary, #666);
+}
+
+.form-info-box code {
+    background-color: rgba(0, 0, 0, 0.06);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const importModeRadios = document.querySelectorAll('input[name="import_mode"]');
+    const folderField = document.getElementById('folder-field');
+    const zipField = document.getElementById('zip-field');
+    
+    function updateFieldVisibility() {
+        const selectedMode = document.querySelector('input[name="import_mode"]:checked');
+        if (selectedMode) {
+            if (selectedMode.value === 'folder') {
+                folderField.style.display = 'block';
+                zipField.style.display = 'none';
+            } else {
+                folderField.style.display = 'none';
+                zipField.style.display = 'block';
+            }
+        }
+    }
+    
+    // Set initial state
+    updateFieldVisibility();
+    
+    // Listen for changes
+    importModeRadios.forEach(radio => {
+        radio.addEventListener('change', updateFieldVisibility);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Notetaking System{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 640px; padding: 4rem 0;">
+    <div class="form-panel animate-fade-in">
+        <div class="form-panel__header">
+            <h1 class="form-panel__title">{{ title }}</h1>
+            <p class="form-panel__subtitle">Courses belong to a subject and contain topics.</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {{ field.label }}
+                    {% if field.field.required %}<span style="color: var(--color-danger);">*</span>{% endif %}
+                </label>
+                
+                {{ field }}
+                
+                {% if field.help_text %}
+                <p class="form-hint">{{ field.help_text }}</p>
+                {% endif %}
+                
+                {% if field.errors %}
+                <div class="form-error">
+                    {% for error in field.errors %}
+                    <span>⚠️ {{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn btn-ghost">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/save.svg' %}'); mask-image: url('{% static 'notes/svg/save.svg' %}');"></span>
+                    Save Course
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

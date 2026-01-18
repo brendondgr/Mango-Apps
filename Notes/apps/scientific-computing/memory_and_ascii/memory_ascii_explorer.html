@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory & ASCII Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary: #4C3BCF;
+            --accent: #FF6B6B;
+            --text-dark: #2D3436;
+            --text-light: #636E72;
+            --card-bg: #FFFFFF;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            
+            /* Data Viz Palette */
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --teal: #14b8a6;
+            --orange: #f97316;
+            --green: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* 1. Text Input Section */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-family: 'Space Grotesk', monospace;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* 2. Memory Grid Section */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .memory-cell {
+            aspect-ratio: 1 / 1;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+        }
+
+        .memory-cell.active {
+            border-color: var(--primary);
+            background: rgba(76, 59, 207, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 59, 207, 0.1);
+        }
+
+        .memory-cell:hover:not(.empty) {
+            border-color: var(--blue);
+        }
+
+        .memory-cell .address {
+            font-size: 0.65rem;
+            color: var(--text-light);
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-family: monospace;
+        }
+
+        .memory-cell .char-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .memory-cell .hex-val {
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-family: monospace;
+        }
+
+        .memory-cell.empty {
+            border-style: dashed;
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        /* 3. Bit-Level Inspector */
+        .inspector-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .inspector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.9rem;
+        }
+
+        .stat-pill {
+            background: #F1F2F6;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .stat-pill span {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .bits-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .bit-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bit-toggle {
+            width: 100%;
+            aspect-ratio: 1/1;
+            max-width: 60px;
+            border-radius: 8px;
+            border: none;
+            background: #E2E8F0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+        }
+
+        .bit-toggle.on {
+            background: var(--primary);
+            color: white;
+        }
+
+        .bit-label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .bit-weight {
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .instruction-box {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            border-left: 4px solid var(--teal);
+            padding-left: 12px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .bits-container {
+                gap: 4px;
+            }
+            .bit-toggle {
+                font-size: 1.1rem;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>Memory & ASCII</h1>
+            <p>Explore how characters become bits and occupy space in memory addresses.</p>
+        </header>
+
+        <!-- Input Area -->
+        <section class="card input-section">
+            <div class="input-group">
+                <label for="textInput">Text Input</label>
+                <input type="text" id="textInput" maxlength="16" placeholder="Type here..." value="Hello!">
+            </div>
+            <p class="instruction-box">
+                Each character you type is converted to a 1-byte (8-bit) binary value using the ASCII standard.
+            </p>
+        </section>
+
+        <!-- Memory Visualization -->
+        <section class="card">
+            <h3 style="margin-bottom: 12px; color: var(--primary);">Memory Addresses</h3>
+            <div class="memory-grid" id="memoryGrid">
+                <!-- Cells generated by JS -->
+            </div>
+        </section>
+
+        <!-- Bit Inspector -->
+        <section class="card inspector-section">
+            <div class="inspector-header">
+                <h3 id="inspectorTitle">Bit-Level Inspector: 'H'</h3>
+                <div class="stats-row">
+                    <div class="stat-pill">DEC: <span id="valDec">72</span></div>
+                    <div class="stat-pill">HEX: <span id="valHex">0x48</span></div>
+                </div>
+            </div>
+
+            <div class="bits-container" id="bitsContainer">
+                <!-- 8 bits generated by JS -->
+            </div>
+
+            <p class="instruction-box">
+                <strong>Interactive:</strong> Click the bits above to flip them (0 to 1). This modifies the byte in memory and changes the resulting character in real-time.
+            </p>
+        </section>
+    </div>
+
+    <script>
+        // Constants for Vibrant UI colors
+        const COLORS = {
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            blue: '#3b82f6',
+            purple: '#a855f7',
+            teal: '#14b8a6',
+            orange: '#f97316',
+            green: '#10b981',
+            bg: '#FEFBF6'
+        };
+
+        let currentString = "Hello!";
+        let selectedIndex = 0;
+        const MAX_MEMORY = 16;
+
+        const textInput = document.getElementById('textInput');
+        const memoryGrid = document.getElementById('memoryGrid');
+        const bitsContainer = document.getElementById('bitsContainer');
+        const inspectorTitle = document.getElementById('inspectorTitle');
+        const valDec = document.getElementById('valDec');
+        const valHex = document.getElementById('valHex');
+
+        function init() {
+            textInput.addEventListener('input', (e) => {
+                currentString = e.target.value;
+                if (selectedIndex >= currentString.length) {
+                    selectedIndex = Math.max(0, currentString.length - 1);
+                }
+                updateUI();
+            });
+
+            updateUI();
+        }
+
+        function updateUI() {
+            renderMemoryGrid();
+            renderBitInspector();
+        }
+
+        function renderMemoryGrid() {
+            memoryGrid.innerHTML = '';
+            
+            for (let i = 0; i < MAX_MEMORY; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'memory-cell';
+                
+                const addr = document.createElement('div');
+                addr.className = 'address';
+                addr.textContent = '0x' + i.toString(16).toUpperCase().padStart(2, '0');
+                cell.appendChild(addr);
+
+                if (i < currentString.length) {
+                    const char = currentString[i];
+                    const code = char.charCodeAt(0);
+
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'char-val';
+                    charDiv.textContent = char === ' ' ? 'SPC' : char;
+                    if (char === ' ') charDiv.style.fontSize = '0.7rem';
+                    
+                    const hexDiv = document.createElement('div');
+                    hexDiv.className = 'hex-val';
+                    hexDiv.textContent = '0x' + code.toString(16).toUpperCase().padStart(2, '0');
+
+                    cell.appendChild(charDiv);
+                    cell.appendChild(hexDiv);
+
+                    if (i === selectedIndex) {
+                        cell.classList.add('active');
+                    }
+
+                    cell.addEventListener('click', () => {
+                        selectedIndex = i;
+                        updateUI();
+                    });
+                } else {
+                    cell.classList.add('empty');
+                    const emptySpan = document.createElement('span');
+                    emptySpan.textContent = '00';
+                    emptySpan.style.color = '#cbd5e1';
+                    emptySpan.style.fontFamily = 'monospace';
+                    cell.appendChild(emptySpan);
+                }
+
+                memoryGrid.appendChild(cell);
+            }
+        }
+
+        function renderBitInspector() {
+            bitsContainer.innerHTML = '';
+            
+            if (currentString.length === 0) {
+                inspectorTitle.textContent = "Bit-Level Inspector: (Empty)";
+                valDec.textContent = "-";
+                valHex.textContent = "-";
+                bitsContainer.innerHTML = '<p style="color: #94a3b8; width: 100%; text-align: center; padding: 20px;">Type something to inspect bits</p>';
+                return;
+            }
+
+            const char = currentString[selectedIndex];
+            const code = char.charCodeAt(0);
+            const binaryStr = code.toString(2).padStart(8, '0');
+
+            inspectorTitle.textContent = `Bit-Level Inspector: '${char === ' ' ? 'Space' : char}'`;
+            valDec.textContent = code;
+            valHex.textContent = '0x' + code.toString(16).toUpperCase().padStart(2, '0');
+
+            // ASCII bits are usually 0-7 (8 bits)
+            for (let i = 0; i < 8; i++) {
+                const bitValue = binaryStr[i];
+                const weight = Math.pow(2, 7 - i);
+
+                const bitBox = document.createElement('div');
+                bitBox.className = 'bit-box';
+
+                const btn = document.createElement('button');
+                btn.className = `bit-toggle ${bitValue === '1' ? 'on' : ''}`;
+                btn.textContent = bitValue;
+                btn.addEventListener('click', () => toggleBit(i));
+
+                const label = document.createElement('div');
+                label.className = 'bit-label';
+                label.textContent = `Bit ${7-i}`;
+
+                const weightDiv = document.createElement('div');
+                weightDiv.className = 'bit-weight';
+                weightDiv.textContent = weight;
+
+                bitBox.appendChild(btn);
+                bitBox.appendChild(label);
+                bitBox.appendChild(weightDiv);
+                bitsContainer.appendChild(bitBox);
+            }
+        }
+
+        function toggleBit(bitIndex) {
+            if (currentString.length === 0) return;
+
+            const char = currentString[selectedIndex];
+            let code = char.charCodeAt(0);
+            
+            // Flip the bit
+            // bitIndex 0 is the MSB (weight 128), bitIndex 7 is the LSB (weight 1)
+            const mask = 1 << (7 - bitIndex);
+            code = code ^ mask;
+
+            // Update the string
+            const charArray = currentString.split('');
+            charArray[selectedIndex] = String.fromCharCode(code);
+            currentString = charArray.join('');
+            
+            // Sync input field
+            textInput.value = currentString;
+            
+            updateUI();
+        }
+
+        // Initialize script
+        init();
+    </script>
+</body>
+</html>

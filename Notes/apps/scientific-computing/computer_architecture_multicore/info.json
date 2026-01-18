@@ -1,0 +1,5 @@
+{
+    "title": "Computer Architecture: Multicore Performance and Parallel Computing",
+    "description": "Comprehensive overview of key computer architecture concepts including multicore processors, clock speed, cache, memory models, Amdahl's Law, and FLOPs calculations.",
+    "entry_point": "computer_architecture_multicore.md"
+}

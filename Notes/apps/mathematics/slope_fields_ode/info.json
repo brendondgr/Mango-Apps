@@ -1,0 +1,5 @@
+{
+    "title": "Slope Fields for First-Order ODEs",
+    "description": "An exploration of slope fields as a graphical tool to visualize and understand the behavior of solutions to first-order ordinary differential equations.",
+    "entry_point": "slope_fields_ode.md"
+}

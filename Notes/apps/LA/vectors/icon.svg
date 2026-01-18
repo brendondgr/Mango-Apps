@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+    <circle cx="50" cy="50" r="45" fill="#e0f2fe" />
+    <!-- Grid hint -->
+    <path d="M20 50 H80 M50 20 V80" stroke="#bae6fd" stroke-width="2" stroke-dasharray="4 4" />
+    
+    <!-- Vector Arrow -->
+    <path d="M30 70 L70 30" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#arrowhead)" />
+    
+    <!-- Components -->
+    <path d="M30 70 L70 70 L70 30" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="4" opacity="0.6"/>
+    
+    <!-- Marker definition -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#0284c7" />
+        </marker>
+    </defs>
+</svg>

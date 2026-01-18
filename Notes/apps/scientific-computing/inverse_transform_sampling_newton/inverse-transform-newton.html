@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inverse Transform Sampling via Newton's Method</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #FEFBF6;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            overflow: hidden;
+            background: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4C3BCF 0%, #a855f7 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (min-width: 900px) {
+            .dashboard {
+                flex-direction: row;
+            }
+        }
+
+        .plot-container {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            padding: 20px;
+            position: relative;
+        }
+
+        .plot-container canvas {
+            width: 100%;
+            height: 350px;
+            border-radius: 8px;
+            background: #FAFAFA;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #FEFBF6;
+            border-radius: 12px;
+            border: 1px solid #F0F0F0;
+        }
+
+        .slider-container {
+            position: relative;
+        }
+
+        .slider-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #4C3BCF;
+            margin-bottom: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #E5E7EB;
+            outline: none;
+            -webkit-appearance: none;
+            touch-action: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4C3BCF;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(76,59,207,0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4C3BCF;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(76,59,207,0.4);
+        }
+
+        .value-display {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4C3BCF;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .value-display.show {
+            opacity: 1;
+        }
+
+        .iteration-info {
+            background: linear-gradient(135deg, #FF6B6B 0%, #f97316 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .iteration-count {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .samples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .sample-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .dashboard { padding: 20px 10px; }
+            .plot-container { padding: 15px; }
+            .controls { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Inverse Transform Sampling via Newton's Method</h1>
+            <p>Drag the **U** slider (uniform random [0,1]) to see how Newton's Method finds <strong>F<sup>-1</sup>(U)</strong> for an Exponential distribution. Watch iterations converge on the right!</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="plot-container">
+                <canvas id="mainPlot"></canvas>
+                <div class="controls">
+                    <div class="slider-container">
+                        <div class="slider-label">U ~ Uniform(0,1): <span id="uValue">0.50</span></div>
+                        <input type="range" id="uSlider" min="0.001" max="0.999" step="0.001" value="0.5">
+                        <div class="value-display" id="sliderValue">0.500</div>
+                    </div>
+                    <div class="iteration-info">
+                        <div>Newton Iterations: <span class="iteration-count" id="iterationCount">0</span></div>
+                        <div>Converged x: <span id="convergedX">0.00</span></div>
+                    </div>
+                    <div class="samples-grid" id="samplesGrid"></div>
+                </div>
+            </div>
+
+            <div class="plot-container">
+                <canvas id="iterationPlot"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vibrant UI Colors (hardcoded for robustness)
+        const COLORS = {
+            bg: '#FEFBF6',
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            blue: '#3b82f6',
+            purple: '#a855f7',
+            teal: '#14b8a6',
+            orange: '#f97316',
+            green: '#10b981',
+            grid: 'rgba(0,0,0,0.1)',
+            axis: '#64748B'
+        };
+
+        // Exponential distribution (λ=1)
+        const LAMBDA = 1.0;
+        function pdf(x) { return LAMBDA * Math.exp(-LAMBDA * x); }
+        function cdf(x) { return 1 - Math.exp(-LAMBDA * x); }
+        function pdf_derivative(x) { return -LAMBDA * LAMBDA * Math.exp(-LAMBDA * x); }
+
+        // Canvas contexts
+        let mainCtx, iterationCtx;
+        let u = 0.5;
+        let iterations = [];
+        let samples = [];
+
+        // Newton's Method for F(x) = u
+        function newtonMethod(targetU, maxIter = 20, tol = 1e-6) {
+            let x = 0.1; // Initial guess
+            let iter = [];
+            
+            for (let i = 0; i < maxIter; i++) {
+                let f = cdf(x) - targetU;
+                let f_prime = pdf(x);
+                
+                if (Math.abs(f) < tol) break;
+                
+                let x_new = x - f / f_prime;
+                // Safeguard
+                if (x_new < 0) x_new = 0.01;
+                
+                iter.push({
+                    n: i,
+                    x: x,
+                    f: f,
+                    tangent: f_prime,
+                    x_new: x_new
+                });
+                
+                x = x_new;
+            }
+            
+            return { iterations: iter, finalX: x };
+        }
+
+        // Generate samples for histogram
+        function generateSamples(count = 50) {
+            samples = [];
+            for (let i = 0; i < count; i++) {
+                let u_sample = Math.random();
+                samples.push(-Math.log(1 - u_sample));
+            }
+        }
+
+        function drawMainPlot() {
+            const canvas = document.getElementById('mainPlot');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            mainCtx = canvas.getContext('2d');
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const margin = 50;
+            const plotWidth = width - 2 * margin;
+            const plotHeight = height - 2 * margin;
+            
+            mainCtx.fillStyle = '#FAFAFA';
+            mainCtx.fillRect(0, 0, width, height);
+            
+            // Grid
+            mainCtx.strokeStyle = COLORS.grid;
+            mainCtx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                let x = margin + (i / 5) * plotWidth;
+                mainCtx.beginPath();
+                mainCtx.moveTo(x, margin);
+                mainCtx.lineTo(x, height - margin);
+                mainCtx.stroke();
+                
+                let y = margin + (i / 5) * plotHeight;
+                mainCtx.beginPath();
+                mainCtx.moveTo(margin, y);
+                mainCtx.lineTo(width - margin, y);
+                mainCtx.stroke();
+            }
+            
+            // Axes
+            mainCtx.strokeStyle = COLORS.axis;
+            mainCtx.lineWidth = 2;
+            mainCtx.beginPath();
+            mainCtx.moveTo(margin, margin);
+            mainCtx.lineTo(margin, height - margin);
+            mainCtx.lineTo(width - margin, height - margin);
+            mainCtx.stroke();
+            
+            // CDF curve (blue)
+            mainCtx.strokeStyle = COLORS.blue;
+            mainCtx.lineWidth = 3;
+            mainCtx.lineJoin = 'round';
+            mainCtx.beginPath();
+            for (let px = 0; px <= plotWidth; px += 2) {
+                let x = (px / plotWidth) * 5;
+                let y = cdf(x);
+                let screenX = margin + px;
+                let screenY = height - margin - (y * plotHeight);
+                if (px === 0) mainCtx.moveTo(screenX, screenY);
+                else mainCtx.lineTo(screenX, screenY);
+            }
+            mainCtx.stroke();
+            
+            // PDF curve (purple, scaled)
+            mainCtx.strokeStyle = COLORS.purple;
+            mainCtx.lineWidth = 2;
+            mainCtx.setLineDash([4, 4]);
+            mainCtx.beginPath();
+            for (let px = 0; px <= plotWidth; px += 2) {
+                let x = (px / plotWidth) * 5;
+                let y = pdf(x) * 2; // Scale for visibility
+                let screenX = margin + px;
+                let screenY = height - margin - (y * plotHeight);
+                if (px === 0) mainCtx.moveTo(screenX, screenY);
+                else mainCtx.lineTo(screenX, screenY);
+            }
+            mainCtx.stroke();
+            mainCtx.setLineDash([]);
+            
+            // U horizontal line (orange)
+            let uScreenY = height - margin - (u * plotHeight);
+            mainCtx.strokeStyle = COLORS.orange;
+            mainCtx.lineWidth = 3;
+            mainCtx.setLineDash([6, 6]);
+            mainCtx.beginPath();
+            mainCtx.moveTo(margin, uScreenY);
+            mainCtx.lineTo(width - margin, uScreenY);
+            mainCtx.stroke();
+            mainCtx.setLineDash([]);
+            
+            // Vertical line to intersection
+            let result = newtonMethod(u);
+            let xIntersect = result.finalX;
+            let xScreen = margin + (xIntersect / 5) * plotWidth;
+            mainCtx.strokeStyle = COLORS.green;
+            mainCtx.lineWidth = 2;
+            mainCtx.setLineDash([3, 3]);
+            mainCtx.beginPath();
+            mainCtx.moveTo(xScreen, uScreenY);
+            mainCtx.lineTo(xScreen, height - margin);
+            mainCtx.stroke();
+            mainCtx.setLineDash([]);
+            
+            // Intersection point
+            mainCtx.fillStyle = COLORS.green;
+            mainCtx.beginPath();
+            mainCtx.arc(xScreen, uScreenY, 8, 0, 2 * Math.PI);
+            mainCtx.fill();
+            
+            // Labels
+            mainCtx.fillStyle = COLORS.axis;
+            mainCtx.font = 'bold 14px Space Grotesk';
+            mainCtx.textAlign = 'center';
+            mainCtx.fillText('F(x) ↑', width/2, 20);
+            mainCtx.fillText('Exponential(λ=1)', width/2, height - 10);
+            
+            mainCtx.save();
+            mainCtx.translate(20, height/2);
+            mainCtx.rotate(-Math.PI/2);
+            mainCtx.textAlign = 'center';
+            mainCtx.fillText('x →', 0, 0);
+            mainCtx.restore();
+            
+            // Legend
+            mainCtx.textAlign = 'left';
+            mainCtx.font = '12px DM Sans';
+            mainCtx.fillStyle = COLORS.blue;
+            mainCtx.fillText('CDF F(x)', margin + 10, 35);
+            mainCtx.fillStyle = COLORS.purple;
+            mainCtx.fillText('PDF f(x)', margin + 10, 55);
+            mainCtx.fillStyle = COLORS.orange;
+            mainCtx.fillText('U ~ Uniform(0,1)', margin + 10, 75);
+        }
+
+        function drawIterationPlot() {
+            const canvas = document.getElementById('iterationPlot');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            iterationCtx = canvas.getContext('2d');
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const margin = 50;
+            const plotWidth = width - 2 * margin;
+            const plotHeight = height - 2 * margin;
+            
+            iterationCtx.fillStyle = '#FAFAFA';
+            iterationCtx.fillRect(0, 0, width, height);
+            
+            // Grid and axes (same as main)
+            iterationCtx.strokeStyle = COLORS.grid;
+            iterationCtx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                let x = margin + (i / 10) * plotWidth;
+                iterationCtx.beginPath();
+                iterationCtx.moveTo(x, margin);
+                iterationCtx.lineTo(x, height - margin);
+                iterationCtx.stroke();
+            }
+            for (let i = 0; i <= 5; i++) {
+                let y = margin + (i / 5) * plotHeight;
+                iterationCtx.beginPath();
+                iterationCtx.moveTo(margin, y);
+                iterationCtx.lineTo(width - margin, y);
+                iterationCtx.stroke();
+            }
+            
+            iterationCtx.strokeStyle = COLORS.axis;
+            iterationCtx.lineWidth = 2;
+            iterationCtx.beginPath();
+            iterationCtx.moveTo(margin, margin);
+            iterationCtx.lineTo(margin, height - margin);
+            iterationCtx.lineTo(width - margin, height - margin);
+            iterationCtx.stroke();
+            
+            // Zoomed CDF curve
+            let xMin = Math.max(0, newtonMethod(u).finalX - 1);
+            let xMax = xMin + 2;
+            iterationCtx.strokeStyle = COLORS.blue;
+            iterationCtx.lineWidth = 3;
+            iterationCtx.lineJoin = 'round';
+            iterationCtx.beginPath();
+            for (let px = 0; px <= plotWidth; px += 1) {
+                let x = xMin + (px / plotWidth) * (xMax - xMin);
+                let y = cdf(x);
+                let screenX = margin + px;
+                let screenY = height - margin - (y * plotHeight);
+                if (px === 0) iterationCtx.moveTo(screenX, screenY);
+                else iterationCtx.lineTo(screenX, screenY);
+            }
+            iterationCtx.stroke();
+            
+            // Newton's Method tangents
+            let result = newtonMethod(u);
+            iterations = result.iterations;
+            
+            iterationCtx.strokeStyle = COLORS.orange;
+            iterationCtx.lineWidth = 2;
+            let uScreenY = height - margin - (u * plotHeight);
+            iterationCtx.setLineDash([6, 6]);
+            iterationCtx.beginPath();
+            iterationCtx.moveTo(margin, uScreenY);
+            iterationCtx.lineTo(width - margin, uScreenY);
+            iterationCtx.stroke();
+            iterationCtx.setLineDash([]);
+            
+            // Draw tangents
+            iterations.slice(0, 8).forEach((iter, idx) => {
+                let screenX = margin + ((iter.x - xMin) / (xMax - xMin)) * plotWidth;
+                let screenXNew = margin + ((iter.x_new - xMin) / (xMax - xMin)) * plotWidth;
+                let screenY = height - margin - (cdf(iter.x) * plotHeight);
+                
+                // Tangent line
+                iterationCtx.strokeStyle = `hsl(${20 + idx * 10}, 70%, 50%)`;
+                iterationCtx.lineWidth = 2;
+                iterationCtx.setLineDash([2, 4]);
+                iterationCtx.beginPath();
+                iterationCtx.moveTo(screenX - 30, screenY + iter.tangent * 30 * plotHeight / 5);
+                iterationCtx.lineTo(screenXNew + 30, screenY + iter.tangent * 30 * plotHeight / 5);
+                iterationCtx.stroke();
+                iterationCtx.setLineDash([]);
+                
+                // Guess points
+                iterationCtx.fillStyle = idx === iterations.length - 1 ? COLORS.green : COLORS.accent;
+                iterationCtx.beginPath();
+                iterationCtx.arc(screenX, screenY, 6, 0, 2 * Math.PI);
+                iterationCtx.fill();
+                
+                if (iter.x_new !== undefined) {
+                    let screenYNew = height - margin - (cdf(iter.x_new) * plotHeight);
+                    iterationCtx.beginPath();
+                    iterationCtx.arc(screenXNew, screenYNew, 6, 0, 2 * Math.PI);
+                    iterationCtx.fill();
+                }
+            });
+            
+            // Labels
+            iterationCtx.fillStyle = COLORS.axis;
+            iterationCtx.font = 'bold 14px Space Grotesk';
+            iterationCtx.textAlign = 'center';
+            iterationCtx.fillText('Newton Iteration Zoom', width/2, 25);
+        }
+
+        function updateSamplesDisplay() {
+            generateSamples(20);
+            const grid = document.getElementById('samplesGrid');
+            grid.innerHTML = '';
+            samples.slice(0, 12).forEach((sample, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'sample-dot';
+                dot.style.opacity = Math.max(0.3, 1 - sample / 5);
+                dot.title = `Sample ${i+1}: ${sample.toFixed(2)}`;
+                grid.appendChild(dot);
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('uValue').textContent = u.toFixed(3);
+            document.getElementById('convergedX').textContent = newtonMethod(u).finalX.toFixed(3);
+            document.getElementById('iterationCount').textContent = iterations.length;
+            drawMainPlot();
+            drawIterationPlot();
+            updateSamplesDisplay();
+        }
+
+        // Slider interaction
+        document.getElementById('uSlider').addEventListener('input', (e) => {
+            u = parseFloat(e.target.value);
+            document.getElementById('sliderValue').textContent = u.toFixed(3);
+            document.getElementById('sliderValue').classList.add('show');
+            updateUI();
+        });
+
+        // Touch-friendly value display
+        const slider = document.getElementById('uSlider');
+        const valueDisplay = document.getElementById('sliderValue');
+        slider.addEventListener('touchstart', () => {
+            valueDisplay.classList.add('show');
+        });
+        slider.addEventListener('touchend', () => {
+            setTimeout(() => valueDisplay.classList.remove('show'), 2000);
+        });
+
+        // Resize handler
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(updateUI, 100);
+        });
+
+        // Initialize
+        function init() {
+            generateSamples();
+            updateUI();
+        }
+
+        // Call immediately (no window.onload)
+        init();
+    </script>
+</body>
+</html>

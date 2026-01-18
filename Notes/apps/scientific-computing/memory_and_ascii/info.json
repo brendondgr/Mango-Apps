@@ -1,0 +1,5 @@
+{
+    "title": "Memory Fundamentals and ASCII Encoding",
+    "description": "Explores how computers store data using bits and bytes, specifically focusing on how the ASCII standard translates text characters into binary values for storage in memory addresses.",
+    "entry_point": "memory_and_ascii.md"
+}

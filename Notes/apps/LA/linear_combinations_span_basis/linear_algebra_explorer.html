@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Combinations & Bases Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary: #4C3BCF;
+            --accent: #FF6B6B;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --teal: #14b8a6;
+            --orange: #f97316;
+            --green: #10b981;
+            --text-main: #2D3436;
+            --card-shadow: 0 10px 25px rgba(76, 59, 207, 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .viz-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            cursor: move;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .controls-card {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-badge {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-valid {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .status-invalid {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .vector-control {
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+            margin-bottom: 10px;
+        }
+
+        .v1 { border-color: var(--blue); }
+        .v2 { border-color: var(--purple); }
+        .v3 { border-color: var(--teal); }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .math-info {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #636e72;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: var(--text-main);
+        }
+
+        .instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Linear Combinations & Span</h1>
+</header>
+
+<div class="container">
+    <div class="viz-card" id="canvasContainer">
+        <div class="instructions">Drag to Rotate • Scroll to Zoom</div>
+        <canvas id="canvas3d"></canvas>
+    </div>
+
+    <div class="controls-card">
+        <div id="status" class="status-badge status-valid">Basis: Valid (3D Space)</div>
+        
+        <div class="math-info" id="mathOutput">
+            Determinant: <span id="detVal">1.00</span><br>
+            Span: ℝ³ (Full Volume)
+        </div>
+
+        <div class="vector-control v1">
+            <div class="label-row">
+                <span>Vector A (Blue)</span>
+                <span id="v1-val">[1, 0, 0]</span>
+            </div>
+            <input type="range" id="v1x" min="-2" max="2" step="0.1" value="1.5">
+            <input type="range" id="v1y" min="-2" max="2" step="0.1" value="0.2">
+        </div>
+
+        <div class="vector-control v2">
+            <div class="label-row">
+                <span>Vector B (Purple)</span>
+                <span id="v2-val">[0, 1, 0]</span>
+            </div>
+            <input type="range" id="v2x" min="-2" max="2" step="0.1" value="0.3">
+            <input type="range" id="v2y" min="-2" max="2" step="0.1" value="1.5">
+        </div>
+
+        <div class="vector-control v3">
+            <div class="label-row">
+                <span>Vector C (Teal)</span>
+                <span id="v3-val">[0, 0, 1]</span>
+            </div>
+            <input type="range" id="v3x" min="-2" max="2" step="0.1" value="-0.2">
+            <input type="range" id="v3z" min="-2" max="2" step="0.1" value="1.5">
+        </div>
+
+        <div class="btn-group">
+            <button onclick="resetVectors()">Reset</button>
+            <button class="secondary" onclick="forceCollapse()">Collapse Span</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas3d');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvasContainer');
+
+    // State
+    let width, height;
+    let rotationX = -0.5;
+    let rotationY = 0.5;
+    let zoom = 120;
+    let isDragging = false;
+    let lastMouseX, lastMouseY;
+
+    // Vectors
+    const vecA = { x: 1.5, y: 0.2, z: 0 };
+    const vecB = { x: 0.3, y: 1.5, z: 0 };
+    const vecC = { x: -0.2, y: 0, z: 1.5 };
+
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // Touch/Mouse Events
+        canvas.addEventListener('mousedown', startRotate);
+        window.addEventListener('mousemove', rotate);
+        window.addEventListener('mouseup', stopRotate);
+        
+        canvas.addEventListener('touchstart', (e) => startRotate(e.touches[0]));
+        window.addEventListener('touchmove', (e) => rotate(e.touches[0]));
+        window.addEventListener('touchend', stopRotate);
+
+        canvas.addEventListener('wheel', (e) => {
+            zoom -= e.deltaY * 0.1;
+            zoom = Math.max(50, Math.min(300, zoom));
+            e.preventDefault();
+            draw();
+        }, { passive: false });
+
+        // Sliders
+        setupSliders();
+        draw();
+    }
+
+    function setupSliders() {
+        const inputs = [
+            ['v1x', vecA, 'x'], ['v1y', vecA, 'y'],
+            ['v2x', vecB, 'x'], ['v2y', vecB, 'y'],
+            ['v3x', vecC, 'x'], ['v3z', vecC, 'z']
+        ];
+
+        inputs.forEach(([id, vec, prop]) => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', (e) => {
+                vec[prop] = parseFloat(e.target.value);
+                updateLabels();
+                draw();
+            });
+        });
+    }
+
+    function updateLabels() {
+        document.getElementById('v1-val').textContent = `[${vecA.x.toFixed(1)}, ${vecA.y.toFixed(1)}, ${vecA.z.toFixed(1)}]`;
+        document.getElementById('v2-val').textContent = `[${vecB.x.toFixed(1)}, ${vecB.y.toFixed(1)}, ${vecB.z.toFixed(1)}]`;
+        document.getElementById('v3-val').textContent = `[${vecC.x.toFixed(1)}, ${vecC.y.toFixed(1)}, ${vecC.z.toFixed(1)}]`;
+    }
+
+    function resize() {
+        width = container.clientWidth;
+        height = container.clientHeight;
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        draw();
+    }
+
+    function startRotate(e) {
+        isDragging = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    }
+
+    function rotate(e) {
+        if (!isDragging) return;
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+        rotationY += deltaX * 0.01;
+        rotationX += deltaY * 0.01;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        draw();
+    }
+
+    function stopRotate() {
+        isDragging = false;
+    }
+
+    function project(x, y, z) {
+        // Simple 3D to 2D Projection
+        // 1. Rotate around Y
+        let nx = x * Math.cos(rotationY) + z * Math.sin(rotationY);
+        let nz = -x * Math.sin(rotationY) + z * Math.cos(rotationY);
+        // 2. Rotate around X
+        let ny = y * Math.cos(rotationX) - nz * Math.sin(rotationX);
+        nz = y * Math.sin(rotationX) + nz * Math.cos(rotationX);
+
+        // Center and scale
+        return {
+            x: width / 2 + nx * zoom,
+            y: height / 2 - ny * zoom,
+            z: nz
+        };
+    }
+
+    function drawLine(p1, p2, color, width = 2, dash = []) {
+        ctx.beginPath();
+        ctx.setLineDash(dash);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    }
+
+    function drawArrow(p1, p2, color) {
+        drawLine(p1, p2, color, 4);
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.moveTo(p2.x, p2.y);
+        ctx.lineTo(p2.x - 12 * Math.cos(angle - Math.PI/6), p2.y - 12 * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(p2.x - 12 * Math.cos(angle + Math.PI/6), p2.y - 12 * Math.sin(angle + Math.PI/6));
+        ctx.fill();
+    }
+
+    function resetVectors() {
+        vecA.x = 1.5; vecA.y = 0.2; vecA.z = 0;
+        vecB.x = 0.3; vecB.y = 1.5; vecB.z = 0;
+        vecC.x = -0.2; vecC.y = 0; vecC.z = 1.5;
+        syncInputs();
+        draw();
+    }
+
+    function forceCollapse() {
+        vecC.x = vecA.x * 0.5 + vecB.x * 0.5;
+        vecC.y = vecA.y * 0.5 + vecB.y * 0.5;
+        vecC.z = 0;
+        syncInputs();
+        draw();
+    }
+
+    function syncInputs() {
+        document.getElementById('v1x').value = vecA.x;
+        document.getElementById('v1y').value = vecA.y;
+        document.getElementById('v2x').value = vecB.x;
+        document.getElementById('v2y').value = vecB.y;
+        document.getElementById('v3x').value = vecC.x;
+        document.getElementById('v3z').value = vecC.z;
+        updateLabels();
+    }
+
+    function calculateDeterminant() {
+        // det = a(ei − fh) − b(di − fg) + c(dh − eg)
+        // Matrix:
+        // [ Ax Bx Cx ]
+        // [ Ay By Cy ]
+        // [ Az Bz Cz ]
+        const a = vecA.x, d = vecA.y, g = vecA.z;
+        const b = vecB.x, e = vecB.y, h = vecB.z;
+        const c = vecC.x, f = vecC.y, i = vecC.z;
+
+        return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Determinant calc
+        const det = calculateDeterminant();
+        const isDependent = Math.abs(det) < 0.15;
+        
+        // Update UI
+        const status = document.getElementById('status');
+        const detSpan = document.getElementById('detVal');
+        const mathOutput = document.getElementById('mathOutput');
+        
+        detSpan.textContent = det.toFixed(2);
+        if (isDependent) {
+            status.textContent = "Basis: Invalid (Linearly Dependent)";
+            status.className = "status-badge status-invalid";
+            mathOutput.innerHTML = `Determinant ≈ 0.00<br>Span: 2D Plane (Volume Collapsed)`;
+        } else {
+            status.textContent = "Basis: Valid (Linearly Independent)";
+            status.className = "status-badge status-valid";
+            mathOutput.innerHTML = `Determinant: ${det.toFixed(2)}<br>Span: ℝ³ (Full Volume)`;
+        }
+
+        const origin = project(0, 0, 0);
+
+        // Draw Grid / Axes
+        const axisLen = 2;
+        drawLine(project(-axisLen, 0, 0), project(axisLen, 0, 0), '#ddd', 1);
+        drawLine(project(0, -axisLen, 0), project(0, axisLen, 0), '#ddd', 1);
+        drawLine(project(0, 0, -axisLen), project(0, 0, axisLen), '#ddd', 1);
+
+        // Volume / Parallelepiped Visualization
+        if (!isDependent) {
+            const pA = vecA;
+            const pB = vecB;
+            const pC = vecC;
+            const pAB = { x: pA.x + pB.x, y: pA.y + pB.y, z: pA.z + pB.z };
+            const pBC = { x: pB.x + pC.x, y: pB.y + pC.y, z: pB.z + pC.z };
+            const pAC = { x: pA.x + pC.x, y: pA.y + pC.y, z: pA.z + pC.z };
+            const pABC = { x: pA.x + pB.x + pC.x, y: pA.y + pB.y + pC.y, z: pA.z + pB.z + pC.z };
+
+            const points = [origin, project(pA.x, pA.y, pA.z), project(pB.x, pB.y, pB.z), project(pC.x, pC.y, pC.z), 
+                           project(pAB.x, pAB.y, pAB.z), project(pBC.x, pBC.y, pBC.z), project(pAC.x, pAC.y, pAC.z), project(pABC.x, pABC.y, pABC.z)];
+
+            // Draw translucent faces
+            ctx.fillStyle = 'rgba(76, 59, 207, 0.15)';
+            const drawFace = (indices) => {
+                ctx.beginPath();
+                ctx.moveTo(points[indices[0]].x, points[indices[0]].y);
+                indices.forEach(idx => ctx.lineTo(points[idx].x, points[idx].y));
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(76, 59, 207, 0.2)';
+                ctx.stroke();
+            };
+
+            drawFace([0, 1, 4, 2]); // Bottom
+            drawFace([0, 1, 6, 3]); // Side 1
+            drawFace([0, 2, 5, 3]); // Side 2
+            drawFace([7, 4, 1, 6]); // Face
+            drawFace([7, 5, 2, 4]); // Face
+            drawFace([7, 6, 3, 5]); // Top
+        } else {
+            // Draw a Plane representation
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.2)';
+            const s = 2;
+            const p1 = project(vecA.x*s + vecB.x*s, vecA.y*s + vecB.y*s, vecA.z*s + vecB.z*s);
+            const p2 = project(vecA.x*s - vecB.x*s, vecA.y*s - vecB.y*s, vecA.z*s - vecB.z*s);
+            const p3 = project(-vecA.x*s - vecB.x*s, -vecA.y*s - vecB.y*s, -vecA.z*s - vecB.z*s);
+            const p4 = project(-vecA.x*s + vecB.x*s, -vecA.y*s + vecB.y*s, -vecA.z*s + vecB.z*s);
+            
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Draw Main Vectors
+        drawArrow(origin, project(vecA.x, vecA.y, vecA.z), '#3b82f6');
+        drawArrow(origin, project(vecB.x, vecB.y, vecB.z), '#a855f7');
+        drawArrow(origin, project(vecC.x, vecC.y, vecC.z), '#14b8a6');
+    }
+
+    // Initialize immediately since script is at end of body
+    init();
+</script>
+</body>
+</html>

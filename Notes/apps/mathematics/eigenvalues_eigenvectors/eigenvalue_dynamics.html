@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eigenvalues in Practice: Dynamics & Stability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #FEFBF6;
+            font-family: 'DM Sans', sans-serif;
+            color: #333;
+            padding: 16px;
+            overflow: hidden; /* Prevent scrolling within iframe */
+        }
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; height: 95vh; gap: 16px; }
+        
+        header { text-align: center; }
+        h1 { font-family: 'Space Grotesk', sans-serif; color: #4C3BCF; font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 4px; }
+        .subtitle { color: #666; font-size: 0.9rem; }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0; /* Important for flex child scrolling */
+        }
+
+        .controls-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.85rem; font-weight: 700; color: #4C3BCF; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .matrix-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #F8F5FC;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #E5E0F0;
+            border-radius: 6px;
+            font-family: 'Space Grotesk', monospace;
+            text-align: center;
+            font-size: 1rem;
+        }
+        input[type="number"]:focus { outline: none; border-color: #4C3BCF; }
+
+        .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-preset { background: #F0EBF8; color: #4C3BCF; }
+        .btn-preset:hover { background: #E5DFF0; transform: translateY(-1px); }
+        .btn-preset.active { background: #4C3BCF; color: white; }
+
+        .btn-action { background: #4C3BCF; color: white; font-weight: 700; margin-top: auto; }
+        .btn-action:hover { background: #3A2BA3; }
+        .btn-secondary { background: #fee2e2; color: #ef4444; }
+        .btn-secondary:hover { background: #fecaca; }
+
+        .legend { font-size: 0.85rem; background: #F8F5FC; padding: 12px; border-radius: 8px; line-height: 1.5; }
+        .legend span { font-weight: 700; }
+        .eigen-val { display: flex; justify-content: space-between; font-size: 0.9rem; margin-top: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column; }
+            .controls-panel { width: 100%; height: auto; max-height: 40%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dynamics & Stability</h1>
+            <p class="subtitle">See how eigenvalues determine the long-term fate of a system (xₖ₊₁ = Axₖ)</p>
+        </header>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Presets</label>
+                    <div class="presets">
+                        <button class="btn-preset active" onclick="setPreset('sink')">Sink (Stability)</button>
+                        <button class="btn-preset" onclick="setPreset('source')">Source (Unstable)</button>
+                        <button class="btn-preset" onclick="setPreset('saddle')">Saddle Point</button>
+                        <button class="btn-preset" onclick="setPreset('spiral')">Spiral Sink</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Transformation Matrix A</label>
+                    <div class="matrix-input">
+                        <input type="number" id="a" value="0.9" step="0.1">
+                        <input type="number" id="b" value="0" step="0.1">
+                        <input type="number" id="c" value="0" step="0.1">
+                        <input type="number" id="d" value="0.8" step="0.1">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Eigenvalues</label>
+                    <div id="eigenDisplay">
+                        <div class="eigen-val">λ₁: <span id="l1">0.9</span></div>
+                        <div class="eigen-val">λ₂: <span id="l2">0.8</span></div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <p style="margin-bottom:8px;"><strong>Visual Key:</strong></p>
+                    <p><span style="color:#4C3BCF">●</span> Particles (System State)</p>
+                    <p><span style="color:#10b981; border-bottom: 2px solid #10b981;">―</span> Eigenvectors</p>
+                    <p style="margin-top:8px; font-size:0.8rem; color:#666;">
+                        |λ| < 1 : Points shrink to origin<br>
+                        |λ| > 1 : Points fly away to infinity
+                    </p>
+                </div>
+
+                <button class="btn-action" onclick="resetParticles()">Reset Particles</button>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="simCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let matrix = { a: 0.9, b: 0, c: 0, d: 0.8 };
+        let particles = [];
+        const NUM_PARTICLES = 400;
+        let animationId;
+        
+        // Setup canvas size
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            resetParticles();
+        }
+        window.addEventListener('resize', resize);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                // Initialize in a grid-like cloud around center
+                const range = 200;
+                this.x = (Math.random() - 0.5) * range * 2;
+                this.y = (Math.random() - 0.5) * range * 2;
+                this.color = `hsla(${Math.random() * 60 + 240}, 70%, 60%, 0.8)`; // Blue-purple hues
+                this.history = [];
+            }
+
+            update(a, b, c, d) {
+                // Store history for trails
+                if (this.history.length > 5) this.history.shift();
+                this.history.push({x: this.x, y: this.y});
+
+                // Apply matrix transformation x_new = A * x
+                const nx = a * this.x + b * this.y;
+                const ny = c * this.x + d * this.y;
+                this.x = nx;
+                this.y = ny;
+
+                // Reset if too far or too close (for visual loops)
+                const distSq = this.x*this.x + this.y*this.y;
+                if (distSq > 1000000 || (distSq < 0.1 && Math.random() < 0.05)) {
+                   this.reset();
+                }
+            }
+
+            draw(ctx, centerX, centerY) {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(centerX + this.x, centerY - this.y, 3, 0, Math.PI * 2); // Flip Y calculation for standard cartesian
+                ctx.fill();
+
+                // Draw trail
+                if (this.history.length > 0) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(centerX + this.history[0].x, centerY - this.history[0].y);
+                    for (let p of this.history) {
+                        ctx.lineTo(centerX + p.x, centerY - p.y);
+                    }
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < NUM_PARTICLES; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function resetParticles() {
+            particles.forEach(p => p.reset());
+        }
+
+        function calculateEigendata() {
+            const { a, b, c, d } = matrix;
+            const trace = a + d;
+            const det = a*d - b*c;
+            const disc = trace*trace - 4*det;
+            
+            let l1, l2;
+            let v1 = null, v2 = null;
+
+            if (disc >= 0) {
+                l1 = (trace + Math.sqrt(disc)) / 2;
+                l2 = (trace - Math.sqrt(disc)) / 2;
+                
+                // Calculate eigenvectors (simple numeric approach)
+                // (A - lI)v = 0  =>  (a-l)x + by = 0
+                const getVec = (lambda) => {
+                    if (Math.abs(b) > 0.0001) return [1, -(a-lambda)/b];
+                    if (Math.abs(c) > 0.0001) return [-(d-lambda)/c, 1];
+                    if (Math.abs(a-lambda) < 0.0001) return [1, 0]; // Diagonal case
+                    return [0, 1];
+                };
+                
+                v1 = getVec(l1);
+                v2 = getVec(l2);
+
+                document.getElementById('l1').textContent = l1.toFixed(3);
+                document.getElementById('l2').textContent = l2.toFixed(3);
+            } else {
+                const real = trace / 2;
+                const imag = Math.sqrt(-disc) / 2;
+                document.getElementById('l1').textContent = `${real.toFixed(2)} + ${imag.toFixed(2)}i`;
+                document.getElementById('l2').textContent = `${real.toFixed(2)} - ${imag.toFixed(2)}i`;
+            }
+            
+            return { l1, l2, v1, v2, isComplex: disc < 0 };
+        }
+
+        function drawGrid(ctx, centerX, centerY) {
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            
+            const step = 50;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.beginPath();
+            for (let x = centerX % step; x < w; x += step) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, h);
+            }
+            for (let y = centerY % step; y < h; y += step) {
+                ctx.moveTo(0, y); ctx.lineTo(w, y);
+            }
+            ctx.stroke();
+
+            // Axes
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY); ctx.lineTo(w, centerY);
+            ctx.moveTo(centerX, 0); ctx.lineTo(centerX, h);
+            ctx.stroke();
+        }
+
+        function drawEigenvectors(ctx, centerX, centerY, data) {
+            if (data.isComplex || !data.v1) return;
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+
+            const drawLine = (v, scale) => {
+                const len = 1000;
+                // Normalize for direction
+                const mag = Math.sqrt(v[0]*v[0] + v[1]*v[1]);
+                const dx = (v[0]/mag) * len;
+                const dy = (v[1]/mag) * len;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX - dx, centerY + dy); // +dy because canvas Y is down
+                ctx.lineTo(centerX + dx, centerY - dy);
+                ctx.stroke();
+            };
+
+            drawLine(data.v1);
+            if (Math.abs(data.l1 - data.l2) > 0.001) drawLine(data.v2);
+            
+            ctx.setLineDash([]);
+        }
+
+        function animate() {
+            ctx.fillStyle = '#FEFBF6'; // Clear with background color
+            // Slight trail effect? No, let's keep it crisp
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            drawGrid(ctx, centerX, centerY);
+            
+            const eigenData = calculateEigendata();
+            drawEigenvectors(ctx, centerX, centerY, eigenData);
+
+            // Update and draw particles
+            particles.forEach(p => {
+                p.update(matrix.a, matrix.b, matrix.c, matrix.d);
+                p.draw(ctx, centerX, centerY);
+            });
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function updateMatrixFromInputs() {
+            matrix.a = parseFloat(document.getElementById('a').value) || 0;
+            matrix.b = parseFloat(document.getElementById('b').value) || 0;
+            matrix.c = parseFloat(document.getElementById('c').value) || 0;
+            matrix.d = parseFloat(document.getElementById('d').value) || 0;
+            
+            // Highlight active preset button if matches
+            // (Skipped for simplicity, just removing active class)
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+        }
+
+        function setPreset(type) {
+            let m = { a: 1, b: 0, c: 0, d: 1 };
+            
+            switch(type) {
+                case 'sink': 
+                    m = { a: 0.9, b: 0, c: 0, d: 0.8 }; 
+                    break;
+                case 'source': 
+                    m = { a: 1.1, b: 0, c: 0, d: 1.2 }; 
+                    break;
+                case 'saddle': 
+                    m = { a: 1.2, b: 0, c: 0, d: 0.8 }; 
+                    break;
+                case 'spiral': 
+                    // Rotation + Scaling 0.99
+                    // Rot 10 deg approx
+                    const cos = 0.95, sin = 0.2;
+                    m = { a: 0.95, b: -0.2, c: 0.2, d: 0.95 }; 
+                    break;
+            }
+            
+            document.getElementById('a').value = m.a;
+            document.getElementById('b').value = m.b;
+            document.getElementById('c').value = m.c;
+            document.getElementById('d').value = m.d;
+            
+            updateMatrixFromInputs();
+            resetParticles();
+            
+            // Update buttons
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Inputs
+        ['a', 'b', 'c', 'd'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateMatrixFromInputs);
+        });
+
+        // Init
+        resize();
+        initParticles();
+        animate();
+
+    </script>
+</body>
+</html>

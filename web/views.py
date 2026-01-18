@@ -143,6 +143,13 @@ def pr_view(request):
             'url': '/pr/projects/',
             'active': False
         },
+        {
+            'name': 'Notes',
+            'description': 'Organize and generate educational notes by subject and course.',
+            'icon': 'notebook-text',
+            'url': '/pr/notes/',
+            'active': False
+        },
         # Integrated apps will be added here
     ]
     return render(request, 'body.html', {

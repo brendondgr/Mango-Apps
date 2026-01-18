@@ -1,0 +1,5 @@
+{
+    "title": "Derivatives of Linear Functions",
+    "description": "An introduction to the derivative as the constant slope of a straight line, explaining why the rate of change of y = mx + b is always m.",
+    "entry_point": "linear_derivatives.md"
+}

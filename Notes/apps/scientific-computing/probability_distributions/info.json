@@ -1,0 +1,5 @@
+{
+    "title": "Key Probability Distributions: Graphs, Properties, and PDFs",
+    "description": "Comprehensive overview of primary probability distributions (Uniform, Bernoulli, Poisson, Continuous Uniform, Gamma, Exponential, Chi-Squared, Normal, Log-Normal), emphasizing starred ones, with typical graphs, key properties, and probability density/mass functions.",
+    "entry_point": "probability_distributions.md"
+}

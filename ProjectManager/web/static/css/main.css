@@ -37,9 +37,10 @@ h6 {
 
 /* Utilities */
 .container {
-    max-width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 1.5rem 3rem;
+    padding: 1.5rem;
+    padding-left: 4rem;
 }
 
 main.container {
@@ -525,14 +526,41 @@ header {
     border-bottom: 1px solid var(--color-border);
 }
 
-header .container {
-    padding: 0.5rem 3rem;
-}
-
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.5rem 1.5rem 0.5rem 4rem;
+}
+
+/* Navigation Menu Button */
+.menu-btn {
+    position: fixed;
+    top: 0.75rem;
+    left: 1rem;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text-main);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.menu-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+    background: white;
+    color: var(--color-primary);
 }
 
 .header-actions {
@@ -1285,6 +1313,9 @@ header .container {
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     overflow: hidden;
+    max-height: calc(100vh - 180px);
+    display: flex;
+    flex-direction: column;
 }
 
 .gantt-container.modal-gantt {

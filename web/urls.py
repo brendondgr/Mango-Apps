@@ -6,6 +6,9 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login', views.login_view, name='login'),
     path('logout', views.logout_view, name='logout'),
+    
+    # Public Static Apps
+    re_path(r'^mimiciv/?(?P<path>.*)$', views.mimic_view, name='mimic_app'),
 
 
     # Main Dashboard (PR)

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIMIC-IV Mindmap | Interactive Network Visualization</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
+    <!-- vis.js Network -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <style>
+        :root {
+            /* Brand Colors from docs/ui.md */
+            --primary: #FF6B6B;
+            --secondary: #4C3BCF;
+            --tertiary: #00D9C0;
+            
+            /* Neutral Base */
+            --bg-color: #1a1a2e;
+            --surface: #16213e;
+            --elevated: #0f3460;
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+
+            /* Node Colors */
+            --node-file-bg: #15803d;
+            --node-file-border: #16a34a;
+            --node-file-text: #ffffff;
+            
+            --node-variable-bg: #db2777;
+            --node-variable-border: #f472b6;
+            --node-variable-text: #ffffff;
+            
+            --node-descriptor-bg: #10b981;
+            --node-descriptor-border: #34d399;
+            --node-descriptor-text: #ffffff;
+            
+            --node-connector-bg: #78350f;
+            --node-connector-border: #92400e;
+            --node-connector-text: #ffffff;
+
+            /* Edge Colors */
+            --edge-green: #22c55e;
+            --edge-red: #ef4444;
+            --edge-cyan: #06b6d4;
+            --edge-blue: #15803d;
+            --edge-purple: #78350f;
+
+            /* Animations */
+            --spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        button {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all var(--transition-speed) var(--spring-easing);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+            color: var(--primary);
+        }
+
+        button#fit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        button#fit-btn:hover {
+            background: #ff5252;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            color: white;
+        }
+
+        button#reveal-btn {
+            background: var(--surface);
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        button#reveal-btn:hover {
+            color: var(--tertiary);
+            border-color: var(--tertiary);
+            box-shadow: 0 4px 12px rgba(0, 217, 192, 0.2);
+        }
+
+        #network-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex; /* Changed to flex to hold network + sidebar */
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(51, 65, 85, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51, 65, 85, 0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        #network {
+            flex: 1; /* Takes up remaining space */
+            height: 100%;
+            outline: none;
+        }
+
+        #sidebar {
+            width: 320px;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-left: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: translateX(0);
+            transition: transform 0.4s var(--spring-easing);
+            z-index: 20;
+            position: relative;
+        }
+
+        #sidebar.collapsed {
+            transform: translateX(100%);
+            padding-left: 0;
+            padding-right: 0;
+            width: 0;
+            border-left: none;
+        }
+
+        #sidebar-toggle {
+            position: absolute;
+            top: 1rem;
+            left: -40px;
+            width: 40px;
+            height: 48px;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            z-index: 21;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+        }
+
+        #sidebar-toggle:hover {
+            color: var(--primary);
+            background: var(--elevated);
+        }
+
+        #sidebar.collapsed #sidebar-toggle {
+            left: -40px;
+        }
+
+        #sidebar.hidden {
+            display: none;
+        }
+
+        .sidebar-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+        }
+
+        .sidebar-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            margin-top: 50%;
+        }
+
+        .sidebar-content-wrapper {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .action-button {
+            margin-top: 1.5rem;
+            width: 100%;
+            justify-content: center;
+            font-size: 0.8rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .action-button:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .visibility-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            margin-top: auto;
+        }
+
+        .visibility-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .module-btn {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .module-btn:hover {
+            border-color: var(--tertiary);
+            color: var(--tertiary);
+        }
+
+        .module-btn.hidden-module {
+            opacity: 0.5;
+            background: rgba(15, 52, 96, 0.5);
+            text-decoration: line-through;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--surface);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s var(--spring-easing) infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1.5rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            z-index: 5;
+        }
+
+        .legend h3 {
+            margin: 0 0 0.75rem 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-shape {
+            width: 20px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        .legend-shape.file {
+            background: var(--node-file-bg);
+            border: 2px solid var(--node-file-border);
+        }
+
+        .legend-shape.variable {
+            background: var(--node-variable-bg);
+            border: 2px solid var(--node-variable-border);
+            border-radius: 50%;
+            width: 14px;
+        }
+
+        .legend-shape.connector {
+            background: var(--node-connector-bg);
+            border: 2px solid var(--node-connector-border);
+            border-radius: 50%;
+            width: 14px;
+        }
+
+        .legend-shape.descriptor {
+            background: var(--node-descriptor-bg);
+            border: 2px solid var(--node-descriptor-border);
+        }
+
+        .legend-line {
+            width: 24px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .legend-line.blue { background: var(--edge-blue); }
+        .legend-line.red { background: var(--edge-red); }
+        .legend-line.purple { background: var(--edge-purple); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MIMIC-IV Network Map</h1>
+        <div class="controls">
+            <button id="reveal-btn">Reveal All</button>
+            <button id="reset-btn">Reset View</button>
+            <button id="fit-btn">Fit to Screen</button>
+        </div>
+    </header>
+
+    <div id="network-container">
+        <div class="loading-overlay" id="loading">
+            <div class="spinner"></div>
+            <p>CONSTRUCTING NETWORK...</p>
+        </div>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-shape file"></div>
+                <span>Table (Database)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape variable"></div>
+                <span>Associated Variable</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape connector"></div>
+                <span>Cross-Table Connector</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line blue"></div>
+                <span>Associated Variable →</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line purple"></div>
+                <span>Cross-Table Link (Connector) →</span>
+            </div>
+        </div>
+        
+        <div id="network"></div>
+        
+        <aside id="sidebar">
+            <button id="sidebar-toggle" title="Toggle Sidebar">
+                <span id="toggle-icon">⟩</span>
+            </button>
+            <div id="sidebar-content" class="sidebar-content-wrapper">
+                <div class="empty-state">Select a node to view details</div>
+            </div>
+
+            <div class="visibility-section">
+                <div class="visibility-title">
+                    <span>Visibility Controls</span>
+                </div>
+                <div class="module-grid">
+                    <button class="module-btn" onclick="toggleModule('hosp')">HOSP</button>
+                    <button class="module-btn" onclick="toggleModule('icu')">ICU</button>
+                    <button class="module-btn" onclick="toggleModule('ed')">ED</button>
+                    <button class="module-btn" onclick="toggleModule('note')">NOTE</button>
+                    <button class="module-btn" onclick="toggleModule('cxr')">CXR</button>
+                    <button class="module-btn" onclick="toggleModule('ecg')">ECG</button>
+                </div>
+            </div>
+        </aside>
+        <div class="hint">Scroll to zoom • Drag to pan • Click nodes to select</div>
+    </div>
+
+    <!-- Modular JavaScript Files -->
+    <script src="js/styles.js"></script>
+    <script src="js/data/common.js"></script>
+    <script src="js/data/hosp.js"></script>
+    <script src="js/data/icu.js"></script>
+    <script src="js/data/ed.js"></script>
+    <script src="js/data/cxr.js"></script>
+    <script src="js/data/ecg.js"></script>
+    <script src="js/data/note.js"></script>
+    <script src="js/network.js"></script>
+</body>
+</html>

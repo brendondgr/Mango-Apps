@@ -143,7 +143,7 @@ function initDragAndDrop() {
                 const formData = new FormData();
                 formData.append('status', newStatus);
 
-                fetch(`/project/${projectId}`, {
+                fetch(`/pr/projects/project/${projectId}`, {
                     method: 'PATCH',
                     body: formData
                 }).then(async response => {

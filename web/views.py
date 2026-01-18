@@ -1,10 +1,11 @@
 import json
+import mimetypes
 import os
 import sys
 from pathlib import Path
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
@@ -87,6 +88,42 @@ def flask_proxy(request, path=''):
 def index(request):
     """Serve the landing page"""
     return render(request, 'index.html')
+
+
+# Path to the MIMIC static app directory
+MIMIC_APP_PATH = Path(__file__).resolve().parent.parent / 'MIMIC'
+
+
+def mimic_view(request, path=''):
+    """Serve the static MIMIC mindmap app at /mimiciv
+    
+    This serves index.html for the root and handles requests
+    for JS files and other static assets within the MIMIC directory.
+    """
+    # Default to index.html for root path
+    if not path or path == '/':
+        file_path = MIMIC_APP_PATH / 'index.html'
+    else:
+        # Sanitize path to prevent directory traversal
+        file_path = MIMIC_APP_PATH / path.lstrip('/')
+    
+    # Security: ensure the resolved path is within the MIMIC directory
+    try:
+        file_path = file_path.resolve()
+        if not str(file_path).startswith(str(MIMIC_APP_PATH.resolve())):
+            raise Http404("File not found")
+    except (ValueError, OSError):
+        raise Http404("File not found")
+    
+    if not file_path.exists() or not file_path.is_file():
+        raise Http404("File not found")
+    
+    # Determine content type
+    content_type, _ = mimetypes.guess_type(str(file_path))
+    if content_type is None:
+        content_type = 'application/octet-stream'
+    
+    return FileResponse(open(file_path, 'rb'), content_type=content_type)
 
 
 def pr_view(request):

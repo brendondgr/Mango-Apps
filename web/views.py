@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
@@ -14,6 +14,75 @@ LIBS_PATH = Path(__file__).resolve().parent.parent.parent / 'libs'
 sys.path.insert(0, str(LIBS_PATH))
 import llm_service
 
+# Flask app for ProjectManager
+from apps.ProjectManager.web import create_app as create_projectmanager_app
+_projectmanager_app = None
+
+def get_projectmanager_app():
+    """Lazy initialization of Flask app"""
+    global _projectmanager_app
+    if _projectmanager_app is None:
+        _projectmanager_app = create_projectmanager_app()
+    return _projectmanager_app
+
+
+@csrf_exempt
+def flask_proxy(request, path=''):
+    """Proxy requests to the Flask ProjectManager app"""
+    from werkzeug.serving import WSGIRequestHandler
+    from werkzeug.wrappers import Request as WerkzeugRequest, Response as WerkzeugResponse
+    from io import BytesIO
+    
+    flask_app = get_projectmanager_app()
+    
+    # Build environ dict for Flask
+    environ = {
+        'REQUEST_METHOD': request.method,
+        'SCRIPT_NAME': '/pr/projects',
+        'PATH_INFO': '/' + path if path else '/',
+        'QUERY_STRING': request.META.get('QUERY_STRING', ''),
+        'CONTENT_TYPE': request.META.get('CONTENT_TYPE', ''),
+        'CONTENT_LENGTH': request.META.get('CONTENT_LENGTH', ''),
+        'SERVER_NAME': request.META.get('SERVER_NAME', 'localhost'),
+        'SERVER_PORT': request.META.get('SERVER_PORT', '80'),
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'wsgi.version': (1, 0),
+        'wsgi.url_scheme': request.scheme,
+        'wsgi.input': BytesIO(request.body),
+        'wsgi.errors': sys.stderr,
+        'wsgi.multithread': True,
+        'wsgi.multiprocess': True,
+        'wsgi.run_once': False,
+    }
+    
+    # Copy HTTP headers
+    for key, value in request.META.items():
+        if key.startswith('HTTP_'):
+            environ[key] = value
+    
+    # Capture Flask response
+    response_started = []
+    response_headers = []
+    
+    def start_response(status, headers, exc_info=None):
+        response_started.append(status)
+        response_headers.extend(headers)
+        return lambda s: None
+    
+    # Call Flask app
+    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+    
+    # Parse status code
+    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+    
+    # Create Django response
+    django_response = HttpResponse(response_body, status=status_code)
+    for header_name, header_value in response_headers:
+        if header_name.lower() not in ('content-length',):
+            django_response[header_name] = header_value
+    
+    return django_response
+
 
 def index(request):
     """Serve the landing page"""
@@ -21,8 +90,28 @@ def index(request):
 
 
 def pr_view(request):
-    """Serve the main dashboard page (previously index)"""
-    return render(request, 'body.html')
+    """Serve the main dashboard page (Private Resources)"""
+    apps_list = [
+        {
+            'name': 'LLM Server',
+            'description': 'Configure and manage local language models.',
+            'icon': 'brain-circuit',
+            'url': '/pr/',  # Current app
+            'active': True
+        },
+        {
+            'name': 'Project Management',
+            'description': 'Track and manage projects with goals and timelines.',
+            'icon': 'folder-kanban',
+            'url': '/pr/projects/',
+            'active': False
+        },
+        # Integrated apps will be added here
+    ]
+    return render(request, 'body.html', {
+        'title': 'Private Resources',
+        'apps': apps_list
+    })
 
 
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
@@ -44,11 +133,15 @@ def login_view(request):
             return redirect(next_path)
         else:
             return render(request, 'login.html', {
+                'title': 'Login',
                 'error': 'Invalid username or password',
                 'next': next_path
             })
             
-    return render(request, 'login.html', {'next': request.GET.get('next', '/')})
+    return render(request, 'login.html', {
+        'title': 'Login',
+        'next': request.GET.get('next', '/')
+    })
 
 
 def logout_view(request):

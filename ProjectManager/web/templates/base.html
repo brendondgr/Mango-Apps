@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    
+    <header>
+        <div class="container header-content">
+            <div class="brand">Project Management</div>
+            
+            <div class="header-actions">
+                <!-- Tab Interface -->
+                <div class="tab-interface header-tabs" data-group="dashboard">
+                    <button class="tab-button active" data-tab="cards">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Cards
+                    </button>
+                    <button class="tab-button" data-tab="timeline">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <line x1="4" y1="12" x2="16" y2="12"></line>
+                            <line x1="4" y1="18" x2="12" y2="18"></line>
+                        </svg>
+                        Timeline
+                    </button>
+                </div>
+
+                <button class="btn-primary" 
+                        hx-get="/pr/projects/project/modal/new" 
+                        hx-target="#modal-container" 
+                        hx-swap="innerHTML">
+                    + New Project
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="modal-container"></div>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timeline.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

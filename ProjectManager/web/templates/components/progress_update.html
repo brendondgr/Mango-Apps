@@ -1,0 +1,31 @@
+<!-- Out-of-band progress updates for both modal and main page -->
+
+<!-- Update Modal Progress Percent -->
+<span id="modal-progress-percent-{{ project.id }}" class="progress-percent" hx-swap-oob="outerHTML">{{ project.calculate_progress() }}%</span>
+
+<!-- Update Modal Goal Count -->
+<span id="goal-count-{{ project.id }}" class="goal-count" hx-swap-oob="outerHTML">{{ project.goals|selectattr('status', 'equalto', 'Completed')|list|length }}/{{ project.goals|length }}</span>
+
+<!-- Smooth animated width update via micro-script -->
+<script hx-swap-oob="true">
+(function() {
+    const progress = {{ project.calculate_progress() }};
+    const modalContainer = document.querySelector('#modal-progress-{{ project.id }}');
+    const cardContainer = document.querySelector('#progress-{{ project.id }}');
+    
+    if (modalContainer) {
+        const modalBar = modalContainer.querySelector('.progress-bar');
+        if (modalBar) modalBar.style.width = progress + '%';
+        const modalText = modalContainer.querySelector('.progress-text-overlay');
+        if (modalText) modalText.textContent = progress + '%';
+    }
+    
+    if (cardContainer) {
+        const cardBar = cardContainer.querySelector('.progress-bar');
+        if (cardBar) cardBar.style.width = progress + '%';
+        const cardText = cardContainer.querySelector('.progress-text-overlay');
+        if (cardText) cardText.textContent = progress + '%';
+    }
+})();
+</script>
+

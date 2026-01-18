@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
@@ -10,6 +10,9 @@ urlpatterns = [
 
     # Main Dashboard (PR)
     path('pr/', views.pr_view, name='pr_view'),
+    
+    # ProjectManager Flask App (mounted at /pr/projects/)
+    re_path(r'^pr/projects/(?P<path>.*)$', views.flask_proxy, name='flask_projectmanager'),
     
     # Configuration API
     path('api/config', views.api_config, name='api_config'),

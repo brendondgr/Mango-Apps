@@ -1,0 +1,254 @@
+{% extends "kitchen.html" %}
+
+{% block title %}{{ recipe.title }} - ShortSpork{% endblock %}
+{% block description %}{{ recipe.description }}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plate.css') }}">
+{% endblock %}
+
+{% block nav_links %}
+<a href="{{ url_for('index') }}" class="nav-link">Menu</a>
+<a href="{{ url_for('prep_station') }}" class="nav-link">Prep Station</a>
+{% endblock %}
+
+{% block content %}
+<div class="recipe-wrapper">
+    <!-- Back Link (Top left) -->
+    <a href="{{ url_for('index') }}" class="back-link">← Menu</a>
+
+    <!-- Unified Recipe Container -->
+    <article class="recipe-container">
+        
+        <!-- Hero Section -->
+            <div class="hero-image-container recipe-carousel" style="position: relative;">
+                <div class="carousel-images">
+                    {% if recipe.images and recipe.images|length > 0 %}
+                        {% for img in recipe.images %}
+                            <img src="{{ img }}" alt="{{ recipe.title }}" class="hero-image carousel-image {{ 'active' if loop.first else '' }}">
+                        {% endfor %}
+                    {% elif recipe.image_url %}
+                        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="hero-image carousel-image active">
+                    {% endif %}
+                </div>
+                
+                {% if recipe.images and recipe.images|length > 1 %}
+                <button class="carousel-nav carousel-prev">&lsaquo;</button>
+                <button class="carousel-nav carousel-next">&rsaquo;</button>
+                {% endif %}
+
+                <!-- Absolute Positioned Action Buttons -->
+                <div class="hero-actions" style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; z-index: 10;">
+                    <a href="{{ url_for('prep_station', edit=recipe.id) }}" class="btn-icon-glass btn-edit" title="Edit Recipe">
+                        <img src="{{ url_for('static', filename='svg/icon-edit-indigo.svg') }}" alt="Edit" style="width: 20px; height: 20px;">
+                    </a>
+                    <button id="delete-recipe-btn" class="btn-icon-glass btn-delete" title="Delete Recipe" data-id="{{ recipe.id }}">
+                         <img src="{{ url_for('static', filename='svg/icon-delete-red.svg') }}" alt="Delete" style="width: 20px; height: 20px;">
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hero-content">
+                <div class="hero-title-row">
+                    <h1 class="hero-title">{{ recipe.title }}</h1>
+                    <span class="badge badge-hero badge-light-blue">{{ recipe.servings }} Servings</span>
+                </div>
+                <!-- Action Buttons Removed from flow -->
+                <p class="hero-description">{{ recipe.description }}</p>
+            </div>
+
+        <!-- Body Content -->
+        <div class="recipe-body">
+            
+            <!-- Ingredients Column -->
+            <section class="recipe-ingredients">
+                <div class="section-header">
+                    <h2 class="section-title">Ingredients</h2>
+                    <!-- Compact Servings Adjuster -->
+                    <div class="servings-compact">
+                        <button type="button" class="btn-mini" id="servings-decrease">−</button>
+                        <input type="number" 
+                               id="servings-input" 
+                               class="input-mini"
+                               value="{{ recipe.servings }}" 
+                               data-original-servings="{{ recipe.servings }}"
+                               min="1">
+                        <button type="button" class="btn-mini" id="servings-increase">+</button>
+                    </div>
+                </div>
+
+                <ul class="ingredient-list-clean">
+                    {% for ing in recipe.ingredients %}
+                    <li class="ing-item{{ ' scalable' if ing.quantity else '' }}">
+                        {% if ing.quantity %}
+                        <span class="ing-qty" data-base-qty="{{ ing.quantity }}">{{ ing.quantity }}</span>
+                        {% endif %}
+                        <span class="ing-unit">{{ ing.unit }}</span>
+                        <span class="ing-name">{{ ing.name }}</span>
+                        {% if ing.is_optional %}
+                        <span class="ing-opt">(opt)</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <!-- Divider (Vertical Line in CSS) -->
+            <div class="recipe-divider"></div>
+
+            <!-- Instructions Column -->
+            <section class="recipe-instructions">
+                <header class="section-header">
+                    <h2 class="section-title">Instructions</h2>
+                    <div class="header-tags">
+                        {% if recipe.cuisine_region %}
+                            {% set cuisine_tags = split_tags(recipe.cuisine_region) %}
+                            {% if cuisine_tags %}
+                            <span class="badge badge-{{ get_tag_color(cuisine_tags[0]) }}">
+                                {{ cuisine_tags[0] }}{% if cuisine_tags|length > 1 %} + {{ cuisine_tags|length - 1 }}{% endif %}
+                            </span>
+                            {% endif %}
+                        {% endif %}
+                        {% if recipe.meal_type %}
+                            {% set meal_tags = split_tags(recipe.meal_type) %}
+                            {% if meal_tags %}
+                            <span class="badge badge-{{ get_tag_color(meal_tags[0]) }}">
+                                {{ meal_tags[0] }}{% if meal_tags|length > 1 %} + {{ meal_tags|length - 1 }}{% endif %}
+                            </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </header>
+                <ol class="instructions-list">
+                    {% for step in recipe.steps %}
+                    <li class="instruction-step">
+                        <span class="step-num">{{ step.step_number }}</span>
+                        <div class="step-text" data-original-text="{{ step.instruction }}">{{ step.instruction }}</div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+
+        </div>
+    </article>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-container">
+        <h3 class="modal-title" id="modal-title">Delete Recipe?</h3>
+        <p class="modal-body" id="modal-body">Are you sure you want to delete this recipe? This cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+            <button class="btn btn-primary" id="modal-confirm" style="background-color: var(--color-red); border-color: var(--color-red);">Delete</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/measuring_cup.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingredient_replacer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteBtn = document.getElementById('delete-recipe-btn');
+        const modalOverlay = document.getElementById('confirm-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalConfirmBtn = document.getElementById('modal-confirm');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+
+        const Modal = {
+            show: (title, body, onConfirm, confirmText = 'Confirm', isDestructive = false) => {
+                modalTitle.textContent = title;
+                modalBody.textContent = body;
+                modalConfirmBtn.textContent = confirmText;
+                
+                if (isDestructive) {
+                    modalConfirmBtn.style.backgroundColor = 'var(--color-red)';
+                    modalConfirmBtn.style.borderColor = 'var(--color-red)';
+                    modalConfirmBtn.classList.add('btn-danger'); // if we have it
+                } else {
+                    modalConfirmBtn.style.backgroundColor = '';
+                    modalConfirmBtn.style.borderColor = '';
+                }
+
+                modalOverlay.classList.add('active');
+                
+                const handleConfirm = () => {
+                    onConfirm();
+                    this.hide();
+                    cleanup();
+                };
+                
+                const handleCancel = () => {
+                    this.hide();
+                    cleanup();
+                };
+
+                const cleanup = () => {
+                    modalConfirmBtn.removeEventListener('click', handleConfirm);
+                    modalCancelBtn.removeEventListener('click', handleCancel);
+                    modalOverlay.removeEventListener('click', handleOverlayClick);
+                };
+
+                const handleOverlayClick = (e) => {
+                    if (e.target === modalOverlay) handleCancel();
+                };
+
+                modalConfirmBtn.addEventListener('click', handleConfirm);
+                modalCancelBtn.addEventListener('click', handleCancel);
+                modalOverlay.addEventListener('click', handleOverlayClick);
+            },
+            hide: () => {
+                modalOverlay.classList.remove('active');
+            },
+            alert: (title, body) => {
+                modalTitle.textContent = title;
+                modalBody.textContent = body;
+                modalConfirmBtn.textContent = 'OK';
+                modalConfirmBtn.style.backgroundColor = '';
+                modalConfirmBtn.style.borderColor = '';
+                modalCancelBtn.style.display = 'none';
+                
+                modalOverlay.classList.add('active');
+                
+                const handleOk = () => {
+                    modalOverlay.classList.remove('active');
+                    modalConfirmBtn.removeEventListener('click', handleOk);
+                    modalCancelBtn.style.display = 'inline-flex';
+                };
+                
+                modalConfirmBtn.addEventListener('click', handleOk);
+            }
+        };
+
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                Modal.show(
+                    'Delete Recipe?',
+                    'Are you sure you want to delete this recipe? This cannot be undone.',
+                    async () => {
+                        const id = deleteBtn.dataset.id;
+                        try {
+                            const res = await fetch(`/delete-recipe/${id}`, { method: 'POST' });
+                            const data = await res.json();
+                            if (data.success) {
+                                window.location.href = '/';
+                            } else {
+                                Modal.alert('Error', 'Failed to delete: ' + (data.error || 'Unknown error'));
+                            }
+                        } catch (e) {
+                            Modal.alert('Error', 'Error deleting recipe: ' + e.message);
+                        }
+                    },
+                    'Delete',
+                    true
+                );
+            });
+        }
+    });
+</script>
+{% endblock %}

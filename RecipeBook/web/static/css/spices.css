@@ -1,0 +1,216 @@
+/**
+ * ShortSpork Design System - Spices
+ * Vibrant UI CSS Variables
+ * 
+ * This file contains all design tokens including colors, typography,
+ * shadows, and border radii for the ShortSpork application.
+ */
+
+:root {
+  /* ========================================
+     BRAND COLORS
+     ======================================== */
+  --color-primary: #FF6B6B;
+  /* Electric Coral */
+  --color-secondary: #2D2A26;
+  /* Warm Charcoal */
+  --color-tertiary: #00D9C0;
+  /* Vivid Teal */
+
+  /* ========================================
+     NEUTRAL BASE
+     ======================================== */
+  --color-background: #FEFBF6;
+  /* Warm Off-White */
+  --color-surface: #FFF8F0;
+  /* Soft Cream */
+  --color-elevated: #FFFFFF;
+  /* Pure White */
+
+  /* ========================================
+     CATEGORIZATION TONES
+     Each category has three variants:
+     - bg: Low-opacity background
+     - border: Saturated accent/border
+     - text: High-contrast text
+     ======================================== */
+
+  /* Yellow Orange */
+  --color-yellow-orange-bg: #fef3c7;
+  --color-yellow-orange-border: #f59e0b;
+  --color-yellow-orange-text: #78350f;
+
+  /* Yellow */
+  --color-yellow-bg: #fef9c3;
+  --color-yellow-border: #eab308;
+  --color-yellow-text: #713f12;
+
+  /* Orange */
+  --color-orange-bg: #ffedd5;
+  --color-orange-border: #f97316;
+  --color-orange-text: #7c2d12;
+
+  /* Red */
+  --color-red-bg: #fee2e2;
+  --color-red-border: #ef4444;
+  --color-red-text: #7f1d1d;
+  --color-red: var(--color-red-border);
+
+  /* Blue */
+  --color-blue-bg: #dbeafe;
+  --color-blue-border: #3b82f6;
+  --color-blue-text: #1e3a8a;
+
+  /* Purple */
+  --color-purple-bg: #f3e8ff;
+  --color-purple-border: #a855f7;
+  --color-purple-text: #581c87;
+
+  /* Teal */
+  --color-teal-bg: #ccfbf1;
+  --color-teal-border: #14b8a6;
+  --color-teal-text: #134e4a;
+
+  /* Light Purple */
+  --color-light-purple-bg: #ede9fe;
+  --color-light-purple-border: #8b5cf6;
+  --color-light-purple-text: #4c1d95;
+
+  /* Light Blue */
+  --color-light-blue-bg: #e0f2fe;
+  --color-light-blue-border: #0ea5e9;
+  --color-light-blue-text: #0c4a6e;
+
+  /* Green */
+  --color-green-bg: #d1fae5;
+  --color-green-border: #10b981;
+  --color-green-text: #064e3b;
+
+  /* Black */
+  --color-black-bg: #1f2937;
+  --color-black-border: #111827;
+  --color-black-text: #ffffff;
+
+  /* Muted Gray */
+  --color-muted-gray-bg: #e2e8f0;
+  --color-muted-gray-border: #64748b;
+  --color-muted-gray-text: #0f172a;
+
+  /* Brown */
+  --color-brown-bg: #fde68a;
+  --color-brown-border: #b45309;
+  --color-brown-text: #78350f;
+
+  /* Light Pink */
+  --color-light-pink-bg: #fce7f3;
+  --color-light-pink-border: #f472b6;
+  --color-light-pink-text: #831843;
+
+  /* Kiwi */
+  --color-kiwi-bg: #ecfccb;
+  --color-kiwi-border: #84cc16;
+  --color-kiwi-text: #365314;
+
+  /* Rose */
+  --color-rose-bg: #ffe4e6;
+  --color-rose-border: #f43f5e;
+  --color-rose-text: #881337;
+
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ========================================
+     SHADOW SYSTEM
+     ======================================== */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Glow Effect (for primary buttons) */
+  --glow-primary: 0 0 20px rgba(255, 107, 107, 0.3);
+  --glow-secondary: 0 0 20px rgba(76, 59, 207, 0.3);
+  --glow-tertiary: 0 0 20px rgba(0, 217, 192, 0.3);
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ========================================
+     SPACING
+     ======================================== */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+
+  /* ========================================
+     TRANSITIONS
+     ======================================== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ========================================
+     GLASSMORPHISM
+     ======================================== */
+  --blur-glass: blur(12px);
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-glass-dark: rgba(0, 0, 0, 0.5);
+
+  /* ========================================
+     Z-INDEX
+     ======================================== */
+  --z-modal: 2000;
+}

@@ -19,6 +19,9 @@ import llm_service
 from apps.ProjectManager.web import create_app as create_projectmanager_app
 _projectmanager_app = None
 
+# Flask app for RecipeBook
+from apps.RecipeBook.app import app as recipebook_flask_app
+
 def get_projectmanager_app():
     """Lazy initialization of Flask app"""
     global _projectmanager_app
@@ -61,6 +64,65 @@ def flask_proxy(request, path=''):
         if key.startswith('HTTP_'):
             environ[key] = value
     
+    # Capture Flask response
+    response_started = []
+    response_headers = []
+    
+    def start_response(status, headers, exc_info=None):
+        response_started.append(status)
+        response_headers.extend(headers)
+        return lambda s: None
+    
+    # Call Flask app
+    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+    
+    # Parse status code
+    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+    
+    # Create Django response
+    django_response = HttpResponse(response_body, status=status_code)
+    for header_name, header_value in response_headers:
+        if header_name.lower() not in ('content-length',):
+            django_response[header_name] = header_value
+    
+    return django_response
+
+
+@csrf_exempt
+def flask_proxy_recipebook(request, path=''):
+    """Proxy requests to the Flask RecipeBook app"""
+    from werkzeug.serving import WSGIRequestHandler
+    from werkzeug.wrappers import Request as WerkzeugRequest, Response as WerkzeugResponse
+    from io import BytesIO
+    
+    # RecipeBook app is already a global instance
+    flask_app = recipebook_flask_app
+    
+    # Build environ dict for Flask
+    environ = {
+        'REQUEST_METHOD': request.method,
+        'SCRIPT_NAME': '/pr/recipes',
+        'PATH_INFO': '/' + path if path else '/',
+        'QUERY_STRING': request.META.get('QUERY_STRING', ''),
+        'CONTENT_TYPE': request.META.get('CONTENT_TYPE', ''),
+        'CONTENT_LENGTH': request.META.get('CONTENT_LENGTH', ''),
+        'SERVER_NAME': request.META.get('SERVER_NAME', 'localhost'),
+        'SERVER_PORT': request.META.get('SERVER_PORT', '80'),
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'wsgi.version': (1, 0),
+        'wsgi.url_scheme': request.scheme,
+        'wsgi.input': BytesIO(request.body),
+        'wsgi.errors': sys.stderr,
+        'wsgi.multithread': True,
+        'wsgi.multiprocess': True,
+        'wsgi.run_once': False,
+    }
+    
+    # Copy HTTP headers
+    for key, value in request.META.items():
+        if key.startswith('HTTP_'):
+            environ[key] = value
+            
     # Capture Flask response
     response_started = []
     response_headers = []
@@ -150,7 +212,14 @@ def pr_view(request):
             'url': '/pr/notes/',
             'active': False
         },
-        # Integrated apps will be added here
+        },
+        {
+            'name': 'Recipe Book',
+            'description': 'Manage recipes and pantry ingredients.',
+            'icon': 'chef-hat',
+            'url': '/pr/recipes/',
+            'active': False
+        },
     ]
     return render(request, 'body.html', {
         'title': 'Private Resources',

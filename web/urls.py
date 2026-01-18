@@ -17,6 +17,9 @@ urlpatterns = [
     # ProjectManager Flask App (mounted at /pr/projects/)
     re_path(r'^pr/projects/(?P<path>.*)$', views.flask_proxy, name='flask_projectmanager'),
     
+    # RecipeBook Flask App (mounted at /pr/recipes/)
+    re_path(r'^pr/recipes/(?P<path>.*)$', views.flask_proxy_recipebook, name='flask_recipebook'),
+    
     # Notes Django App (mounted at /pr/notes/)
     path('pr/notes/', include('apps.Notes.apps.notes.urls')),
     

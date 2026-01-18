@@ -1,0 +1,560 @@
+/**
+ * ShortSpork - plate.css
+ * Recipe Detail Page Styles (Clean & Warm Refinement)
+ */
+
+/* ========================================
+   CONTAINER & LAYOUT
+   ======================================== */
+
+.recipe-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.back-link {
+    display: inline-block;
+    color: var(--color-muted-gray-text);
+    text-decoration: none;
+    font-weight: var(--font-medium);
+    transition: color var(--transition-fast);
+    opacity: 0.7;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+.recipe-container {
+    background: var(--color-elevated);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    /* Soft, warm shadow instead of harsh dark one */
+    box-shadow: 0 10px 30px -10px rgba(120, 53, 15, 0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+
+
+
+.hero-image-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    /* Reduced height */
+    overflow: hidden;
+    background-color: var(--color-muted-gray-bg);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-content {
+    padding: var(--space-8) var(--space-8) var(--space-4);
+    width: 100%;
+}
+
+.hero-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-2);
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-secondary);
+    /* Dark text */
+    line-height: 1.1;
+    margin-bottom: 0;
+}
+
+.hero-description {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-muted-gray-text);
+    /* Dark gray text */
+    margin-bottom: var(--space-2);
+    max-width: 800px;
+    line-height: 1.6;
+}
+
+.header-tags {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.badge-hero {
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    width: fit-content;
+}
+
+/* ========================================
+   BODY CONTENT
+   ======================================== */
+
+.recipe-body {
+    display: grid;
+    grid-template-columns: 280px 1px 1fr;
+    gap: var(--space-8);
+    padding: var(--space-4) var(--space-8) var(--space-10);
+    /* More vertical breathing room */
+}
+
+/* Allow instructions to wrap underneath on long content */
+.recipe-instructions {
+    min-width: 0;
+    /* Allow shrinking below content size */
+}
+
+/* When instructions are very long, let them span full width below */
+@media (min-width: 801px) {
+    .recipe-body {
+        display: grid;
+        grid-template-columns: 280px 1px 1fr;
+        grid-template-rows: auto auto;
+        gap: var(--space-8);
+    }
+
+    .recipe-ingredients {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .recipe-divider {
+        grid-column: 2;
+        grid-row: 1 / -1;
+    }
+
+    .recipe-instructions {
+        grid-column: 3;
+        grid-row: 1 / -1;
+    }
+}
+
+.recipe-divider {
+    background-color: var(--color-muted-gray-bg);
+    width: 1px;
+    height: 100%;
+    opacity: 0.6;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    /* Larger, cleaner title */
+    font-weight: var(--font-bold);
+    color: var(--color-muted-gray-text);
+    /* Dark Gray instead of Blue */
+    margin-bottom: var(--space-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: -0.5px;
+}
+
+/* ========================================
+   INGREDIENTS
+   ======================================== */
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+}
+
+.servings-compact {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-muted-gray-bg);
+}
+
+.btn-mini {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--color-muted-gray-border);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.btn-mini:hover {
+    background: var(--color-muted-gray-bg);
+    color: var(--color-primary);
+}
+
+.input-mini {
+    width: 32px;
+    height: 24px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: bold;
+    color: var(--color-muted-gray-text);
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.input-mini::-webkit-outer-spin-button,
+.input-mini::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.ingredient-list-clean {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.ing-item {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-muted-gray-bg);
+    /* Use solid line but light */
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-muted-gray-text);
+    line-height: 1.5;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.ing-item:last-child {
+    border-bottom: none;
+}
+
+.ing-qty {
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    /* Coral */
+    font-family: var(--font-mono);
+    transition: all var(--transition-fast);
+    display: inline-block;
+    font-size: 1.1em;
+}
+
+.ing-qty.quantity-updating {
+    transform: scale(1.2);
+    color: var(--color-orange-border);
+    /* Warmer highlight when updating */
+}
+
+.ing-unit {
+    color: var(--color-muted-gray-border);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.ing-opt {
+    color: var(--color-muted-gray-border);
+    font-size: var(--text-xs);
+    font-style: italic;
+    background: var(--color-muted-gray-bg);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+}
+
+/* Scalable Ingredients - Visual Indicator */
+.ing-item.scalable {
+    position: relative;
+    padding-left: var(--space-4);
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.08) 0%, transparent 50%);
+    border-radius: var(--radius-sm);
+    margin-left: calc(-1 * var(--space-2));
+    padding-right: var(--space-2);
+}
+
+.ing-item.scalable::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 70%;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    opacity: 0.8;
+}
+
+/* ========================================
+   INSTRUCTIONS (Cleaner!)
+   ======================================== */
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: step;
+}
+
+.instruction-step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    /* Wider number column */
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    /* More space between steps */
+}
+
+.step-num {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    /* Big, minimal number */
+    font-weight: var(--font-bold);
+    color: var(--color-muted-gray-bg);
+    /* Very subtle gray number */
+    text-align: right;
+    line-height: 1;
+    position: relative;
+    top: -5px;
+    /* Visual alignment */
+    transition: color var(--transition-normal);
+}
+
+.instruction-step:hover .step-num {
+    color: var(--color-primary);
+    /* Coral on hover */
+}
+
+.step-text {
+    font-family: var(--font-body);
+    /* Switch to Body font for readability */
+    font-size: var(--text-lg);
+    /* Larger text */
+    color: var(--color-muted-gray-text);
+    line-height: 1.6;
+}
+
+/* Highlighted Ingredient mentions in instructions */
+.instruction-ingredient {
+    color: var(--color-primary);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 800px) {
+    .recipe-body {
+        grid-template-columns: 1fr;
+        /* Stack */
+        gap: var(--space-8);
+        padding: var(--space-6);
+    }
+
+    .recipe-divider {
+        width: 100%;
+        height: 1px;
+        margin: var(--space-2) 0;
+    }
+
+    .hero-image-container {
+        height: 250px;
+    }
+
+    .hero-title {
+        font-size: var(--text-3xl);
+    }
+
+    .hero-content {
+        padding: var(--space-6);
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .hero-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+}
+
+/* ========================================
+   RECIPE ACTIONS (Refined Glassmorphism)
+   ======================================== */
+
+.btn-icon-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: transform var(--transition-spring),
+        background var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border var(--transition-fast);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-icon-glass:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-3px) scale(1.05);
+}
+
+.btn-icon-glass:active {
+    transform: translateY(-1px) scale(0.95);
+    transition: transform 100ms ease;
+}
+
+.btn-icon-glass img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+    transition: transform var(--transition-spring);
+}
+
+.btn-icon-glass:hover img {
+    transform: rotate(5deg);
+    opacity: 1;
+}
+
+/* Specific Action Borders & Glows */
+.btn-edit {
+    border-color: var(--color-light-purple-border);
+}
+
+.btn-edit:hover {
+    box-shadow: var(--glow-secondary), var(--shadow-lg);
+    border-color: var(--color-secondary);
+}
+
+.btn-delete {
+    border-color: var(--color-red-border);
+}
+
+.btn-delete:hover {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), var(--shadow-lg);
+    border-color: #ff0000;
+}
+
+/* ========================================
+   CAROUSEL STYLES
+   ======================================== */
+
+.recipe-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Ensure hero container keeps its height when used as carousel */
+.hero-image-container.recipe-carousel {
+    height: 300px;
+}
+
+.carousel-images {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.carousel-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.carousel-image.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    /* Slightly larger for hero */
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.recipe-carousel:hover .carousel-nav,
+.hero-image-container:hover .carousel-nav {
+    opacity: 1;
+}
+
+.carousel-nav:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.carousel-prev {
+    left: 16px;
+}
+
+.carousel-next {
+    right: 16px;
+}

@@ -1,0 +1,203 @@
+{% extends "kitchen.html" %}
+
+{% block title %}Prep Station - ShortSpork{% endblock %}
+
+{% block nav_links %}
+<a href="{{ url_for('index') }}" class="nav-link">Menu</a>
+<a href="{{ url_for('prep_station') }}" class="nav-link active">Prep Station</a>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/prep_station.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="page-header" style="margin-bottom: 2rem;">
+        <h1>{% if is_edit_mode %}Edit Logic{% else %}Prep Station{% endif %}</h1>
+        <p class="subtitle">Add a new recipe via AI or enter it manually.</p>
+    </header>
+
+    <div class="prep-layout">
+        <!-- AI Parser Section -->
+        <section class="ai-parser-section card">
+            <h2>AI Chef</h2>
+            <p style="margin-bottom: 1rem; color: #666;">Paste recipe text below and let the AI fill out the form for you.</p>
+            
+            <div class="form-group">
+                <textarea id="recipe-text" class="textarea" placeholder="Paste recipe text here..."></textarea>
+            </div>
+            
+            <button id="parse-btn" class="btn btn-primary btn-teal" style="width: 100%;">
+                <span class="btn-text">Magic Parse</span>
+                <span class="spinner hidden"></span>
+            </button>
+            
+            <div id="parse-error" class="error-message hidden" style="color: red; margin-top: 1rem;"></div>
+        </section>
+
+        <!-- Manual Entry / Edit Form -->
+        <section class="manual-entry-section card">
+            <h2>Recipe Details</h2>
+            <form id="recipe-form">
+                
+                <div class="split-row" style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 3;">
+                        <label for="title">Recipe Title *</label>
+                        <input type="text" id="title" name="title" class="input" placeholder="e.g. Spicy Miso Ramen" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="servings">Servings *</label>
+                        <input type="number" id="servings" name="servings" class="input" value="4" min="1" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="textarea" rows="3" placeholder="A brief description of the dish..."></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label>Recipe Images</label>
+                        <div class="image-upload-container">
+                            <div id="image-upload-zone" class="image-upload-zone">
+                                <div class="upload-content">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    <p>Drag & Drop images here</p>
+                                    <span class="or-divider">or</span>
+                                    <button type="button" id="browse-files-btn" class="btn-text-only">Browse Files</button>
+                                </div>
+                                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" multiple hidden>
+                            </div>
+                            
+                            <div class="url-input-group hidden" id="url-input-container">
+                                <input type="url" id="url-input" class="input" placeholder="Paste image URL...">
+                                <button type="button" id="add-url-btn" class="btn-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                </button>
+                            </div>
+                            
+                            <div id="image-preview-grid" class="image-preview-grid">
+                                <!-- Preview cards will go here -->
+                            </div>
+                            
+                            <div class="upload-actions">
+                                <button type="button" id="toggle-url-btn" class="btn-text-link">+ Add URL instead</button>
+                            </div>
+                        </div>
+                </div>
+
+                <!-- Cuisine Tags -->
+                <div class="form-group">
+                    <label>Cuisine Region</label>
+                    <div class="tag-cloud" id="cuisine-tags">
+                        <!-- Options populated by JS or static list -->
+                        <span class="tag-option" data-value="Italian">Italian</span>
+                        <span class="tag-option" data-value="Mexican">Mexican</span>
+                        <span class="tag-option" data-value="Japanese">Japanese</span>
+                        <span class="tag-option" data-value="Chinese">Chinese</span>
+                        <span class="tag-option" data-value="Indian">Indian</span>
+                        <span class="tag-option" data-value="Thai">Thai</span>
+                        <span class="tag-option" data-value="American">American</span>
+                        <span class="tag-option" data-value="French">French</span>
+                        <span class="tag-option" data-value="Mediterranean">Mediterranean</span>
+                    </div>
+                    <input type="hidden" id="cuisine_region" name="cuisine_region">
+                </div>
+
+                <!-- Meal Type Tags -->
+                <div class="form-group">
+                    <label>Meal Type</label>
+                    <div class="tag-cloud" id="meal-tags">
+                        <span class="tag-option" data-value="Breakfast">Breakfast</span>
+                        <span class="tag-option" data-value="Lunch">Lunch</span>
+                        <span class="tag-option" data-value="Dinner">Dinner</span>
+                        <span class="tag-option" data-value="Snack">Snack</span>
+                        <span class="tag-option" data-value="Side Dish">Side Dish</span>
+                        <span class="tag-option" data-value="Dessert">Dessert</span>
+                    </div>
+                    <input type="hidden" id="meal_type" name="meal_type">
+                </div>
+
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+
+                <!-- Ingredients -->
+                <div class="form-group">
+                    <label>Ingredients *</label>
+                    <div id="ingredients-list">
+                        <!-- Ingredient rows go here -->
+                    </div>
+                    <button type="button" class="add-btn" id="add-ingredient-btn">+ Add Ingredient</button>
+                </div>
+
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+
+                <!-- Steps -->
+                <div class="form-group">
+                    <label>Instructions *</label>
+                    <div id="steps-list">
+                        <!-- Step rows go here -->
+                    </div>
+                    <button type="button" class="add-btn" id="add-step-btn">+ Add Step</button>
+                </div>
+
+                <div class="form-actions" style="margin-top: 2rem; text-align: right;">
+                    <div id="submit-error" class="error-message hidden" style="color: red; margin-bottom: 1rem; text-align: left;"></div>
+                    <button type="submit" class="btn btn-primary" id="save-btn" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Save Recipe</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<template id="ingredient-row-template">
+    <div class="ingredient-row">
+        <select name="ing_category" class="input" style="width: 130px;">
+            <option value="Other" selected>Other</option>
+            <option value="Produce">Produce</option>
+            <option value="Dairy & Eggs">Dairy & Eggs</option>
+            <option value="Pantry / Dry Goods">Pantry / Dry Goods</option>
+            <option value="Canned / Jarred">Canned / Jarred</option>
+            <option value="Proteins">Proteins</option>
+            <option value="Spices & Baking">Spices & Baking</option>
+        </select>
+        <input type="text" name="ing_name" class="input" placeholder="Ingredient" style="flex: 2;" required>
+        <input type="number" name="ing_qty" class="input" placeholder="Qty" step="any" style="width: 70px;">
+        <input type="text" name="ing_unit" class="input" placeholder="Unit" style="width: 70px;">
+        <label style="font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;">
+            <input type="checkbox" name="ing_optional" class="checkbox"> Opt?
+        </label>
+        <button type="button" class="remove-row-btn">&times;</button>
+    </div>
+</template>
+
+<template id="step-row-template">
+    <div class="step-row">
+        <span class="step-number" style="font-weight: bold; width: 24px;">1.</span>
+        <textarea name="step_text" class="textarea" required></textarea>
+        <button type="button" class="remove-row-btn">&times;</button>
+    </div>
+</template>
+
+<template id="image-card-template">
+    <div class="image-preview-card">
+        <img src="" alt="Recipe Image" class="preview-img">
+        <button type="button" class="remove-image-btn" aria-label="Remove image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="loading-overlay hidden">
+            <div class="spinner-sm"></div>
+        </div>
+    </div>
+</template>
+
+{% if is_edit_mode %}
+<script>
+    window.EXISTING_RECIPE = {{ recipe_data | tojson | safe }};
+</script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/prep_station.js') }}"></script>
+{% endblock %}

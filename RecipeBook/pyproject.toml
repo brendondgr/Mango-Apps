@@ -1,0 +1,6 @@
+[project]
+name = "shortspork"
+version = "0.1.0"
+description = "A Cookbook"
+requires-python = ">=3.12"
+dependencies = []

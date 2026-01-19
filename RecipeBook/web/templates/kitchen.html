@@ -17,9 +17,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/garnishes.css') }}">
+    
+    <!-- Tailwind CSS CDN (for sidebar consistency) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     {% block styles %}{% endblock %}
 </head>
 <body>
+    <!-- Sidebar Navigation -->
+    {% include 'components/sidebar.html' %}
+
     <!-- Navigation -->
     <nav class="main-nav">
         <div class="container">
@@ -52,6 +62,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

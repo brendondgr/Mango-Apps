@@ -15,9 +15,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/timeline_controls.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/event_editor.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="h-screen flex flex-col overflow-hidden" style="font-family: var(--font-body); background: var(--color-background-gradient); color: var(--color-text-primary);">
+    <!-- Sidebar Navigation -->
+    {% include 'components/sidebar.html' %}
+    
     <script>
         window.INITIAL_CONTEXT = {{ initial_context | tojson | safe if initial_context else '{}' }};
     </script>
@@ -51,7 +58,8 @@
     {% include 'parts/summary_row.html' %}
     {% include 'parts/loading_skeleton.html' %}
     {% include 'parts/empty_state.html' %}
-
+    
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 

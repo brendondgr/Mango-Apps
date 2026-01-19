@@ -87,7 +87,7 @@ class Project(db.Model):
 
     def get_deadline_status(self):
         """Return deadline status with display text and CSS class."""
-        from utils.deadline import get_deadline_status
+        from apps.ProjectManager.utils.deadline import get_deadline_status
         return get_deadline_status(self.deadline)
 
 
@@ -135,6 +135,6 @@ class Goal(db.Model):
 
     def get_deadline_status(self):
         """Return deadline status with display text and CSS class."""
-        from utils.deadline import get_deadline_status
+        from apps.ProjectManager.utils.deadline import get_deadline_status
         return get_deadline_status(self.deadline)
 

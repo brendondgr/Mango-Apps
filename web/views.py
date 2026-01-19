@@ -241,7 +241,12 @@ def index(request, path=''):
     if content_type is None:
         content_type = 'application/octet-stream'
     
-    return FileResponse(open(file_path, 'rb'), content_type=content_type)
+    response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+    # Disable caching for development
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 # Path to the MIMIC static app directory

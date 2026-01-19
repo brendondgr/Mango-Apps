@@ -13,19 +13,19 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     
+    <!-- Tailwind CSS CDN (for sidebar consistency with /pr/) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
     
-    <!-- Navigation Menu Button -->
-    <a href="/pr/" class="menu-btn" title="Back to Dashboard">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    </a>
+    <!-- Sidebar Navigation -->
+    {% include 'components/sidebar.html' %}
 
     <header>
         <div class="header-content">
@@ -70,6 +70,7 @@
     <div id="modal-container"></div>
 
     <!-- JS -->
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
     <script src="{{ url_for('static', filename='js/timeline.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

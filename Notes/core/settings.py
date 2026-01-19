@@ -60,7 +60,11 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'web' / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'web' / 'templates',
+            # Navigate: apps/Notes -> apps -> Mango -> templates
+            BASE_DIR.parent.parent / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

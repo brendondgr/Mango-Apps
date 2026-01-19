@@ -13,6 +13,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, 
             static_folder=os.path.join(BASE_DIR, 'web', 'static'),
             template_folder=os.path.join(BASE_DIR, 'web', 'templates'))
+
+# Configure Jinja to look in local templates and global templates
+import jinja2
+global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(BASE_DIR))), 'templates')
+app.jinja_loader = jinja2.ChoiceLoader([
+    app.jinja_loader,
+    jinja2.FileSystemLoader(global_templates)
+])
+
 CORS(app)
 
 # --- Schedule Metadata Helpers ---

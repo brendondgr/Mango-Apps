@@ -29,6 +29,14 @@ app = Flask(
     static_url_path='/static'
 )
 
+# Configure Jinja to look in local templates and global templates
+import jinja2
+global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'templates')
+app.jinja_loader = jinja2.ChoiceLoader([
+    app.jinja_loader,
+    jinja2.FileSystemLoader(global_templates)
+])
+
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 app.config['PERPLEXITY_API_KEY'] = os.environ.get('PERPLEXITY_API_KEY', '')

@@ -1662,6 +1662,8 @@ header {
 /* Gantt Chart */
 .gantt-chart {
     display: flex;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
     /* Main container doesn't scroll, inner container does */
 }
@@ -1678,6 +1680,8 @@ header {
     flex-direction: column;
     background: var(--color-bg);
     z-index: 5;
+    height: 100%;
+    min-height: 0;
 }
 
 .gantt-label-header {
@@ -1691,13 +1695,26 @@ header {
     min-height: 40px;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
+}
+
+.gantt-labels-body {
+    flex: 1;
+    overflow-y: hidden;
+    /* Scroll sync via JS */
+    overflow-x: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .gantt-scroll-container {
     flex: 1;
     overflow-x: auto;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .gantt-header {

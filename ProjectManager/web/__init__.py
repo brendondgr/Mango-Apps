@@ -11,6 +11,25 @@ def create_app(config_class=Config):
                 static_url_path='/pr/projects/static',
                 static_folder='static',
                 template_folder='templates')
+    
+    # Configure Jinja to look in local templates and global templates
+    import jinja2
+    import os
+    
+    # Use the existing loader (which already points to the app's template folder)
+    # and add the global templates folder.
+    pass  # We need to make sure we don't trigger the recursion bug.
+    
+    # Direct safe approach:
+    global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 'templates')
+    
+    # If app.jinja_loader is not already a ChoiceLoader, make it one
+    my_loader = jinja2.ChoiceLoader([
+        app.jinja_loader,
+        jinja2.FileSystemLoader(global_templates),
+    ])
+    app.jinja_loader = my_loader
+
     app.config.from_object(config_class)
 
     db.init_app(app)

@@ -74,7 +74,10 @@
     <div class="flex flex-1 overflow-hidden relative">
         
         <!-- Include Sidebar -->
-        <div id="sidebar-container"></div>
+        <!-- Include Sidebar -->
+        <div id="sidebar-container">
+            {% include 'components/sidebar.html' %}
+        </div>
 
         <!-- Main View Container -->
         <main class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-8 pb-20 md:pb-8" id="mainContainer">
@@ -125,7 +128,7 @@
             // 2. Load the rest in parallel
             await Promise.all([
                 loadPartial('mobile-nav-container', 'parts/mobile-nav.html'),
-                loadPartial('sidebar-container', 'parts/sidebar.html'),
+                // Sidebar loaded via Jinja2
                 loadPartial('new-jobs-container', 'primary/new-jobs.html'),
                 loadPartial('tracker-container', 'primary/tracker.html'),
                 loadPartial('job-detail-panel-container', 'parts/job-detail-panel.html')

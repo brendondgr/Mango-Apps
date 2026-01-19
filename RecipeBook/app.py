@@ -16,7 +16,10 @@ from apps.RecipeBook.utils.database.cookbook import get_recipes_with_pantry_comp
 from apps.RecipeBook.utils.database.food_processor import parse_recipe_text
 
 # Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file
+from pathlib import Path
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(env_path)
 
 # Initialize Flask application
 app = Flask(

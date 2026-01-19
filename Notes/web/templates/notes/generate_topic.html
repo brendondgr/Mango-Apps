@@ -87,7 +87,7 @@
                     {% endfor %}
                 </select>
                 {% if not courses %}
-                <small class="form-hint form-hint--warning">No courses found. <a href="{% url 'course_create' %}" class="link">Create one first</a>.</small>
+                <small class="form-hint form-hint--warning">No courses found. <a href="{% url 'notes:course_create' %}" class="link">Create one first</a>.</small>
                 {% endif %}
             </div>
 
@@ -201,7 +201,7 @@
                 {% endif %}
             </div>
         </div>
-        <a href="{% url 'settings' %}" class="btn btn-link">
+        <a href="{% url 'notes:settings' %}" class="btn btn-link">
             <span class="icon-mask" style="-webkit-mask-image: url('{% static 'svg/settings.svg' %}'); mask-image: url('{% static 'svg/settings.svg' %}');"></span>
             Configure API Keys
         </a>
@@ -743,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addLog = (msg) => console.log(msg); // fallback logger
 
         try {
-            const response = await fetch("{% url 'generate_topic_stream' %}", {
+            const response = await fetch("{% url 'notes:generate_topic_stream' %}", {
                 method: 'POST',
                 body: formData,
                 headers: {

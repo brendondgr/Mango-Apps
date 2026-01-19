@@ -68,7 +68,7 @@
                     <span class="icon-mask" style="-webkit-mask-image: url('{% static 'svg/save.svg' %}'); mask-image: url('{% static 'svg/save.svg' %}');"></span>
                     Save Keys
                 </button>
-                <a href="{% url 'index' %}" class="btn btn-secondary">
+                <a href="{% url 'notes:index' %}" class="btn btn-secondary">
                     <span class="icon-mask" style="-webkit-mask-image: url('{% static 'svg/arrow-left.svg' %}'); mask-image: url('{% static 'svg/arrow-left.svg' %}');"></span>
                     Back to Home
                 </a>
@@ -84,7 +84,7 @@
             <li><strong>Content</strong> — Gemini synthesizes research into Markdown with LaTeX</li>
             <li><strong>Visualizations</strong> — Interactive HTML apps are generated automatically</li>
         </ul>
-        <a href="{% url 'generate_topic' %}" class="btn btn-primary">
+        <a href="{% url 'notes:generate_topic' %}" class="btn btn-primary">
             <span class="icon-mask" style="-webkit-mask-image: url('{% static 'svg/rocket.svg' %}'); mask-image: url('{% static 'svg/rocket.svg' %}');"></span>
             Generate Topic
         </a>

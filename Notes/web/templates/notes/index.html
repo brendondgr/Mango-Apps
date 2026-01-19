@@ -4,7 +4,7 @@
 {% block title %}Notetaking System | Home{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 1rem; padding-bottom: 0;">
+<div class="layout-container" style="padding-top: 1rem; padding-bottom: 0;">
     <!-- Subjects Section -->
     <section class="section" style="padding-top: 0.5rem;">
         <div class="section-header">
@@ -69,9 +69,15 @@
                 </div>
                 <div class="list-item__content">
                     <h3 class="list-item__title">{{ course.name }}</h3>
-                    <span class="list-item__meta">{{ course.subject.name }} • {{ course.topics.count }} Topics</span>
+                    <div class="list-item__meta" style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span style="font-weight: 500;">{{ course.subject.name }}</span>
+                        <span style="width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.4;"></span>
+                        <span>{{ course.topics.count }} Topics</span>
+                    </div>
                 </div>
-                <span class="list-item__arrow">→</span>
+                <div class="list-item__action">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </div>
             </a>
             {% endfor %}
         </div>

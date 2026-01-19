@@ -115,7 +115,7 @@ def topic_detail(request, topic_id):
     # Assuming topic.directory_path is relative to 'apps' or configured root
     # Adjusting based on user request: BASE_DIR / 'apps' / topic.directory_path
     
-    topic_path = settings.BASE_DIR / 'apps' / topic.directory_path.replace('\\', '/')
+    topic_path = settings.BASE_DIR / 'apps' / 'Notes' / 'apps' / topic.directory_path.replace('\\', '/')
     
     metadata, _ = services.parse_topic_metadata(topic_path)
     entry_point = metadata.entry_point if metadata else 'example.md'
@@ -155,7 +155,7 @@ def topic_detail(request, topic_id):
 def serve_visualization(request, topic_id, filename):
     topic = get_object_or_404(Topic, id=topic_id)
     
-    topic_path = settings.BASE_DIR / 'apps' / topic.directory_path.replace('\\', '/')
+    topic_path = settings.BASE_DIR / 'apps' / 'Notes' / 'apps' / topic.directory_path.replace('\\', '/')
     file_path = (topic_path / filename).resolve()
     
     # Security check: Ensure the resolved path is within the topic directory

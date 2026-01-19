@@ -37,8 +37,8 @@ class ValidationResult:
 
 
 def get_apps_dir() -> Path:
-    """Get the apps directory path."""
-    return settings.BASE_DIR / 'apps'
+    """Get the apps directory path where topic content is stored."""
+    return settings.BASE_DIR / 'apps' / 'Notes' / 'apps'
 
 
 def generate_unique_dir_name(base_name: str) -> str:

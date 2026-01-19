@@ -7,7 +7,7 @@
    LAYOUT: Container & Bento Grid
    ========================================================================== */
 
-.container {
+.layout-container {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
@@ -50,11 +50,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%);
   pointer-events: none;
 }
 
@@ -118,11 +116,9 @@
 }
 
 .btn-primary:hover {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-hover) 0%,
-    var(--color-primary) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-primary-hover) 0%,
+      var(--color-primary) 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px var(--color-primary-glow);
 }
@@ -269,11 +265,9 @@
 }
 
 .section--alt {
-  background: linear-gradient(
-    180deg,
-    var(--color-surface-100) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(180deg,
+      var(--color-surface-100) 0%,
+      transparent 100%);
   margin: 0 calc(-1 * var(--spacing-6));
   padding-left: var(--spacing-6);
   padding-right: var(--spacing-6);
@@ -307,11 +301,9 @@
   content: "";
   width: 4px;
   height: 1.5rem;
-  background: linear-gradient(
-    180deg,
-    var(--color-primary),
-    var(--color-secondary)
-  );
+  background: linear-gradient(180deg,
+      var(--color-primary),
+      var(--color-secondary));
   border-radius: 2px;
 }
 
@@ -325,11 +317,9 @@
   gap: 1.5rem;
   margin-bottom: 3rem;
   padding: 2rem;
-  background: linear-gradient(
-    135deg,
-    var(--color-surface-100) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-surface-100) 0%,
+      transparent 100%);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
 }
@@ -470,8 +460,9 @@
    ========================================================================== */
 
 .list-item {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
   padding: 1.25rem 1.5rem;
   text-decoration: none;
   background: var(--color-bg-elevated);
@@ -492,11 +483,9 @@
 }
 
 .list-item:hover {
-  background: color-mix(
-    in srgb,
-    var(--item-bg, var(--color-surface-100)) 40%,
-    white
-  );
+  background: color-mix(in srgb,
+      var(--item-bg, var(--color-surface-100)) 40%,
+      white);
   padding-left: 2rem;
 }
 
@@ -520,11 +509,9 @@
 .list-item__icon {
   width: 48px;
   height: 48px;
-  background: color-mix(
-    in srgb,
-    var(--item-bg, var(--color-primary-100)) 50%,
-    white
-  );
+  background: color-mix(in srgb,
+      var(--item-bg, var(--color-primary-100)) 50%,
+      white);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -577,6 +564,16 @@
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 0.25rem;
+  /* Harden against Tailwind resets */
+  line-height: 1.4;
+  margin-top: 0;
+  display: block;
+}
+
+/* Ensure margins are respected */
+.list-item h3 {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
 }
 
 .list-item__meta {
@@ -584,17 +581,36 @@
   color: var(--color-text-secondary);
 }
 
-.list-item__arrow {
+/* Structured action/arrow container */
+.list-item__action {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-text-tertiary);
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
-  opacity: 0;
+  transition: all 0.2s var(--ease-standard);
+  margin-left: 1rem;
+  background: transparent;
+  flex-shrink: 0;
 }
 
-.list-item:hover .list-item__arrow {
-  opacity: 1;
-  transform: translateX(4px);
+.list-item:hover .list-item__action {
+  background: color-mix(in srgb,
+      var(--item-bg, var(--color-primary-100)) 50%,
+      white);
   color: var(--item-color, var(--color-primary));
+}
+
+.list-item__action svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.list-item:hover .list-item__action svg {
+  transform: translateX(2px);
 }
 
 /* List container */
@@ -822,7 +838,7 @@
   color: var(--color-text-primary);
 }
 
-.markdown-content > *:first-child {
+.markdown-content>*:first-child {
   margin-top: 0;
 }
 
@@ -922,35 +938,35 @@
 }
 
 /* Staggered animations for grid items */
-.bento-grid > .animate-fade-in:nth-child(1) {
+.bento-grid>.animate-fade-in:nth-child(1) {
   animation-delay: 0ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(2) {
+.bento-grid>.animate-fade-in:nth-child(2) {
   animation-delay: 50ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(3) {
+.bento-grid>.animate-fade-in:nth-child(3) {
   animation-delay: 100ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(4) {
+.bento-grid>.animate-fade-in:nth-child(4) {
   animation-delay: 150ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(5) {
+.bento-grid>.animate-fade-in:nth-child(5) {
   animation-delay: 200ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(6) {
+.bento-grid>.animate-fade-in:nth-child(6) {
   animation-delay: 250ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(7) {
+.bento-grid>.animate-fade-in:nth-child(7) {
   animation-delay: 300ms;
 }
 
-.bento-grid > .animate-fade-in:nth-child(8) {
+.bento-grid>.animate-fade-in:nth-child(8) {
   animation-delay: 350ms;
 }
 
@@ -1247,11 +1263,9 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
-  background: linear-gradient(
-    135deg,
-    var(--color-surface-100) 0%,
-    var(--color-bg-elevated) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-surface-100) 0%,
+      var(--color-bg-elevated) 100%);
   border: 2px dashed var(--color-border-strong);
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -1261,11 +1275,9 @@
 
 .file-upload-zone:hover {
   border-color: var(--color-primary);
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-100) 0%,
-    var(--color-bg-elevated) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-primary-100) 0%,
+      var(--color-bg-elevated) 100%);
 }
 
 .file-upload-zone.is-dragover {
@@ -1278,11 +1290,9 @@
 .file-upload-zone.has-file {
   border-style: solid;
   border-color: var(--color-tertiary);
-  background: linear-gradient(
-    135deg,
-    var(--tone-teal-bg) 0%,
-    var(--color-bg-elevated) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--tone-teal-bg) 0%,
+      var(--color-bg-elevated) 100%);
 }
 
 .file-upload-zone__icon {
@@ -1687,6 +1697,7 @@
    ========================================================================== */
 
 @media (max-width: 768px) {
+
   /* Container adjustments - increased padding for mobile */
   .container {
     padding-left: 1.25rem;
@@ -2049,6 +2060,7 @@
   text-transform: uppercase;
   font-size: 0.85em;
 }
+
 /* ==========================================================================
    UTILITY: Icon Mask
    Allows external SVGs to be used as icons with currentColor
@@ -2217,6 +2229,7 @@
   border-color: var(--color-secondary);
   box-shadow: 0 4px 12px var(--color-secondary-glow);
 }
+
 /* ==========================================================================
    COPY BUTTON WIDGET
    ========================================================================== */
@@ -2227,11 +2240,13 @@
   float: right;
   margin-left: 1rem;
   margin-bottom: 1rem;
-  z-index: 50; /* Above markdown content */
+  z-index: 50;
+  /* Above markdown content */
 }
 
 .copy-widget.active {
-  z-index: 100; /* Above everything when dropdown is open */
+  z-index: 100;
+  /* Above everything when dropdown is open */
 }
 
 .copy-dropdown {

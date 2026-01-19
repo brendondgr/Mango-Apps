@@ -3,7 +3,7 @@
 {% block title %}{{ subject.name }} | Notetaking System{% endblock %}
 
 {% block content %}
-<div class="container page--themed" 
+<div class="layout-container page--themed" 
      style="padding-top: 2rem; padding-bottom: 0; --theme-bg: var(--tone-{{ subject.color_tone }}-bg); --theme-border: var(--tone-{{ subject.color_tone }}-border); --theme-text: var(--tone-{{ subject.color_tone }}-text);">
     <!-- Breadcrumbs -->
     <nav class="breadcrumbs">
@@ -104,9 +104,13 @@
                 </div>
                 <div class="list-item__content">
                     <h3 class="list-item__title">{{ topic.title }}</h3>
-                    <span class="list-item__meta">{% for course in topic.courses.all %}{{ course.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                    <div class="list-item__meta" style="display: flex; gap: 0.5rem; align-items: center;">
+                         <span style="font-weight: 500;">{% for course in topic.courses.all %}{{ course.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                    </div>
                 </div>
-                <span class="list-item__arrow">→</span>
+                <div class="list-item__action">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </div>
             </a>
             {% endfor %}
         </div>

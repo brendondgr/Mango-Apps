@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Finder | Job Search Tracker</title>
+    <base href="/pr/jobs/">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/variables.css">
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/components.css">
+    <link rel="stylesheet" href="static/css/modal.css">
+
+    <!-- Tailwind Config using CSS Variables -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                     colors: {
+                        primary: {
+                            DEFAULT: 'var(--color-primary)',
+                            50: '#fff0f0',
+                            100: '#ffdede',
+                            500: '#ff6b6b',
+                            600: '#e66060',
+                            700: '#cc5656',
+                        },
+                        secondary: {
+                            DEFAULT: 'var(--color-secondary)',
+                            50: '#ecebff',
+                            100: '#dad6ff',
+                            800: '#4c3bcf',
+                        },
+                        tertiary: {
+                            DEFAULT: 'var(--color-tertiary)',
+                        },
+                        bg: {
+                            base: 'var(--color-bg-base)',
+                            surface: 'var(--color-bg-surface)',
+                            elevated: 'var(--color-bg-elevated)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-slate-800 antialiased h-screen flex flex-col overflow-hidden bg-slate-50">
+
+    <!-- Include Header -->
+    <div id="header-container"></div>
+
+    <!-- Include Mobile Navigation -->
+    <div id="mobile-nav-container"></div>
+
+    <!-- Main Content Layout -->
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main View Container -->
+        <main class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-8 pb-20 md:pb-8" id="mainContainer">
+            
+            <!-- Include New Jobs View -->
+            <div id="new-jobs-container"></div>
+
+            <!-- Include Tracker View -->
+            <div id="tracker-container"></div>
+
+        </main>
+
+        <!-- Include Job Detail Panel -->
+        <div id="job-detail-panel-container"></div>
+
+    </div>
+
+    <!-- JavaScript: Load Order Matters -->
+    <script src="static/js/data.js?v=2"></script>
+    <script src="static/js/helpers.js?v=2"></script>
+    <script src="static/js/renderers.js?v=2"></script>
+    <script src="static/js/components/find_jobs_modal.js?v=2"></script>
+    <script src="static/js/handlers.js?v=2"></script>
+
+    <script src="static/js/app.js?v=2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Load HTML Partials -->
+    <script>
+        // Helper function to load HTML partials
+        async function loadPartial(containerId, filePath) {
+            try {
+                const response = await fetch(filePath);
+                const html = await response.text();
+                document.getElementById(containerId).innerHTML = html;
+            } catch (error) {
+                console.error(`Error loading ${filePath}:`, error);
+            }
+        }
+
+        // Load all partials on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 1. Load Header first
+            await loadPartial('header-container', 'parts/header.html');
+
+            // 2. Load the rest in parallel
+            await Promise.all([
+                loadPartial('mobile-nav-container', 'parts/mobile-nav.html'),
+                loadPartial('sidebar-container', 'parts/sidebar.html'),
+                loadPartial('new-jobs-container', 'primary/new-jobs.html'),
+                loadPartial('tracker-container', 'primary/tracker.html'),
+                loadPartial('job-detail-panel-container', 'parts/job-detail-panel.html')
+            ]);
+
+            // Initialize App Logic after views are loaded
+            if (typeof initApp === 'function') {
+                initApp();
+            }
+        });
+    </script>
+
+</body>
+</html>

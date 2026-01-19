@@ -27,6 +27,9 @@ urlpatterns = [
     
     # RecipeBook Flask App (mounted at /pr/recipes/)
     re_path(r'^pr/recipes/(?P<path>.*)$', views.flask_proxy_recipebook, name='flask_recipebook'),
+
+    # Jobs Flask App (mounted at /pr/jobs/)
+    re_path(r'^pr/jobs/(?P<path>.*)$', views.flask_proxy_jobs, name='flask_jobs'),
     
     # Notes Django App (mounted at /pr/notes/)
     path('pr/notes/', include('apps.Notes.apps.notes.urls')),

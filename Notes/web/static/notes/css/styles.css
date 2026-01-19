@@ -513,13 +513,13 @@
       var(--item-bg, var(--color-primary-100)) 50%,
       white);
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   margin-right: 1rem;
   color: var(--item-color, var(--color-primary));
   font-size: 1.25rem;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
   transition: transform 0.2s var(--ease-spring);
 }
 
@@ -589,14 +589,14 @@
   width: 48px;
   height: 48px;
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   color: var(--color-text-tertiary);
   transition: all 0.2s var(--ease-standard);
   margin-left: 1rem;
   background: transparent;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
 }
 
 .list-item:hover .list-item__action {

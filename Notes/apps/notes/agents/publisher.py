@@ -13,8 +13,8 @@ from .schemas import TopicContent, GenerationError
 
 
 def get_apps_dir() -> Path:
-    """Get the apps directory path."""
-    return Path(settings.BASE_DIR) / "apps"
+    """Get the apps directory path where topic content is stored."""
+    return Path(settings.BASE_DIR) / "apps" / "Notes" / "apps"
 
 
 def publish_topic(

@@ -1,0 +1,5 @@
+{
+    "title": "Basics of Likelihood Functions",
+    "description": "An introductory guide to likelihood functions, explaining how they measure how well a statistical model fits observed data compared to standard probability.",
+    "entry_point": "likelihood_functions_basics.md"
+}

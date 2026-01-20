@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Likelihood Functions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FEFBF6;
+            --primary-color: #4C3BCF;
+            --accent-color: #FF6B6B;
+            --text-dark: #2D3436;
+            --text-light: #636E72;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --teal: #14b8a6;
+            --orange: #f97316;
+            --green: #10b981;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-accent { background-color: var(--accent-color); color: white; }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
+        
+        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
+
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            margin: 20px 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .slider-group {
+            margin: 20px 0;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 8px;
+            background: #e1e1e1;
+            border-radius: 4px;
+            appearance: none;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .explanation {
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .mle-badge {
+            display: inline-block;
+            background: var(--teal);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .data-stream {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .heads { background-color: var(--blue); }
+        .tails { background-color: var(--orange); }
+
+        .parameter-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .highlight-val {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h1>Basics of Likelihood</h1>
+        <p>In statistics, <b>Likelihood</b> measures how well a specific hypothesis (parameter) explains the data you've already observed.</p>
+    </div>
+
+    <div class="card">
+        <h3>1. Generate Observed Data</h3>
+        <p class="explanation">Flip a virtual coin to create a dataset. Is it a fair coin ($p=0.5$)? Or is it biased? Your data will help us find out.</p>
+        
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Heads (H)</span>
+                <span id="heads-count" class="stat-value" style="color: var(--blue)">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Tails (T)</span>
+                <span id="tails-count" class="stat-value" style="color: var(--orange)">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total (N)</span>
+                <span id="total-count" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-outline" onclick="addFlip()">Flip Once</button>
+            <button class="btn-primary" onclick="generateBatch(10)">Flip 10 Times</button>
+        </div>
+        <button class="btn-accent" style="width: 100%" onclick="resetData()">Reset Experiment</button>
+
+        <div id="data-stream" class="data-stream"></div>
+    </div>
+
+    <div class="card">
+        <div class="parameter-display">
+            <h3>2. The Likelihood Curve</h3>
+            <div id="mle-result"></div>
+        </div>
+        
+        <p class="explanation">The curve shows the likelihood for <b>every possible bias</b> (p) from 0 to 1. The higher the curve, the more likely that specific 'p' value is the true source of your data.</p>
+        
+        <div class="canvas-container">
+            <canvas id="likelihoodChart"></canvas>
+        </div>
+
+        <div class="slider-group">
+            <div class="parameter-display">
+                <label for="p-slider">Hypothesis: Probability of Heads (p) = <span class="highlight-val" id="p-value-display">0.50</span></label>
+            </div>
+            <input type="range" id="p-slider" min="0" max="1" step="0.01" value="0.5">
+        </div>
+
+        <div id="calculation-box" class="explanation">
+            <div class="formula">L(p | data) = p<sup>H</sup> &times; (1-p)<sup>T</sup></div>
+            <p>For your hypothesis <span class="highlight-val">p = <span id="calc-p">0.5</span></span>:</p>
+            <p>Likelihood = <span id="calc-result">0.000</span></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>How to read this?</h3>
+        <p class="explanation">
+            While <b>Probability</b> is used to predict future outcomes based on a known parameter, <b>Likelihood</b> is used to estimate an unknown parameter based on outcomes already observed.
+        </p>
+        <p class="explanation" style="margin-top: 10px;">
+            The <b>Maximum Likelihood Estimate (MLE)</b> is the value of <i>p</i> where the curve peaks. It is the single "best" guess for the coin's bias according to your specific dataset.
+        </p>
+    </div>
+
+    <script>
+        // Constants from Vibrant UI
+        const COLORS = {
+            primary: '#4C3BCF',
+            accent: '#FF6B6B',
+            blue: '#3b82f6',
+            purple: '#a855f7',
+            teal: '#14b8a6',
+            orange: '#f97316',
+            green: '#10b981',
+            textLight: '#636E72',
+            gridColor: '#E1E1E1'
+        };
+
+        let heads = 0;
+        let tails = 0;
+        let data = [];
+        let currentP = 0.5;
+
+        const canvas = document.getElementById('likelihoodChart');
+        const ctx = canvas.getContext('2d');
+        const pSlider = document.getElementById('p-slider');
+        const pDisplay = document.getElementById('p-value-display');
+        const headsDisplay = document.getElementById('heads-count');
+        const tailsDisplay = document.getElementById('tails-count');
+        const totalDisplay = document.getElementById('total-count');
+        const dataStream = document.getElementById('data-stream');
+        const calcP = document.getElementById('calc-p');
+        const calcResult = document.getElementById('calc-result');
+        const mleResult = document.getElementById('mle-result');
+
+        function init() {
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            pSlider.addEventListener('input', (e) => {
+                currentP = parseFloat(e.target.value);
+                updateUI();
+            });
+
+            // Initial state
+            updateUI();
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth * window.devicePixelRatio;
+            canvas.height = container.clientHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            drawChart();
+        }
+
+        function addFlip() {
+            // Internal "true" probability for the simulation is slightly biased (0.6) 
+            // to make it more interesting than just 0.5
+            const result = Math.random() < 0.6 ? 'H' : 'T';
+            data.push(result);
+            if (result === 'H') heads++; else tails++;
+            
+            updateDataUI();
+            updateUI();
+        }
+
+        function generateBatch(n) {
+            for (let i = 0; i < n; i++) {
+                const result = Math.random() < 0.6 ? 'H' : 'T';
+                data.push(result);
+                if (result === 'H') heads++; else tails++;
+            }
+            updateDataUI();
+            updateUI();
+        }
+
+        function resetData() {
+            heads = 0;
+            tails = 0;
+            data = [];
+            dataStream.innerHTML = '';
+            updateDataUI();
+            updateUI();
+        }
+
+        function updateDataUI() {
+            headsDisplay.innerText = heads;
+            tailsDisplay.innerText = tails;
+            totalDisplay.innerText = data.length;
+
+            // Update coin icons (limit to last 20 for performance/ui)
+            dataStream.innerHTML = '';
+            const recent = data.slice(-24);
+            recent.forEach(f => {
+                const div = document.createElement('div');
+                div.className = `coin-icon ${f === 'H' ? 'heads' : 'tails'}`;
+                div.innerText = f;
+                dataStream.appendChild(div);
+            });
+        }
+
+        function calculateLikelihood(p, h, t) {
+            if (h === 0 && t === 0) return 0;
+            // Likelihood L = p^h * (1-p)^t
+            // Use Math.pow for small values. If h+t gets very large, this will go to 0.
+            return Math.pow(p, h) * Math.pow(1 - p, t);
+        }
+
+        function updateUI() {
+            pDisplay.innerText = currentP.toFixed(2);
+            calcP.innerText = currentP.toFixed(2);
+            
+            const l = calculateLikelihood(currentP, heads, tails);
+            // Format scientific notation if too small
+            calcResult.innerText = l < 0.0001 && l > 0 ? l.toExponential(3) : l.toFixed(6);
+
+            // MLE
+            if (heads + tails > 0) {
+                const mle = heads / (heads + tails);
+                mleResult.innerHTML = `<span class="mle-badge">MLE: p = ${mle.toFixed(2)}</span>`;
+            } else {
+                mleResult.innerHTML = '';
+            }
+
+            drawChart();
+        }
+
+        function drawChart() {
+            const w = canvas.width / window.devicePixelRatio;
+            const h = canvas.height / window.devicePixelRatio;
+            const padding = 40;
+            const graphW = w - padding * 2;
+            const graphH = h - padding * 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Axes
+            ctx.beginPath();
+            ctx.strokeStyle = COLORS.gridColor;
+            ctx.lineWidth = 2;
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+
+            // Axis Labels
+            ctx.fillStyle = COLORS.textLight;
+            ctx.font = '12px DM Sans';
+            ctx.textAlign = 'center';
+            ctx.fillText('0.0 (Tails)', padding, h - padding + 20);
+            ctx.fillText('0.5 (Fair)', padding + graphW / 2, h - padding + 20);
+            ctx.fillText('1.0 (Heads)', w - padding, h - padding + 20);
+            
+            ctx.save();
+            ctx.translate(padding - 25, h / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Likelihood', 0, 0);
+            ctx.restore();
+
+            if (heads + tails === 0) {
+                ctx.fillStyle = COLORS.textLight;
+                ctx.textAlign = 'center';
+                ctx.fillText('Flip some coins to see the likelihood curve!', w / 2, h / 2);
+                return;
+            }
+
+            // Calculate Likelihood Curve
+            const points = [];
+            let maxL = 0;
+            for (let i = 0; i <= 100; i++) {
+                const p = i / 100;
+                const l = calculateLikelihood(p, heads, tails);
+                if (l > maxL) maxL = l;
+                points.push({ p, l });
+            }
+
+            // Normalization factor (to make curve visible)
+            // If we don't normalize, the curve disappears as N increases because L -> 0
+            const scaleY = maxL > 0 ? graphH / maxL : 0;
+
+            // Draw Curve
+            ctx.beginPath();
+            ctx.strokeStyle = COLORS.primary;
+            ctx.lineWidth = 3;
+            points.forEach((pt, i) => {
+                const x = padding + pt.p * graphW;
+                const y = (h - padding) - pt.l * scaleY;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Gradient under curve
+            ctx.lineTo(w - padding, h - padding);
+            ctx.lineTo(padding, h - padding);
+            const gradient = ctx.createLinearGradient(0, padding, 0, h - padding);
+            gradient.addColorStop(0, 'rgba(76, 59, 207, 0.2)');
+            gradient.addColorStop(1, 'rgba(76, 59, 207, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Draw MLE Marker
+            const mle = heads / (heads + tails);
+            const mleX = padding + mle * graphW;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = COLORS.teal;
+            ctx.beginPath();
+            ctx.moveTo(mleX, padding);
+            ctx.lineTo(mleX, h - padding);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Current Selected P
+            const curX = padding + currentP * graphW;
+            const curL = calculateLikelihood(currentP, heads, tails);
+            const curY = (h - padding) - curL * scaleY;
+
+            // Vertical line for current P
+            ctx.strokeStyle = COLORS.accent;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(curX, h - padding);
+            ctx.lineTo(curX, curY);
+            ctx.stroke();
+
+            // Point for current P
+            ctx.fillStyle = COLORS.accent;
+            ctx.beginPath();
+            ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Initialize directly as requested
+        init();
+
+    </script>
+</body>
+</html>

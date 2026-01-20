@@ -1,0 +1,239 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* ========================================
+   CSS Custom Properties
+   ======================================== */
+:root {
+  /* Brand Colors */
+  --color-primary: #FF6B6B;
+  /* Electric Coral */
+  --color-secondary: #4C3BCF;
+  /* Deep Indigo */
+  --color-tertiary: #00D9C0;
+  /* Vivid Teal */
+
+  /* Neutral Base */
+  --color-background: #FEFBF6;
+  /* Warm Off-White */
+  --color-surface: #FFF8F0;
+  /* Soft Cream */
+  --color-elevated: #FFFFFF;
+  /* Pure White */
+
+  /* Typography */
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Animation */
+  --spring-curve: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.12);
+
+  /* Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: #1a1a2e;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+/* ========================================
+   Global Slide Typography
+   ======================================== */
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.25rem;
+  color: #3b82f6;
+  margin-bottom: 1.75rem;
+}
+
+/* ========================================
+   Glassmorphism Utilities
+   ======================================== */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(30, 30, 50, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   Interactive Elements
+   ======================================== */
+.interactive-lift {
+  transition: transform 0.3s var(--spring-curve), box-shadow 0.3s ease;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   Slide Container Base
+   ======================================== */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border-radius: var(--radius-xl);
+}
+
+.slide-content {
+  max-width: 900px;
+  width: 100%;
+}
+
+.slide-header {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.slide-header::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ========================================
+   Card Styles
+   ======================================== */
+.card {
+  background: var(--color-elevated);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid transparent;
+  transition: all 0.3s var(--spring-curve);
+}
+
+.card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   Navigation
+   ======================================== */
+.nav-button {
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--spring-curve);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-button:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(76, 59, 207, 0.4);
+}
+
+.nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   Progress Indicator
+   ======================================== */
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  transition: all 0.3s var(--spring-curve);
+}
+
+.progress-dot.active {
+  background: var(--color-secondary);
+  transform: scale(1.3);
+}

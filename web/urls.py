@@ -34,6 +34,9 @@ urlpatterns = [
     # Notes Django App (mounted at /pr/notes/)
     path('pr/notes/', include('apps.Notes.apps.notes.urls')),
     
+    # Slides Static App (mounted at /pr/slides/)
+    re_path(r'^pr/slides/?(?P<path>.*)$', views.slides_view, name='slides_app'),
+    
     # Configuration API
     path('api/config', views.api_config, name='api_config'),
     path('api/config/directories', views.api_update_directories, name='api_update_directories'),

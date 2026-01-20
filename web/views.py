@@ -313,6 +313,9 @@ def index(request, path=''):
 # Path to the MIMIC static app directory
 MIMIC_APP_PATH = Path(__file__).resolve().parent.parent / 'MIMIC'
 
+# Path to the Slides static app directory
+SLIDES_APP_PATH = Path(__file__).resolve().parent.parent / 'Slides' / 'slides'
+
 
 def mimic_view(request, path=''):
     """Serve the static MIMIC mindmap app at /mimiciv
@@ -331,6 +334,48 @@ def mimic_view(request, path=''):
     try:
         file_path = file_path.resolve()
         if not str(file_path).startswith(str(MIMIC_APP_PATH.resolve())):
+            raise Http404("File not found")
+    except (ValueError, OSError):
+        raise Http404("File not found")
+    
+    if not file_path.exists() or not file_path.is_file():
+        raise Http404("File not found")
+    
+    # Determine content type
+    content_type, _ = mimetypes.guess_type(str(file_path))
+    if content_type is None:
+        content_type = 'application/octet-stream'
+    
+    return FileResponse(open(file_path, 'rb'), content_type=content_type)
+
+
+def slides_view(request, path=''):
+    """Serve the static Slides app at /pr/slides/
+    
+    This serves index.html for the root and handles requests
+    for presentation files and other static assets within the Slides directory.
+    """
+    # Default to index.html for root path
+    if not path or path == '/':
+        file_path = SLIDES_APP_PATH / 'index.html'
+    else:
+        # Sanitize path to prevent directory traversal
+        clean_path = path.lstrip('/')
+        file_path = SLIDES_APP_PATH / clean_path
+        
+        # Check if the path is a directory
+        if file_path.exists() and file_path.is_dir():
+            # If it's a directory but URL doesn't end with slash, redirect
+            if not path.endswith('/'):
+                return redirect(f'/pr/slides/{path}/')
+            
+            # Serve index.html for directories
+            file_path = file_path / 'index.html'
+    
+    # Security: ensure the resolved path is within the Slides directory
+    try:
+        file_path = file_path.resolve()
+        if not str(file_path).startswith(str(SLIDES_APP_PATH.resolve())):
             raise Http404("File not found")
     except (ValueError, OSError):
         raise Http404("File not found")
@@ -390,6 +435,13 @@ def pr_view(request):
             'description': 'Manage recipes and pantry ingredients.',
             'icon': 'chef-hat',
             'url': '/pr/recipes/',
+            'active': False
+        },
+        {
+            'name': 'Slides',
+            'description': 'View and present slideshows.',
+            'icon': 'presentation',
+            'url': '/pr/slides/',
             'active': False
         },
     ]

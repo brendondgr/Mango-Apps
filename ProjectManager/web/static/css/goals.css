@@ -1,0 +1,230 @@
+/* =========================
+   GOALS SECTION
+   Goals list, items, forms, progress
+========================= */
+
+/* Goals Section */
+.goals-section {
+    margin-bottom: 1.5rem;
+}
+
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.goals-header h4 {
+    font-size: 1rem;
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.goal-count {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+}
+
+.goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.goals-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.goals-empty svg {
+    opacity: 0.5;
+}
+
+/* Goal Item */
+.goal-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.goal-item:hover {
+    border-color: var(--color-border);
+}
+
+.goal-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s var(--ease-spring);
+    color: white;
+}
+
+.goal-checkbox:hover {
+    border-color: var(--color-tertiary);
+    background: rgba(0, 217, 192, 0.1);
+}
+
+.goal-item.completed .goal-checkbox {
+    background: var(--color-tertiary);
+    border-color: var(--color-tertiary);
+}
+
+.goal-title-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.goal-title {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+    transition: all 0.15s ease;
+}
+
+.goal-item.completed .goal-title {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+}
+
+.goal-meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    margin-top: 0.1rem;
+}
+
+.goal-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.goal-delete {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+}
+
+.goal-item:hover .goal-delete {
+    opacity: 1;
+}
+
+.goal-delete:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Add Goal Form */
+.add-goal-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.add-goal-form input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.add-goal-form input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(76, 59, 207, 0.1);
+}
+
+.btn-add-goal {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-tertiary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: transform 0.15s var(--ease-spring), box-shadow 0.15s ease;
+}
+
+.btn-add-goal:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 217, 192, 0.3);
+}
+
+/* Modal Progress */
+.modal-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.progress-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.progress-container.lg {
+    flex: 1;
+    height: 10px;
+}
+
+.progress-percent {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Card Body Clickable */
+.card-body {
+    cursor: pointer;
+}

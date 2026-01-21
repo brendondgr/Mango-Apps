@@ -1,0 +1,107 @@
+/* =========================
+   LAYOUT STYLES
+   Dashboard grid, columns, headers
+========================= */
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+    height: 100%;
+    padding-bottom: 2rem;
+}
+
+/* Status Columns */
+.status-column {
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    height: 100%;
+    /* Drop target area */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    align-content: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.status-column::-webkit-scrollbar {
+    width: 6px;
+}
+
+.status-column::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.status-column::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 20px;
+}
+
+/* Column header spans both columns and is sticky */
+.status-column .column-header {
+    grid-column: 1 / -1;
+    position: sticky;
+    top: -1rem;
+    /* Adjust for padding */
+    background: inherit;
+    z-index: 5;
+    padding: 0.5rem 0;
+    margin-top: -0.5rem;
+}
+
+/* Column Specific Colors */
+#col-active {
+    background-color: #f0f9ff;
+    border-top: 4px solid var(--cat-blue-border);
+}
+
+#col-completed {
+    background-color: #f0fdf4;
+    border-top: 4px solid var(--cat-green-border);
+}
+
+#col-on-hold {
+    background-color: #fffbeb;
+    border-top: 4px solid var(--cat-orange-border);
+}
+
+#col-abandoned {
+    background-color: #fef2f2;
+    border-top: 4px solid var(--cat-red-border);
+}
+
+.column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.5rem;
+    margin-bottom: 0.5rem;
+    min-height: 3rem;
+    /* Ensure consistent height for vertical centering */
+}
+
+.column-title {
+    font-size: 1.1rem;
+    color: var(--color-text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    font-weight: 600;
+}

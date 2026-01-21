@@ -1,0 +1,393 @@
+/* =========================
+   CARD STYLES
+   Project cards, drag, categories, progress
+========================= */
+
+/* Cards */
+.project-card {
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+    border: 1px solid var(--color-border);
+    user-select: none;
+    /* Prevent text selection during drag */
+    touch-action: none;
+    /* Critical for Pointer Events */
+    position: relative;
+    /* Needed for z-index context */
+}
+
+.drag-handle {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    cursor: grab;
+    color: var(--color-text-muted);
+    padding: 0.25rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.edit-action {
+    position: absolute;
+    top: 0.75rem;
+    right: 2.5rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 0.25rem;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s, transform 0.2s;
+}
+
+.edit-action:hover {
+    opacity: 1;
+    color: var(--color-primary);
+    transform: scale(1.1);
+}
+
+.drag-handle:hover {
+    opacity: 1;
+}
+
+.project-card.is-dragging .drag-handle {
+    cursor: grabbing;
+}
+
+/* Dragging State - The element being moved */
+.project-card.is-dragging {
+    position: fixed;
+    /* Break out of flow */
+    z-index: 1000;
+    cursor: grabbing;
+    box-shadow: var(--shadow-xl);
+    transform: scale(1.05) rotate(2deg);
+    /* Lift effect */
+    pointer-events: none;
+    /* Let events pass through to drop targets */
+    width: var(--drag-width);
+    /* Maintain width */
+    height: var(--drag-height);
+}
+
+/* Placeholder - The empty space left behind */
+.card-placeholder {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--color-border);
+    margin-bottom: 1rem;
+    /* Match gap */
+    width: 100%;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Card Content */
+.card-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.category-badge {
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    opacity: 0.8;
+}
+
+/* Dynamic Classes for Categories */
+.cat-blue {
+    background: var(--cat-blue-bg);
+    border: 1px solid var(--cat-blue-border);
+    color: var(--cat-blue-text);
+}
+
+.cat-green {
+    background: var(--cat-green-bg);
+    border: 1px solid var(--cat-green-border);
+    color: var(--cat-green-text);
+}
+
+.cat-purple {
+    background: var(--cat-purple-bg);
+    border: 1px solid var(--cat-purple-border);
+    color: var(--cat-purple-text);
+}
+
+.cat-orange {
+    background: var(--cat-orange-bg);
+    border: 1px solid var(--cat-orange-border);
+    color: var(--cat-orange-text);
+}
+
+.cat-red {
+    background: var(--cat-red-bg);
+    border: 1px solid var(--cat-red-border);
+    color: var(--cat-red-text);
+}
+
+.cat-teal {
+    background: var(--cat-teal-bg);
+    border: 1px solid var(--cat-teal-border);
+    color: var(--cat-teal-text);
+}
+
+.cat-yellow {
+    background: var(--cat-yellow-bg);
+    border: 1px solid var(--cat-yellow-border);
+    color: var(--cat-yellow-text);
+}
+
+.cat-pink {
+    background: var(--cat-pink-bg);
+    border: 1px solid var(--cat-pink-border);
+    color: var(--cat-pink-text);
+}
+
+.card-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-main);
+}
+
+.card-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.status-date {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.date-pill {
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.date-pill.added {
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.date-pill.done {
+    background: var(--cat-green-bg);
+    border-color: var(--cat-green-border);
+    color: var(--cat-green-text);
+}
+
+.date-pill.held {
+    background: var(--cat-yellow-bg);
+    border-color: var(--cat-yellow-border);
+    color: var(--cat-yellow-text);
+}
+
+.date-pill.dropped {
+    background: var(--cat-red-bg);
+    border-color: var(--cat-red-border);
+    color: var(--cat-red-text);
+}
+
+/* Progress Bar */
+.progress-container {
+    height: 18px;
+    background: var(--color-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--color-border);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    /* Fallback */
+    border-radius: 0;
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Category Specific Progress Bars (Matching Tags) */
+.progress-container.cat-blue {
+    background-color: var(--cat-blue-bg);
+    border-color: var(--cat-blue-border);
+}
+
+.progress-bar.cat-blue {
+    background-color: var(--cat-blue-border);
+}
+
+.cat-blue .progress-text-overlay {
+    color: var(--cat-blue-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-green {
+    background-color: var(--cat-green-bg);
+    border-color: var(--cat-green-border);
+}
+
+.progress-bar.cat-green {
+    background-color: var(--cat-green-border);
+}
+
+.cat-green .progress-text-overlay {
+    color: var(--cat-green-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-purple {
+    background-color: var(--cat-purple-bg);
+    border-color: var(--cat-purple-border);
+}
+
+.progress-bar.cat-purple {
+    background-color: var(--cat-purple-border);
+}
+
+.cat-purple .progress-text-overlay {
+    color: var(--cat-purple-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-orange {
+    background-color: var(--cat-orange-bg);
+    border-color: var(--cat-orange-border);
+}
+
+.progress-bar.cat-orange {
+    background-color: var(--cat-orange-border);
+}
+
+.cat-orange .progress-text-overlay {
+    color: var(--cat-orange-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-red {
+    background-color: var(--cat-red-bg);
+    border-color: var(--cat-red-border);
+}
+
+.progress-bar.cat-red {
+    background-color: var(--cat-red-border);
+}
+
+.cat-red .progress-text-overlay {
+    color: var(--cat-red-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-teal {
+    background-color: var(--cat-teal-bg);
+    border-color: var(--cat-teal-border);
+}
+
+.progress-bar.cat-teal {
+    background-color: var(--cat-teal-border);
+}
+
+.cat-teal .progress-text-overlay {
+    color: var(--cat-teal-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-yellow {
+    background-color: var(--cat-yellow-bg);
+    border-color: var(--cat-yellow-border);
+}
+
+.progress-bar.cat-yellow {
+    background-color: var(--cat-yellow-border);
+}
+
+.cat-yellow .progress-text-overlay {
+    color: var(--cat-yellow-text);
+    text-shadow: none;
+}
+
+.progress-container.cat-pink {
+    background-color: var(--cat-pink-bg);
+    border-color: var(--cat-pink-border);
+}
+
+.progress-bar.cat-pink {
+    background-color: var(--cat-pink-border);
+}
+
+.cat-pink .progress-text-overlay {
+    color: var(--cat-pink-text);
+    text-shadow: none;
+}
+
+.progress-text-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: white;
+    /* Fallback */
+    pointer-events: none;
+    z-index: 1;
+    letter-spacing: 0.05em;
+}
+
+/* Header */
+header {
+    padding: 0.5rem 0;
+    background: rgba(254, 251, 246, 0.8);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.btn-plus {
+    margin-right: 0.25rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.5rem 1.5rem 0.5rem 4rem;
+}

@@ -9,26 +9,28 @@
     <section class="section" style="padding-top: 0.5rem;">
         <div class="section-header">
             <h2 class="section-title">Subjects</h2>
-            <a href="{% url 'notes:subject_create' %}" class="btn btn-primary">
-                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span> New Subject
-            </a>
+            <button class="btn btn-primary" data-modal-target="modal-create-subject">
+                <span class="icon-mask"
+                    style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span>
+                New Subject
+            </button>
         </div>
         {% if subjects %}
         <div class="bento-grid">
             {% for subject in subjects %}
-            <a href="{% url 'notes:subject_detail' subject.slug %}" 
-               class="subject-card animate-fade-in" 
-               style="--card-bg: var(--tone-{{ subject.color_tone }}-bg); --card-border: var(--tone-{{ subject.color_tone }}-border); --card-text: var(--tone-{{ subject.color_tone }}-text);">
+            <a href="{% url 'notes:subject_detail' subject.slug %}" class="subject-card animate-fade-in"
+                style="--card-bg: var(--tone-{{ subject.color_tone }}-bg); --card-border: var(--tone-{{ subject.color_tone }}-border); --card-text: var(--tone-{{ subject.color_tone }}-text);">
                 {% if subject.icon_svg %}
-                    <div class="svg-icon--tinted svg-icon--lg" 
-                         style="-webkit-mask-image: url('{{ subject.icon_svg.url }}'); mask-image: url('{{ subject.icon_svg.url }}'); background-color: var(--card-border);"></div>
+                <div class="svg-icon--tinted svg-icon--lg"
+                    style="-webkit-mask-image: url('{{ subject.icon_svg.url }}'); mask-image: url('{{ subject.icon_svg.url }}'); background-color: var(--card-border);">
+                </div>
                 {% elif subject.icon_image %}
-                    <img src="{{ subject.icon_image.url }}" alt="{{ subject.name }}" 
-                         style="width: 72px; height: 72px; margin-bottom: 1rem; object-fit: contain; border-radius: var(--radius-md);">
+                <img src="{{ subject.icon_image.url }}" alt="{{ subject.name }}"
+                    style="width: 72px; height: 72px; margin-bottom: 1rem; object-fit: contain; border-radius: var(--radius-md);">
                 {% else %}
-                    <div class="subject-icon-wrapper" style="color: var(--card-text);">
-                        📚
-                    </div>
+                <div class="subject-icon-wrapper" style="color: var(--card-text);">
+                    📚
+                </div>
                 {% endif %}
                 <h3>{{ subject.name }}</h3>
                 <span class="subject-card__count">{{ subject.courses.count }} Courses</span>
@@ -40,7 +42,7 @@
             <div class="empty-state__icon">📚</div>
             <h3 class="empty-state__title">No subjects yet</h3>
             <p class="empty-state__text">Create your first subject to start organizing your learning materials.</p>
-            <a href="{% url 'notes:subject_create' %}" class="btn btn-primary">Create First Subject</a>
+            <button class="btn btn-primary" data-modal-target="modal-create-subject">Create First Subject</button>
         </div>
         {% endif %}
     </section>
@@ -49,34 +51,44 @@
     <section class="section section--alt">
         <div class="section-header">
             <h2 class="section-title">All Courses</h2>
-            <a href="{% url 'notes:course_create' %}" class="btn btn-outline-secondary">
-                <span class="icon-mask" style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span> New Course
-            </a>
+            <button class="btn btn-outline-secondary" data-modal-target="modal-create-course">
+                <span class="icon-mask"
+                    style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span>
+                New Course
+            </button>
         </div>
         {% if courses %}
         <div class="list-container animate-slide-up">
             {% for course in courses %}
-            <a href="{% url 'notes:course_detail' course.slug %}" class="list-item" 
-               style="--item-color: var(--tone-{{ course.subject.color_tone }}-border); --item-bg: var(--tone-{{ course.subject.color_tone }}-bg);">
+            <a href="{% url 'notes:course_detail' course.slug %}" class="list-item"
+                style="--item-color: var(--tone-{{ course.subject.color_tone }}-border); --item-bg: var(--tone-{{ course.subject.color_tone }}-bg);">
                 <div class="list-item__icon">
                     {% if course.icon_svg %}
-                        <div class="svg-icon--tinted" style="-webkit-mask-image: url('{{ course.icon_svg.url }}'); mask-image: url('{{ course.icon_svg.url }}');"></div>
+                    <div class="svg-icon--tinted"
+                        style="-webkit-mask-image: url('{{ course.icon_svg.url }}'); mask-image: url('{{ course.icon_svg.url }}');">
+                    </div>
                     {% elif course.icon_image %}
-                        <img src="{{ course.icon_image.url }}" style="width: 28px; height: 28px; object-fit: contain;" alt="">
+                    <img src="{{ course.icon_image.url }}" style="width: 28px; height: 28px; object-fit: contain;"
+                        alt="">
                     {% else %}
-                        📖
+                    📖
                     {% endif %}
                 </div>
                 <div class="list-item__content">
                     <h3 class="list-item__title">{{ course.name }}</h3>
                     <div class="list-item__meta" style="display: flex; gap: 0.5rem; align-items: center;">
                         <span style="font-weight: 500;">{{ course.subject.name }}</span>
-                        <span style="width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.4;"></span>
+                        <span
+                            style="width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.4;"></span>
                         <span>{{ course.topics.count }} Topics</span>
                     </div>
                 </div>
                 <div class="list-item__action">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
                 </div>
             </a>
             {% endfor %}
@@ -90,4 +102,131 @@
         {% endif %}
     </section>
 </div>
+
+<!-- Create Subject Modal -->
+<div class="modal-backdrop" id="modal-create-subject">
+    <div class="modal-content">
+        <div class="modal-form-panel">
+            <div class="modal-form-panel__header">
+                <div class="modal-form-panel__title-group">
+                    <h2 class="modal-form-panel__title">Create Subject</h2>
+                    <p class="modal-form-panel__subtitle">Create a new container for your learning materials.</p>
+                </div>
+                <button type="button" class="modal-close-btn" data-modal-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{% url 'notes:subject_create' %}" method="post" enctype="multipart/form-data"
+                class="modal-form">
+                {% csrf_token %}
+
+                {% for field in subject_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color: var(--color-danger);">*</span>{% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <p class="form-hint">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="modal-form-actions">
+                    <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon-mask"
+                            style="-webkit-mask-image: url('{% static 'notes/svg/save.svg' %}'); mask-image: url('{% static 'notes/svg/save.svg' %}');"></span>
+                        Create Subject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Course Modal -->
+<div class="modal-backdrop" id="modal-create-course">
+    <div class="modal-content">
+        <div class="modal-form-panel">
+            <div class="modal-form-panel__header">
+                <div class="modal-form-panel__title-group">
+                    <h2 class="modal-form-panel__title">Create Course</h2>
+                    <p class="modal-form-panel__subtitle">Courses belong to a subject and contain topics.</p>
+                </div>
+                <button type="button" class="modal-close-btn" data-modal-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{% url 'notes:course_create' %}" method="post" enctype="multipart/form-data"
+                class="modal-form">
+                {% csrf_token %}
+
+                {% for field in course_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color: var(--color-danger);">*</span>{% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <p class="form-hint">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="modal-form-actions">
+                    <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon-mask"
+                            style="-webkit-mask-image: url('{% static 'notes/svg/save.svg' %}'); mask-image: url('{% static 'notes/svg/save.svg' %}');"></span>
+                        Create Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Intercept navigation links from the header to open modals instead
+        const links = [
+            { url: "{% url 'notes:subject_create' %}", modal: 'modal-create-subject' },
+            { url: "{% url 'notes:course_create' %}", modal: 'modal-create-course' }
+        ];
+
+        links.forEach(item => {
+            // Find all anchor tags pointing to these URLs
+            const elements = document.querySelectorAll(`a[href="${item.url}"]`);
+            elements.forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (typeof openModal === 'function') {
+                        openModal(item.modal);
+                    } else {
+                        window.location.href = item.url;
+                    }
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}

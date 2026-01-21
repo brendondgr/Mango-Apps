@@ -14,25 +14,26 @@
 {% block content %}
 <div class="container">
     <header class="page-header" style="margin-bottom: 2rem;">
-        <h1>{% if is_edit_mode %}Edit Logic{% else %}Prep Station{% endif %}</h1>
-        <p class="subtitle">Add a new recipe via AI or enter it manually.</p>
+        <h1 class="page-title">{% if is_edit_mode %}Edit Logic{% else %}Prep Station{% endif %}</h1>
+        <p class="page-subtitle">Add a new recipe via AI or enter it manually.</p>
     </header>
 
     <div class="prep-layout">
         <!-- AI Parser Section -->
         <section class="ai-parser-section card">
             <h2>AI Chef</h2>
-            <p style="margin-bottom: 1rem; color: #666;">Paste recipe text below and let the AI fill out the form for you.</p>
-            
+            <p style="margin-bottom: 1rem; color: #666;">Paste recipe text below and let the AI fill out the form for
+                you.</p>
+
             <div class="form-group">
                 <textarea id="recipe-text" class="textarea" placeholder="Paste recipe text here..."></textarea>
             </div>
-            
+
             <button id="parse-btn" class="btn btn-primary btn-teal" style="width: 100%;">
                 <span class="btn-text">Magic Parse</span>
                 <span class="spinner hidden"></span>
             </button>
-            
+
             <div id="parse-error" class="error-message hidden" style="color: red; margin-top: 1rem;"></div>
         </section>
 
@@ -40,11 +41,12 @@
         <section class="manual-entry-section card">
             <h2>Recipe Details</h2>
             <form id="recipe-form">
-                
+
                 <div class="split-row" style="display: flex; gap: 1rem;">
                     <div class="form-group" style="flex: 3;">
                         <label for="title">Recipe Title *</label>
-                        <input type="text" id="title" name="title" class="input" placeholder="e.g. Spicy Miso Ramen" required>
+                        <input type="text" id="title" name="title" class="input" placeholder="e.g. Spicy Miso Ramen"
+                            required>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label for="servings">Servings *</label>
@@ -54,37 +56,50 @@
 
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" class="textarea" rows="3" placeholder="A brief description of the dish..."></textarea>
+                    <textarea id="description" name="description" class="textarea" rows="3"
+                        placeholder="A brief description of the dish..."></textarea>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 2rem;">
                     <label>Recipe Images</label>
-                        <div class="image-upload-container">
-                            <div id="image-upload-zone" class="image-upload-zone">
-                                <div class="upload-content">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                    <p>Drag & Drop images here</p>
-                                    <span class="or-divider">or</span>
-                                    <button type="button" id="browse-files-btn" class="btn-text-only">Browse Files</button>
-                                </div>
-                                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" multiple hidden>
+                    <div class="image-upload-container">
+                        <div id="image-upload-zone" class="image-upload-zone">
+                            <div class="upload-content">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="upload-icon">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <p>Drag & Drop images here</p>
+                                <span class="or-divider">or</span>
+                                <button type="button" id="browse-files-btn" class="btn-text-only">Browse Files</button>
                             </div>
-                            
-                            <div class="url-input-group hidden" id="url-input-container">
-                                <input type="url" id="url-input" class="input" placeholder="Paste image URL...">
-                                <button type="button" id="add-url-btn" class="btn-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                </button>
-                            </div>
-                            
-                            <div id="image-preview-grid" class="image-preview-grid">
-                                <!-- Preview cards will go here -->
-                            </div>
-                            
-                            <div class="upload-actions">
-                                <button type="button" id="toggle-url-btn" class="btn-text-link">+ Add URL instead</button>
-                            </div>
+                            <input type="file" id="file-input"
+                                accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" multiple hidden>
                         </div>
+
+                        <div class="url-input-group hidden" id="url-input-container">
+                            <input type="url" id="url-input" class="input" placeholder="Paste image URL...">
+                            <button type="button" id="add-url-btn" class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div id="image-preview-grid" class="image-preview-grid">
+                            <!-- Preview cards will go here -->
+                        </div>
+
+                        <div class="upload-actions">
+                            <button type="button" id="toggle-url-btn" class="btn-text-link">+ Add URL instead</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Cuisine Tags -->
@@ -142,8 +157,10 @@
                 </div>
 
                 <div class="form-actions" style="margin-top: 2rem; text-align: right;">
-                    <div id="submit-error" class="error-message hidden" style="color: red; margin-bottom: 1rem; text-align: left;"></div>
-                    <button type="submit" class="btn btn-primary" id="save-btn" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Save Recipe</button>
+                    <div id="submit-error" class="error-message hidden"
+                        style="color: red; margin-bottom: 1rem; text-align: left;"></div>
+                    <button type="submit" class="btn btn-primary" id="save-btn"
+                        style="padding: 0.8rem 2rem; font-size: 1.1rem;">Save Recipe</button>
                 </div>
             </form>
         </section>
@@ -183,7 +200,11 @@
     <div class="image-preview-card">
         <img src="" alt="Recipe Image" class="preview-img">
         <button type="button" class="remove-image-btn" aria-label="Remove image">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
         </button>
         <div class="loading-overlay hidden">
             <div class="spinner-sm"></div>

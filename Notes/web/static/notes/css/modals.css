@@ -6,16 +6,18 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    padding: 2rem;
+    box-sizing: border-box;
 }
 
 .modal-backdrop.active {
@@ -28,9 +30,138 @@
     transform: translateY(20px) scale(0.95);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    
+
     /* Ensure content stays within viewport */
-    max-height: 90vh;
+    max-height: calc(100vh - 4rem);
     overflow-y: auto;
     width: 100%;
+    max-width: 540px;
+
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: 3px;
+}
+
+/* Form Modal specific styles */
+.modal-form-panel {
+    background: var(--color-bg-elevated);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+}
+
+.modal-form-panel__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal-form-panel__title-group {
+    flex: 1;
+}
+
+.modal-form-panel__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.modal-form-panel__subtitle {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Close button */
+.modal-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-100);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--ease-standard);
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.modal-close-btn:hover {
+    background: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+    transform: scale(1.05);
+}
+
+.modal-close-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Modal form actions */
+.modal-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Loading state for form submission */
+.modal-form-panel.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.modal-form-panel.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: modal-spinner 0.8s linear infinite;
+}
+
+@keyframes modal-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error message in modal */
+.modal-error {
+    background: var(--tone-red-bg);
+    border: 1px solid var(--tone-red-border);
+    color: var(--tone-red-text);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
 }

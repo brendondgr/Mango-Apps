@@ -70,7 +70,12 @@ def index(request):
     """
     subjects = Subject.objects.all()
     courses = Course.objects.all()
-    return render(request, 'notes/index.html', {'subjects': subjects, 'courses': courses})
+    return render(request, 'notes/index.html', {
+        'subjects': subjects, 
+        'courses': courses,
+        'subject_form': SubjectForm(),
+        'course_form': CourseForm(),
+    })
 
 def subject_detail(request, slug):
     subject = get_object_or_404(Subject, slug=slug)
@@ -195,11 +200,25 @@ def serve_visualization(request, topic_id, filename):
 
 # Subject CRUD
 def subject_create(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     if request.method == 'POST':
         form = SubjectForm(request.POST, request.FILES)
         if form.is_valid():
             subject = form.save()
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': reverse('notes:index'),
+                    'message': f'Subject "{subject.name}" created successfully!'
+                })
             return redirect('notes:subject_detail', slug=subject.slug)
+        else:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'errors': {field: [str(e) for e in errors] for field, errors in form.errors.items()}
+                })
     else:
         form = SubjectForm()
     return render(request, 'notes/subject_form.html', {'form': form, 'title': 'Create Subject'})
@@ -224,11 +243,25 @@ def subject_delete(request, slug):
 
 # Course CRUD
 def course_create(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     if request.method == 'POST':
         form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
             course = form.save()
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': reverse('notes:index'),
+                    'message': f'Course "{course.name}" created successfully!'
+                })
             return redirect('notes:course_detail', slug=course.slug)
+        else:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'errors': {field: [str(e) for e in errors] for field, errors in form.errors.items()}
+                })
     else:
         form = CourseForm()
     return render(request, 'notes/course_form.html', {'form': form, 'title': 'Create Course'})

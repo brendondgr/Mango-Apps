@@ -172,76 +172,68 @@
     cursor: pointer;
 }
 
-/* Gantt Chart */
+/* Gantt Chart - Unified Sticky Layout */
 .gantt-chart {
     display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
     overflow: hidden;
-    /* Main container doesn't scroll, inner container does */
-}
-
-.gantt-chart.compact .gantt-header {
-    min-height: 32px;
-}
-
-.gantt-labels-column {
-    flex-shrink: 0;
-    width: 200px;
-    border-right: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    background: var(--color-bg);
-    z-index: 5;
-    height: 100%;
-    min-height: 0;
-}
-
-.gantt-label-header {
-    padding: 0.5rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--color-border);
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.gantt-labels-body {
-    flex: 1;
-    overflow-y: hidden;
-    /* Scroll sync via JS */
-    overflow-x: hidden;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+    position: relative;
 }
 
 .gantt-scroll-container {
     flex: 1;
-    overflow-x: auto;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    overflow: auto;
+    position: relative;
+    display: block;
+    /* Unified flow */
 }
 
-.gantt-header {
+/* Header Row - Enhanced Styling */
+.gantt-header-row {
     position: sticky;
     top: 0;
-    background: var(--color-bg);
+    z-index: 20;
+    display: flex;
+    height: 48px;
+    /* Taller header for better spacing */
+    background: var(--color-surface-elevated, #fff);
+    /* Fallback to white if var missing */
     border-bottom: 1px solid var(--color-border);
-    z-index: 4;
-    min-height: 40px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow for depth */
 }
 
-.gantt-axis {
+.gantt-corner-header {
+    position: sticky;
+    left: 0;
+    z-index: 30;
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--color-surface-elevated, #fff);
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 1rem;
+
+    /* Typography */
+    font-family: var(--font-mono, monospace);
+    /* Ensure mono font is used */
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+
+    display: flex;
+    align-items: center;
+}
+
+.gantt-date-axis {
+    flex: 1;
     position: relative;
-    min-height: 32px;
+    overflow: hidden;
+    background: var(--color-surface-elevated, #fff);
 }
 
 .gantt-axis-inner {
@@ -249,39 +241,62 @@
     height: 100%;
 }
 
+/* Ensure ticks are visible and styled */
 .gantt-axis-tick {
     position: absolute;
     top: 0;
     height: 100%;
     border-left: 1px solid var(--color-border);
-    padding-left: 0.5rem;
+    padding-left: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .axis-label {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.7rem;
+    font-weight: 600;
     color: var(--color-text-muted);
     white-space: nowrap;
-    padding-top: 0.5rem;
 }
 
-/* Gantt Body */
-.gantt-body {
-    min-height: 100px;
-    position: relative;
-}
-
+/* Data Rows */
 .gantt-row {
     display: flex;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    height: 36px;
+    height: 40px;
+    /* Increase row height slightly */
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+    min-width: fit-content;
 }
 
-.gantt-row:hover {
+.gantt-sticky-label {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--color-bg);
+    border-right: 1px solid var(--color-border);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    /* Typography */
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    transition: background 0.1s;
+}
+
+.gantt-row:hover .gantt-sticky-label {
     background: rgba(0, 0, 0, 0.02);
 }
 
-.gantt-row.project-row {
+.gantt-row.project-row .gantt-sticky-label {
     background: rgba(0, 0, 0, 0.01);
 }
 
@@ -527,9 +542,10 @@
 }
 
 .gantt-item-onhold {
-    background: repeating-linear-gradient(45deg,
-            rgba(0, 0, 0, 0.05),
-            rgba(0, 0, 0, 0.05) 5px,
+    /* Overlay stripes on top of the category color */
+    background-image: repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.2) 5px,
             transparent 5px,
             transparent 10px) !important;
 }

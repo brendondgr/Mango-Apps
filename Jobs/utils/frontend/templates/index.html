@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Finder | Job Search Tracker</title>
     <base href="/pr/jobs/">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="static/css/variables.css">
@@ -33,7 +36,7 @@
                         heading: ['Space Grotesk', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
-                     colors: {
+                    colors: {
                         primary: {
                             DEFAULT: 'var(--color-primary)',
                             50: '#fff0f0',
@@ -62,26 +65,27 @@
         }
     </script>
 </head>
+
 <body class="text-slate-800 antialiased h-screen flex flex-col overflow-hidden bg-slate-50">
 
     <!-- Include Header -->
     <div id="header-container"></div>
+
+    <!-- Include Sidebar (Global) -->
+    {% include 'components/sidebar.html' %}
 
     <!-- Include Mobile Navigation -->
     <div id="mobile-nav-container"></div>
 
     <!-- Main Content Layout -->
     <div class="flex flex-1 overflow-hidden relative">
-        
+
         <!-- Include Sidebar -->
-        <!-- Include Sidebar -->
-        <div id="sidebar-container">
-            {% include 'components/sidebar.html' %}
-        </div>
+
 
         <!-- Main View Container -->
         <main class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-8 pb-20 md:pb-8" id="mainContainer">
-            
+
             <!-- Include New Jobs View -->
             <div id="new-jobs-container"></div>
 
@@ -103,7 +107,7 @@
     <script src="static/js/handlers.js?v=2"></script>
 
     <script src="static/js/app.js?v=2"></script>
-    
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -121,7 +125,7 @@
         }
 
         // Load all partials on page load
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
             // 1. Load Header first
             await loadPartial('header-container', 'parts/header.html');
 
@@ -142,4 +146,5 @@
     </script>
 
 </body>
+
 </html>

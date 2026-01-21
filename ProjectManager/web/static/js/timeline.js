@@ -38,8 +38,9 @@ class TimelineRenderer {
     init() {
         this.axisContainer = document.getElementById(`${this.containerId}-axis`);
         this.bodyContainer = document.getElementById(`${this.containerId}-body`);
-        this.labelsContainer = document.getElementById(`${this.containerId}-labels`);
         this.tooltipElement = document.getElementById(`${this.containerId}-tooltip`);
+
+        // Labels container is no longer separate
 
         this.attachEventListeners();
     }
@@ -147,10 +148,11 @@ class TimelineRenderer {
         const totalDays = this.getTotalDays();
         let axisWidth = totalDays * dayWidth;
 
-        // Ensure full container width: get scroll container width and use the larger value
+        // Ensure full container width: get scroll container width and subtract label width
         const scrollContainer = this.container.querySelector('.gantt-scroll-container');
         if (scrollContainer) {
-            const containerWidth = scrollContainer.clientWidth;
+            // Subtract label column width (200px) from container total to get visible bar area
+            const containerWidth = scrollContainer.clientWidth - 200;
             axisWidth = Math.max(axisWidth, containerWidth);
         }
 
@@ -168,23 +170,24 @@ class TimelineRenderer {
 
         html += '</div>';
         this.axisContainer.innerHTML = html;
-        this.axisContainer.querySelector('.gantt-axis-inner').style.minWidth = axisWidth + 'px';
+        // this.axisContainer.style.width = axisWidth + 'px'; // Not needed if inner has width? 
+        // Better to set min-width on the sticky header content to ensure it scrolls
+        this.axisContainer.style.minWidth = axisWidth + 'px';
     }
 
     renderItems() {
-        if (!this.bodyContainer || !this.labelsContainer) return;
+        if (!this.bodyContainer) return;
 
         const { items, minDate, maxDate } = this.data;
 
-        // Use calculated width from renderDateAxis (ensures full container width)
+        // Use calculated width from renderDateAxis
         const barAreaWidth = this.calculatedAxisWidth || (this.getTotalDays() * this.getDayWidth());
 
         const minDateTime = new Date(minDate).getTime();
         const maxDateTime = new Date(maxDate).getTime();
         const totalMs = maxDateTime - minDateTime;
 
-        let labelsHtml = '';
-        let bodyHtml = '';
+        let rowsHtml = '';
 
         // Sort items: projects first, then goals grouped by project
         const sortedItems = this.sortItems(items);
@@ -211,9 +214,13 @@ class TimelineRenderer {
             const endPos = ((endDate.getTime() - minDateTime) / totalMs) * barAreaWidth;
             const barWidth = Math.max(endPos - startPos, this.options.minBarWidth);
 
-            // Labels Column
-            labelsHtml += `
-                <div class="gantt-label ${isProject ? 'project-label' : 'goal-label'}${hiddenClass}" data-item-id="${item.id}">
+            // Unified Row Construction
+            rowsHtml += `
+            <div class="${rowClass}" data-item-id="${item.id}">
+                <!-- Sticky Label -->
+                <div class="gantt-sticky-label ${isProject ? 'project-label' : 'goal-label'}" 
+                     onclick="timelineManager.handleItemClick(event, '${this.containerId}', '${item.id}', '${item.type}')"
+                     title="${item.name}">
                     ${isProject ? `
                         <button class="btn-toggle-expand ${this.expandedProjects.has(item.id.toString()) ? '' : 'collapsed'}" 
                                 onclick="timelineManager.toggleExpansion(event, '${this.containerId}', '${item.id}')">
@@ -222,15 +229,13 @@ class TimelineRenderer {
                             </svg>
                         </button>
                     ` : ''}
-                    <span class="label-text" onclick="timelineManager.handleItemClick(event, '${this.containerId}', '${item.id}', '${item.type}')" title="${item.name}">
+                    <span class="label-text">
                         ${this.truncateText(item.name, 25)}
                     </span>
                 </div>
-            `;
 
-            // Timeline Body
-            bodyHtml += `
-                <div class="${rowClass}" data-item-id="${item.id}" style="width: ${barAreaWidth}px;">
+                <!-- Bar Area -->
+                <div class="gantt-bar-container" style="min-width: ${barAreaWidth}px;">
                     <div class="gantt-bar-area">
                         <div class="${barClass}" 
                              style="left: ${startPos}px; width: ${barWidth}px;"
@@ -242,16 +247,10 @@ class TimelineRenderer {
                         </div>
                     </div>
                 </div>
-            `;
+            </div>`;
         });
 
-        this.labelsContainer.innerHTML = labelsHtml;
-        this.bodyContainer.innerHTML = bodyHtml || this.getEmptyStateHtml();
-
-        // Set min-width for body rows to ensure scroll works
-        this.bodyContainer.querySelectorAll('.gantt-row').forEach(row => {
-            row.style.minWidth = barAreaWidth + 'px';
-        });
+        this.bodyContainer.innerHTML = rowsHtml || this.getEmptyStateHtml();
     }
 
     toggleExpansion(projectId) {
@@ -430,17 +429,8 @@ const timelineManager = {
     },
 
     setupScrollSync(containerId) {
-        const labelsBody = document.getElementById(`${containerId}-labels`);
-        const scrollContainer = document.querySelector(`#${containerId} .gantt-scroll-container`);
-
-        if (labelsBody && scrollContainer) {
-            scrollContainer.addEventListener('scroll', () => {
-                labelsBody.scrollTop = scrollContainer.scrollTop;
-            });
-            labelsBody.addEventListener('scroll', () => {
-                scrollContainer.scrollTop = labelsBody.scrollTop;
-            });
-        }
+        // No longer needed with sticky CSS layout
+        console.log(`[Timeline] Using CSS sticky layout for ${containerId}`);
     },
 
     toggleExpansion(event, containerId, projectId) {

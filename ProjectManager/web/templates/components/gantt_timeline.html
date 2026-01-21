@@ -55,24 +55,18 @@
         </div>
     </div>
 
-    <!-- Timeline Chart -->
+    <!-- Timeline Chart (Unified Row Layout) -->
     <div class="gantt-chart">
-        <div class="gantt-labels-column">
-            <div class="gantt-label-header">Item</div>
-            <div class="gantt-labels-body" id="{{ container_id or 'gantt-timeline' }}-labels">
-                <!-- Labels populated by JS -->
-            </div>
-        </div>
-        
         <div class="gantt-scroll-container">
-            <!-- Date Axis Header -->
-            <div class="gantt-header">
-                <div class="gantt-axis" id="{{ container_id or 'gantt-timeline' }}-axis">
+            <!-- Sticky Header Row -->
+            <div class="gantt-header-row">
+                <div class="gantt-corner-header">Item</div>
+                <div class="gantt-date-axis" id="{{ container_id or 'gantt-timeline' }}-axis">
                     <!-- Date labels populated by JS -->
                 </div>
             </div>
 
-            <!-- Timeline Body -->
+            <!-- Timeline Body (Rows) -->
             <div class="gantt-body" id="{{ container_id or 'gantt-timeline' }}-body">
                 <!-- Item rows populated by JS -->
                 <div class="gantt-empty-state">
@@ -114,4 +108,3 @@
         </div>
     </div>
 </div>
-

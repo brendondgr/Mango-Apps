@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
@@ -17,14 +20,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
-    
+
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Hide global sidebar toggle */
+        #gs-sidebar-toggle-btn {
+            display: none !important;
+        }
+    </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden" style="font-family: var(--font-body); background: var(--color-background-gradient); color: var(--color-text-primary);">
+
+<body class="h-screen flex flex-col overflow-hidden"
+    style="font-family: var(--font-body); background: var(--color-background-gradient); color: var(--color-text-primary);">
     <!-- Sidebar Navigation -->
     {% include 'components/sidebar.html' %}
-    
+
     <script>
         window.INITIAL_CONTEXT = {{ initial_context | tojson | safe if initial_context else '{}' }};
     </script>
@@ -32,13 +44,13 @@
     {% include 'parts/header.html' %}
 
     <main class="flex-1 overflow-hidden relative p-4 main-content flex flex-col">
-        
+
         <!-- Calendar Tab -->
         {% include 'parts/calendar_view.html' %}
-        
+
         <!-- Schedule Editor Tab -->
         {% include 'parts/schedule_editor.html' %}
-        
+
     </main>
 
     <!-- Existing Modals -->
@@ -47,18 +59,18 @@
     {% include 'parts/event_editor_modal.html' %}
     {% include 'parts/new_schedule_modal.html' %}
     {% include 'parts/toast_container.html' %}
-    
+
     <!-- Calendar Modals -->
     {% include 'parts/calendar_config_modal.html' %}
     {% include 'parts/calendar_event_modal.html' %}
-    
+
     <!-- Templates -->
     {% include 'parts/legend_item.html' %}
     {% include 'parts/event_card.html' %}
     {% include 'parts/summary_row.html' %}
     {% include 'parts/loading_skeleton.html' %}
     {% include 'parts/empty_state.html' %}
-    
+
     <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 

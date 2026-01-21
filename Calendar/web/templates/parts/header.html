@@ -1,17 +1,30 @@
-<header class="header-vibrant p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-center shrink-0 gap-1 sm:gap-3">
+<header
+    class="header-vibrant p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-center shrink-0 gap-1 sm:gap-3">
     <!-- Main Row: 3 Columns Desktop / Stacked Mobile -->
     <div class="header-main-row flex flex-col sm:grid sm:grid-cols-3 items-center w-full gap-2 sm:gap-4">
-        
+
         <!-- Mobile Top Row: Title (Left) and Segmented Control + Info (Right) -->
         <div class="flex items-center justify-between w-full sm:w-auto sm:contents">
             <!-- Column 1: Left - Logo & Title -->
             <div class="header-left flex items-center justify-start gap-3">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center" style="background: var(--color-primary);">
+                <button onclick="toggleGlobalSidebar()" class="btn btn-icon-square btn-ghost sm:hidden" title="Menu"
+                    style="margin-right: -0.5rem;">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <button onclick="toggleGlobalSidebar()" class="btn btn-icon-square btn-ghost hidden sm:flex"
+                    title="Menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
+                    style="background: var(--color-primary);">
                     <i class="fas fa-calendar-alt text-white text-sm sm:text-base"></i>
                 </div>
                 <div class="text-left">
-                    <h1 id="scheduleTitle" class="text-base sm:text-xl font-bold" style="font-family: var(--font-heading); color: var(--color-text-primary);">Calendar</h1>
-                    <p id="scheduleDesc" class="text-xs sm:text-sm max-w-xs truncate hidden sm:block" style="color: var(--color-text-secondary);">View and manage your schedule</p>
+                    <h1 id="scheduleTitle" class="text-base sm:text-xl font-bold"
+                        style="font-family: var(--font-heading); color: var(--color-text-primary);">Calendar</h1>
+                    <p id="scheduleDesc" class="text-xs sm:text-sm max-w-xs truncate hidden sm:block"
+                        style="color: var(--color-text-secondary);">View and manage your schedule</p>
                 </div>
             </div>
 
@@ -19,16 +32,18 @@
             <div class="header-center flex items-center justify-end sm:justify-center gap-2">
                 <div class="segmented-control">
                     <div class="segmented-control__indicator" id="mainTabIndicator"></div>
-                    <button type="button" class="segmented-control__option active" data-tab="calendar" id="calendarTabBtn">
+                    <button type="button" class="segmented-control__option active" data-tab="calendar"
+                        id="calendarTabBtn">
                         <i class="fas fa-calendar"></i>
                         <span class="hidden sm:inline">Calendar</span>
                     </button>
-                    <button type="button" class="segmented-control__option" data-tab="schedule-editor" id="scheduleEditorTabBtn">
+                    <button type="button" class="segmented-control__option" data-tab="schedule-editor"
+                        id="scheduleEditorTabBtn">
                         <i class="fas fa-edit"></i>
                         <span class="hidden sm:inline">Editor</span>
                     </button>
                 </div>
-                
+
                 <button id="infoBtn" class="btn btn-icon-square btn-ghost" title="Instructions">
                     <i class="fas fa-info-circle"></i>
                 </button>
@@ -37,13 +52,14 @@
 
         <!-- Column 3: Right - Controls (Row 2 on Mobile) -->
         <div class="header-right flex items-center justify-end w-full sm:w-auto mt-1 sm:mt-0">
-             <!-- Schedule Controls (Only visible in Editor tab) -->
+            <!-- Schedule Controls (Only visible in Editor tab) -->
             <div id="scheduleEditorControls" class="flex items-center gap-2 hidden flex-1 justify-end sm:flex-none">
-                 <select id="scheduleSelector" class="schedule-selector-compact flex-1 sm:flex-none sm:w-32">
+                <select id="scheduleSelector" class="schedule-selector-compact flex-1 sm:flex-none sm:w-32">
                     <option>Loading...</option>
                 </select>
-                
-                <button id="deleteScheduleBtn" class="btn btn-icon-square btn-ghost text-danger" title="Delete Schedule">
+
+                <button id="deleteScheduleBtn" class="btn btn-icon-square btn-ghost text-danger"
+                    title="Delete Schedule">
                     <i class="fas fa-trash"></i>
                 </button>
 
@@ -53,7 +69,7 @@
                     <button id="uploadBtn" class="btn btn-icon-square btn-ghost" title="Upload Schedule">
                         <i class="fas fa-upload"></i>
                     </button>
-                    
+
                     <button id="newScheduleBtn" class="btn btn-icon-square btn-secondary" title="New Schedule">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -74,7 +90,8 @@
         </div>
         <div class="modal-body">
             <p>Are you sure you want to delete <strong id="deleteScheduleName"></strong>?</p>
-            <p class="text-sm text-secondary mt-2">This will also remove any calendar mappings using this schedule. This action cannot be undone.</p>
+            <p class="text-sm text-secondary mt-2">This will also remove any calendar mappings using this schedule. This
+                action cannot be undone.</p>
         </div>
         <div class="modal-footer">
             <button type="button" id="cancelScheduleDelete" class="btn btn-ghost">Cancel</button>
@@ -85,4 +102,3 @@
         </div>
     </div>
 </div>
-

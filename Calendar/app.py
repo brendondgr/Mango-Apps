@@ -16,7 +16,7 @@ app = Flask(__name__,
 
 # Configure Jinja to look in local templates and global templates
 import jinja2
-global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(BASE_DIR))), 'templates')
+global_templates = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'templates')
 app.jinja_loader = jinja2.ChoiceLoader([
     app.jinja_loader,
     jinja2.FileSystemLoader(global_templates)

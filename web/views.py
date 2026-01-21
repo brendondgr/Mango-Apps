@@ -2,6 +2,8 @@ import json
 import mimetypes
 import os
 import sys
+import logging
+import traceback
 from pathlib import Path
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -9,6 +11,10 @@ from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
+from django.conf import settings
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # Add libs to path
 LIBS_PATH = Path(__file__).resolve().parent.parent.parent / 'libs'
@@ -80,18 +86,26 @@ def flask_proxy(request, path=''):
         return lambda s: None
     
     # Call Flask app
-    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
-    
-    # Parse status code
-    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
-    
-    # Create Django response
-    django_response = HttpResponse(response_body, status=status_code)
-    for header_name, header_value in response_headers:
-        if header_name.lower() not in ('content-length',):
-            django_response[header_name] = header_value
-    
-    return django_response
+    try:
+        response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+        
+        # Parse status code
+        status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+        
+        # Create Django response
+        django_response = HttpResponse(response_body, status=status_code)
+        for header_name, header_value in response_headers:
+            if header_name.lower() not in ('content-length',):
+                django_response[header_name] = header_value
+        
+        return django_response
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Flask proxy error (ProjectManager): {str(e)}\n{tb}")
+        
+        if settings.DEBUG:
+            return HttpResponse(f"<h1>Proxy Error (ProjectManager)</h1><pre>{tb}</pre>", status=500)
+        return HttpResponse("Internal Server Error in ProjectManager", status=500)
 
 
 @csrf_exempt
@@ -138,18 +152,26 @@ def flask_proxy_calendar(request, path=''):
         return lambda s: None
     
     # Call Flask app
-    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
-    
-    # Parse status code
-    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
-    
-    # Create Django response
-    django_response = HttpResponse(response_body, status=status_code)
-    for header_name, header_value in response_headers:
-        if header_name.lower() not in ('content-length',):
-            django_response[header_name] = header_value
-    
-    return django_response
+    try:
+        response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+        
+        # Parse status code
+        status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+        
+        # Create Django response
+        django_response = HttpResponse(response_body, status=status_code)
+        for header_name, header_value in response_headers:
+            if header_name.lower() not in ('content-length',):
+                django_response[header_name] = header_value
+        
+        return django_response
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Flask proxy error (Calendar): {str(e)}\n{tb}")
+        
+        if settings.DEBUG:
+            return HttpResponse(f"<h1>Proxy Error (Calendar)</h1><pre>{tb}</pre>", status=500)
+        return HttpResponse("Internal Server Error in Calendar", status=500)
 
 
 @csrf_exempt
@@ -197,18 +219,26 @@ def flask_proxy_recipebook(request, path=''):
         return lambda s: None
     
     # Call Flask app
-    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
-    
-    # Parse status code
-    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
-    
-    # Create Django response
-    django_response = HttpResponse(response_body, status=status_code)
-    for header_name, header_value in response_headers:
-        if header_name.lower() not in ('content-length',):
-            django_response[header_name] = header_value
-    
-    return django_response
+    try:
+        response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+        
+        # Parse status code
+        status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+        
+        # Create Django response
+        django_response = HttpResponse(response_body, status=status_code)
+        for header_name, header_value in response_headers:
+            if header_name.lower() not in ('content-length',):
+                django_response[header_name] = header_value
+        
+        return django_response
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Flask proxy error (RecipeBook): {str(e)}\n{tb}")
+        
+        if settings.DEBUG:
+            return HttpResponse(f"<h1>Proxy Error (RecipeBook)</h1><pre>{tb}</pre>", status=500)
+        return HttpResponse("Internal Server Error in RecipeBook", status=500)
 
 
 @csrf_exempt
@@ -255,18 +285,26 @@ def flask_proxy_jobs(request, path=''):
         return lambda s: None
     
     # Call Flask app
-    response_body = b''.join(flask_app.wsgi_app(environ, start_response))
-    
-    # Parse status code
-    status_code = int(response_started[0].split(' ')[0]) if response_started else 200
-    
-    # Create Django response
-    django_response = HttpResponse(response_body, status=status_code)
-    for header_name, header_value in response_headers:
-        if header_name.lower() not in ('content-length',):
-            django_response[header_name] = header_value
-    
-    return django_response
+    try:
+        response_body = b''.join(flask_app.wsgi_app(environ, start_response))
+        
+        # Parse status code
+        status_code = int(response_started[0].split(' ')[0]) if response_started else 200
+        
+        # Create Django response
+        django_response = HttpResponse(response_body, status=status_code)
+        for header_name, header_value in response_headers:
+            if header_name.lower() not in ('content-length',):
+                django_response[header_name] = header_value
+        
+        return django_response
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Flask proxy error (Jobs): {str(e)}\n{tb}")
+        
+        if settings.DEBUG:
+            return HttpResponse(f"<h1>Proxy Error (Jobs)</h1><pre>{tb}</pre>", status=500)
+        return HttpResponse("Internal Server Error in Jobs", status=500)
 
 
 # Path to the Astro frontend build

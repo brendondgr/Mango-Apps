@@ -208,6 +208,17 @@
 }
 
 /* =========================
+   MODAL SUBMIT BUTTON DESKTOP DEFAULTS
+========================= */
+.modal-submit-btn .btn-icon-svg {
+    display: none;
+}
+
+.modal-submit-btn .btn-text {
+    display: inline;
+}
+
+/* =========================
    MOBILE RESPONSIVE
 ========================= */
 
@@ -367,16 +378,62 @@
     }
 
     /* Ensure main content doesn't get hidden under fixed tabs */
-    /* Ensure main content doesn't get hidden under fixed tabs */
     main.container {
         padding-bottom: 5rem;
         padding-left: 0.5rem;
         padding-right: 0.5rem;
     }
 
+    /* Modal Sizing for Mobile */
+    .modal {
+        max-width: calc(100% - 1rem);
+        margin: 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .modal .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .modal .form-group input,
+    .modal .form-group textarea {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .modal-footer {
+        margin-top: 1rem;
+    }
+
+    /* SVG Icon in Modal Submit Button */
+    .modal-submit-btn .btn-icon-svg {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+    }
+
+    .modal-submit-btn .btn-text {
+        display: none;
+    }
+
+    .modal-submit-btn {
+        width: auto;
+        height: auto;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+    }
+
+    /* Header "+" Button Centering */
     .header-actions {
         width: auto;
         justify-content: flex-end;
+        align-items: center;
+    }
+
+    .header-actions .btn-primary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .brand {

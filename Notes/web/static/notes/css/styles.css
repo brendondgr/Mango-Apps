@@ -2475,3 +2475,54 @@
   width: 20px;
   height: 20px;
 }
+/* ==========================================================================
+   RESPONSIVE: Mobile Header (Icon Only)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .site-header {
+    height: 64px;
+  }
+
+  .site-header__container {
+    padding: 0 var(--spacing-4);
+  }
+
+  .site-header__logo .header-text {
+    display: none;
+  }
+
+  .site-header__logo .header-logo-icon {
+    display: inline-block !important;
+    color: var(--color-primary);
+  }
+
+  .site-header__actions {
+    gap: 0.5rem;
+  }
+
+  .site-header__actions .btn {
+    padding: 0.75rem;
+    min-width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
+  }
+
+  .site-header__actions .btn__text {
+    display: none;
+  }
+
+  .site-header__actions .btn .icon-mask {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .dropdown__caret {
+    display: none;
+  }
+
+  .site-header .btn-ghost[onclick*="toggleGlobalSidebar"] {
+    left: 0.5rem !important;
+  }
+}

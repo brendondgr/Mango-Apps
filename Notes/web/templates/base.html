@@ -121,7 +121,8 @@
         <div class="site-header__container">
             <!-- Logo/Name - clickable to home -->
             <a href="{% url 'notes:index' %}" class="site-header__logo">
-                StudyHub
+                <i data-lucide="notebook-text" class="header-logo-icon" style="display: none; width: 1.5rem; height: 1.5rem;"></i>
+                <span class="header-text">StudyHub</span>
             </a>
 
             <!-- Right-aligned actions -->
@@ -132,7 +133,7 @@
                         aria-expanded="false">
                         <span class="icon-mask"
                             style="-webkit-mask-image: url('{% static 'notes/svg/plus.svg' %}'); mask-image: url('{% static 'notes/svg/plus.svg' %}');"></span>
-                        New
+                        <span class="btn__text">New</span>
                         <svg class="dropdown__caret" width="12" height="12" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
@@ -156,14 +157,14 @@
                 <a href="{% url 'notes:generate_topic' %}" class="btn btn-primary">
                     <span class="icon-mask"
                         style="-webkit-mask-image: url('{% static 'notes/svg/sparkles.svg' %}'); mask-image: url('{% static 'notes/svg/sparkles.svg' %}');"></span>
-                    Generate Topic
+                    <span class="btn__text">Generate Topic</span>
                 </a>
 
                 <!-- Settings -->
                 <a href="{% url 'notes:settings' %}" class="btn btn-ghost" title="Settings">
                     <span class="icon-mask"
                         style="-webkit-mask-image: url('{% static 'notes/svg/settings.svg' %}'); mask-image: url('{% static 'notes/svg/settings.svg' %}');"></span>
-                    Settings
+                    <span class="btn__text">Settings</span>
                 </a>
             </nav>
         </div>

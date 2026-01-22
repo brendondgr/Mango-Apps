@@ -243,14 +243,28 @@
     }
 
     .header-content {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
     }
 
+    .header-left-group {
+        flex: 1;
+    }
+
+    /* Hide "Project Management" text if requested, but user said "Align with text", 
+       so we keep it but maybe adjust size or structure. 
+       If user wanted to remove the "logo" (which might be the text), 
+       we can hide .brand here. 
+       Let's assume "Remove Logo" means remove the text brand if it takes up space, 
+       BUT "Align menu with text" implies keeping text. 
+       I will keep text but make sure it fits. */
+
     .header-actions {
-        width: 100%;
-        justify-content: space-between;
+        width: auto;
+        justify-content: flex-end;
     }
 
     .tab-interface.header-tabs .tab-button {
@@ -270,8 +284,21 @@
     }
 
     .status-date {
-        flex-wrap: wrap;
-        gap: 0.25rem;
+        display: none !important;
+    }
+
+    /* Container even spacing */
+    /* Container even spacing */
+    .dashboard-grid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        gap: 1rem;
+    }
+
+    .status-column {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
     }
 
     /* Add goal form - stack on mobile */
@@ -290,18 +317,32 @@
 
     /* Card/Timeline swapping at bottom on mobile */
     .tab-interface.header-tabs {
-        position: fixed;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        box-shadow: var(--shadow-lg);
-        width: auto;
-        padding: 6px;
-        margin: 0;
-        border: 1px solid var(--color-border);
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        top: auto !important;
+        transform: none !important;
+        z-index: 9999 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+        width: 100% !important;
+        padding: 0.75rem !important;
+        margin: 0 !important;
+        border-top: 1px solid var(--color-border) !important;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-radius: 0 !important;
+        justify-content: center !important;
+        gap: 1rem !important;
+        display: flex !important;
+    }
+
+    .tab-interface.header-tabs .tab-button {
+        flex: 1;
+        justify-content: center;
+        padding: 0.5rem;
     }
 
     /* New Project button converts to + on mobile */
@@ -326,8 +367,11 @@
     }
 
     /* Ensure main content doesn't get hidden under fixed tabs */
+    /* Ensure main content doesn't get hidden under fixed tabs */
     main.container {
         padding-bottom: 5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
     }
 
     .header-actions {

@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django_ratelimit.decorators import ratelimit
 from django.conf import settings
+from dotenv import load_dotenv, set_key
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -728,11 +729,99 @@ def api_server_stop(request):
     """POST /api/server/stop - Stop the LLM server"""
     try:
         success, message = llm_service.stop_server()
-        
+
         if success:
             return JsonResponse({'success': True, 'message': message})
         else:
             return JsonResponse({'error': message}, status=400)
-            
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# ============================================================================
+# LLM Provider and API Key Management
+# ============================================================================
+
+# Path to the .env file
+ENV_PATH = Path(__file__).resolve().parent.parent / '.env'
+
+
+def mask_api_key(key):
+    """Mask API key showing first 2 and last 4 characters"""
+    if not key or len(key) < 8:
+        return None
+    return f"{key[:2]}{'•' * (len(key) - 6)}{key[-4:]}"
+
+
+def api_llm_provider(request):
+    """GET/POST /api/llm-provider - Get or set the active LLM provider"""
+    if request.method == 'GET':
+        try:
+            # Load environment variables
+            load_dotenv(ENV_PATH)
+
+            # Get current provider (default to 'local' if not set)
+            provider = os.getenv('LLM_PROVIDER', 'local')
+
+            # Get API keys (masked)
+            api_keys = {
+                'gemini': mask_api_key(os.getenv('GEMINI_API_KEY')),
+                'perplexity': mask_api_key(os.getenv('PERPLEXITY_API_KEY')),
+                'claude': mask_api_key(os.getenv('CLAUDE_API_KEY'))
+            }
+
+            return JsonResponse({
+                'provider': provider,
+                'api_keys': api_keys
+            })
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            provider = data.get('provider')
+
+            if provider not in ['local', 'gemini', 'perplexity', 'claude']:
+                return JsonResponse({'error': 'Invalid provider'}, status=400)
+
+            # Save provider to .env
+            set_key(ENV_PATH, 'LLM_PROVIDER', provider)
+
+            return JsonResponse({
+                'success': True,
+                'message': f'Provider set to {provider}',
+                'provider': provider
+            })
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@require_http_methods(["POST"])
+def api_save_api_keys(request):
+    """POST /api/api-keys - Save API keys to .env file"""
+    try:
+        data = json.loads(request.body)
+
+        # Save non-empty keys
+        if 'gemini' in data and data['gemini']:
+            set_key(ENV_PATH, 'GEMINI_API_KEY', data['gemini'])
+
+        if 'perplexity' in data and data['perplexity']:
+            set_key(ENV_PATH, 'PERPLEXITY_API_KEY', data['perplexity'])
+
+        if 'claude' in data and data['claude']:
+            set_key(ENV_PATH, 'CLAUDE_API_KEY', data['claude'])
+
+        return JsonResponse({
+            'success': True,
+            'message': 'API keys saved successfully'
+        })
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

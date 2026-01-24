@@ -50,4 +50,8 @@ urlpatterns = [
     path('api/server/status', views.api_server_status, name='api_server_status'),
     path('api/server/start', views.api_server_start, name='api_server_start'),
     path('api/server/stop', views.api_server_stop, name='api_server_stop'),
+
+    # LLM Provider & API Keys
+    path('api/llm-provider', views.api_llm_provider, name='api_llm_provider'),
+    path('api/api-keys', views.api_save_api_keys, name='api_save_api_keys'),
 ]

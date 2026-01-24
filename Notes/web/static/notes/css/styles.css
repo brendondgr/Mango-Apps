@@ -1816,10 +1816,33 @@
     font-size: 1.5rem;
   }
 
-  /* Bento grid mobile adjustments */
+  /* Bento grid mobile adjustments - 2 columns for subjects/topics */
   .bento-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .subject-card {
+    padding: 1.25rem 0.75rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .subject-icon-wrapper,
+  .subject-card img,
+  .svg-icon--lg {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .subject-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .subject-card__count {
+    font-size: 0.75rem;
   }
 
   /* Reduce content-panel padding: 3rem → 1.5rem */
@@ -2352,11 +2375,20 @@
 .site-header__container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   height: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--spacing-6);
+}
+
+.header-sidebar-toggle {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  min-width: 40px;
+  height: 40px;
 }
 
 .site-header__logo {
@@ -2522,7 +2554,11 @@
     display: none;
   }
 
-  .site-header .btn-ghost[onclick*="toggleGlobalSidebar"] {
-    left: 0.5rem !important;
+  .site-header .header-sidebar-toggle {
+    display: flex !important;
+  }
+
+  .site-header__logo {
+    margin-right: auto;
   }
 }

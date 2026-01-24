@@ -19,10 +19,13 @@ application = Flask(__name__, static_folder='utils/frontend/static', template_fo
 
 # Configure Jinja loader safely
 import jinja2
-global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'templates')
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+global_templates_new = os.path.join(root_dir, 'apps', 'web', 'templates')
+global_templates_old = os.path.join(root_dir, 'templates')
 application.jinja_loader = jinja2.ChoiceLoader([
     application.jinja_loader,
-    jinja2.FileSystemLoader(global_templates)
+    jinja2.FileSystemLoader(global_templates_new),
+    jinja2.FileSystemLoader(global_templates_old)
 ])
 application.register_blueprint(config_bp)
 application.register_blueprint(scrape_bp)

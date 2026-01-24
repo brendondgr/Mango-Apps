@@ -16,9 +16,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from the root .env file
-env_path = BASE_DIR.parent.parent / '.env'
-load_dotenv(env_path)
+# Load environment variables from the apps/.env file
+APPS_ROOT = BASE_DIR.parent
+load_dotenv(APPS_ROOT / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,7 +62,9 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'web' / 'templates',
-            # Navigate: apps/Notes -> apps -> Mango -> templates
+            # New location: apps/Notes -> apps -> web -> templates
+            BASE_DIR.parent / 'web' / 'templates',
+            # Fallback: apps/Notes -> apps -> Mango -> templates
             BASE_DIR.parent.parent / 'templates',
         ],
         'APP_DIRS': True,

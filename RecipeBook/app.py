@@ -16,10 +16,9 @@ from apps.RecipeBook.utils.database.cookbook import get_recipes_with_pantry_comp
 from apps.RecipeBook.utils.database.food_processor import parse_recipe_text
 
 # Load environment variables from .env file
-# Load environment variables from .env file
 from pathlib import Path
-env_path = Path(__file__).resolve().parent.parent.parent / '.env'
-load_dotenv(env_path)
+APPS_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(APPS_ROOT / '.env')
 
 # Initialize Flask application
 app = Flask(
@@ -31,10 +30,13 @@ app = Flask(
 
 # Configure Jinja to look in local templates and global templates
 import jinja2
-global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'templates')
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+global_templates_new = os.path.join(root_dir, 'apps', 'web', 'templates')
+global_templates_old = os.path.join(root_dir, 'templates')
 app.jinja_loader = jinja2.ChoiceLoader([
     app.jinja_loader,
-    jinja2.FileSystemLoader(global_templates)
+    jinja2.FileSystemLoader(global_templates_new),
+    jinja2.FileSystemLoader(global_templates_old)
 ])
 
 # Configuration

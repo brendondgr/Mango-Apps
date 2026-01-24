@@ -16,8 +16,9 @@ from .scraper_config import SUPPORTED_SITES, DEFAULT_RESULTS_WANTED, DEFAULT_HOU
 
 logger = logging.getLogger(__name__)
 
-# Config file path (relative to project root: scrapers -> backend -> utils -> project root)
-CONFIG_DIR = Path(__file__).resolve().parents[3] / "config"
+# Config file path (relative to apps root: scrapers -> backend -> utils -> Jobs -> apps)
+APPS_ROOT = Path(__file__).resolve().parents[4]
+CONFIG_DIR = APPS_ROOT.parent / "config"
 JOBS_CONFIG_PATH = CONFIG_DIR / "jobs_config.json"
 
 

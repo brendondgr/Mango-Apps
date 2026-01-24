@@ -37,11 +37,11 @@ RETRY_DELAY: float = 1.0  # Delay between retries in seconds
 
 from pathlib import Path
 
-# Get project root directory (5 levels up: scrapers -> backend -> utils -> Jobs -> apps -> Mango)
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
+# Get apps root directory (4 levels up: scrapers -> backend -> utils -> Jobs -> apps)
+APPS_ROOT = Path(__file__).resolve().parents[4]
 
 # Data directory settings
-DEFAULT_DATA_DIR: Path = PROJECT_ROOT / "apps" / "data" / "Jobs" / "scrapers"
+DEFAULT_DATA_DIR: Path = APPS_ROOT / "data" / "Jobs" / "scrapers"
 
 # Field mapping: jobspy field names to database column names
 # This maps the raw jobspy output to our database schema

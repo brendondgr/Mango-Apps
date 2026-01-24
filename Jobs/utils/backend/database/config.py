@@ -10,11 +10,11 @@ This module contains all database-related configuration including:
 import os
 from pathlib import Path
 
-# Get project root directory (5 levels up: database -> backend -> utils -> Jobs -> apps -> Mango)
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
+# Get apps root directory (4 levels up: database -> backend -> utils -> Jobs -> apps)
+APPS_ROOT = Path(__file__).resolve().parents[4]
 
 # Database path configuration
-DATABASE_DIR = PROJECT_ROOT / "apps" / "data" / "Jobs"
+DATABASE_DIR = APPS_ROOT / "data" / "Jobs"
 DATABASE_NAME = "magnificiation.db"
 DATABASE_PATH = DATABASE_DIR / DATABASE_NAME
 

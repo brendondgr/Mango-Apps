@@ -22,8 +22,8 @@ def ensure_config_exists(config_path: Optional[Path] = None) -> Path:
     """
     if config_path is None:
         # Default location: apps/data/Jobs/config/llm_config.json
-        PROJECT_ROOT = Path(__file__).resolve().parents[5]
-        config_path = PROJECT_ROOT / "apps" / "data" / "Jobs" / "config" / "llm_config.json"
+        APPS_ROOT = Path(__file__).resolve().parents[4]
+        config_path = APPS_ROOT / "data" / "Jobs" / "config" / "llm_config.json"
     else:
         config_path = Path(config_path)
 
@@ -49,8 +49,8 @@ def get_config_path(config_path: Optional[Path] = None) -> Path:
     """
     if config_path is None:
         # Try to find llm_config.json in the centralized data directory
-        PROJECT_ROOT = Path(__file__).resolve().parents[5]
-        config_path = PROJECT_ROOT / "apps" / "data" / "Jobs" / "config" / "llm_config.json"
+        APPS_ROOT = Path(__file__).resolve().parents[4]
+        config_path = APPS_ROOT / "data" / "Jobs" / "config" / "llm_config.json"
 
         if not config_path.exists():
             # Fallback: try package directory for backward compatibility check
@@ -59,6 +59,6 @@ def get_config_path(config_path: Optional[Path] = None) -> Path:
                 config_path = pkg_config
             else:
                 # If still not found, ensure it will be created in the new location
-                config_path = PROJECT_ROOT / "apps" / "data" / "Jobs" / "config" / "llm_config.json"
+                config_path = APPS_ROOT / "data" / "Jobs" / "config" / "llm_config.json"
 
     return ensure_config_exists(config_path)

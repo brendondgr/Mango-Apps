@@ -5,8 +5,8 @@ from datetime import datetime
 import os
 from pathlib import Path
 
-# Get project root directory (5 levels up: utils -> LocalLLM -> utils -> Jobs -> apps -> Mango)
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
+# Get apps root directory (4 levels up: utils -> LocalLLM -> utils -> Jobs -> apps)
+APPS_ROOT = Path(__file__).resolve().parents[4]
 
 from loguru import logger
 from tqdm import tqdm
@@ -48,7 +48,7 @@ class LoggerWrapper:
         if self.config is not None:
             log_dir = self.config.config["PATHS"]["logs"]
         else:
-            log_dir = PROJECT_ROOT / "apps" / "data" / "Jobs" / "logs"
+            log_dir = APPS_ROOT / "data" / "Jobs" / "logs"
 
         os.makedirs(log_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

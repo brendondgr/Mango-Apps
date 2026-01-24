@@ -16,10 +16,13 @@ app = Flask(__name__,
 
 # Configure Jinja to look in local templates and global templates
 import jinja2
-global_templates = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'templates')
+root_dir = os.path.dirname(os.path.dirname(BASE_DIR))
+global_templates_new = os.path.join(root_dir, 'apps', 'web', 'templates')
+global_templates_old = os.path.join(root_dir, 'templates')
 app.jinja_loader = jinja2.ChoiceLoader([
     app.jinja_loader,
-    jinja2.FileSystemLoader(global_templates)
+    jinja2.FileSystemLoader(global_templates_new),
+    jinja2.FileSystemLoader(global_templates_old)
 ])
 
 CORS(app)

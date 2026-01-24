@@ -20,13 +20,16 @@ def create_app(config_class=Config):
     # and add the global templates folder.
     pass  # We need to make sure we don't trigger the recursion bug.
     
-    # Direct safe approach:
-    global_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 'templates')
+    # Direct safe approach for global templates
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    global_templates_new = os.path.join(root_dir, 'apps', 'web', 'templates')
+    global_templates_old = os.path.join(root_dir, 'templates')
     
     # If app.jinja_loader is not already a ChoiceLoader, make it one
     my_loader = jinja2.ChoiceLoader([
         app.jinja_loader,
-        jinja2.FileSystemLoader(global_templates),
+        jinja2.FileSystemLoader(global_templates_new),
+        jinja2.FileSystemLoader(global_templates_old),
     ])
     app.jinja_loader = my_loader
 

@@ -2,9 +2,9 @@ import sqlite3
 import os
 from pathlib import Path
 
-# Get project root directory
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
-DATABASE_PATH = PROJECT_ROOT / "apps" / "data" / "Jobs" / "magnificiation.db"
+# Get apps root directory
+APPS_ROOT = Path(__file__).resolve().parents[4]
+DATABASE_PATH = APPS_ROOT / "data" / "Jobs" / "magnificiation.db"
 
 def migrate():
     print(f"Connecting to database at {DATABASE_PATH}...")

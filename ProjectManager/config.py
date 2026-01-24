@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Get the Mango root directory (apps/ProjectManager -> apps -> Mango)
-MANGO_ROOT = Path(__file__).resolve().parent.parent.parent
-load_dotenv(MANGO_ROOT / '.env')
-DATA_DIR = MANGO_ROOT / 'apps' / 'data' / 'ProjectManager'
+# Get the apps root directory (apps/ProjectManager -> apps)
+APPS_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(APPS_ROOT / '.env')
+DATA_DIR = APPS_ROOT / 'data' / 'ProjectManager'
 DB_PATH = DATA_DIR / 'projectmanager.db'
 
 # Ensure the data directory exists

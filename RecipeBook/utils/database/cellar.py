@@ -16,10 +16,9 @@ class Cellar:
     Handles thread-safe SQLite connections.
     """
     
-    # Default database path relative to project root
+    # Default database path relative to apps root
     DEFAULT_DB_PATH = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))),
-        'apps',
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
         'data',
         'RecipeBook',
         'RecipeBook.db'

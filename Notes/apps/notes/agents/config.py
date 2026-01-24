@@ -9,8 +9,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-ENV_PATH = PROJECT_ROOT / ".env"
+APPS_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+ENV_PATH = APPS_ROOT / ".env"
 load_dotenv(ENV_PATH)
 
 # API Keys

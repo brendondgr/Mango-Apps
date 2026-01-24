@@ -19,6 +19,7 @@ class Cellar:
     # Default database path relative to project root
     DEFAULT_DB_PATH = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))),
+        'apps',
         'data',
         'RecipeBook',
         'RecipeBook.db'
@@ -29,7 +30,7 @@ class Cellar:
         Initialize the Cellar with optional custom database path.
         
         Args:
-            db_path: Path to SQLite database file. Defaults to data/cookbook.db
+            db_path: Path to SQLite database file. Defaults to apps/data/RecipeBook/RecipeBook.db
         """
         self.db_path = db_path or self.DEFAULT_DB_PATH
         self._ensure_data_directory()

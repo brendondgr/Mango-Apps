@@ -7,7 +7,7 @@ import json
 from typing import Optional, List, Dict, Any, Tuple
 from . import date_utils
 
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../data/Calendar'))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/Calendar'))
 CALENDAR_FILE = os.path.join(DATA_DIR, 'calendar.json')
 SCHEDULES_DIR = os.path.join(DATA_DIR, 'schedules')
 

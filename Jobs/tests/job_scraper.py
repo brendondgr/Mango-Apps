@@ -1,5 +1,10 @@
 import os
 import pandas as pd
+from pathlib import Path
+
+# Get project root directory (4+ levels up depending on run location, but let's use parents[3] if run from apps/Jobs/tests)
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_DATA_DIR = PROJECT_ROOT / "apps" / "data" / "Jobs" / "scrapers" / "tests"
 from jobspy import scrape_jobs
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
@@ -74,7 +79,7 @@ class JobSpyScraper:
         self,
         job_titles: List[str],
         sites: Optional[List[str]] = None,
-        data_dir: str = 'data',
+        data_dir: Path = DEFAULT_DATA_DIR,
         results_wanted: int = 20,
         hours_old: int = 24,
         country_indeed: str = 'USA'

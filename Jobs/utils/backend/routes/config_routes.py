@@ -5,7 +5,7 @@ from loguru import logger
 
 config_bp = Blueprint('config_bp', __name__)
 
-CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../config/jobs_config.json'))
+CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../config/jobs_config.json'))
 
 def load_jobs_config():
     if not os.path.exists(CONFIG_PATH):

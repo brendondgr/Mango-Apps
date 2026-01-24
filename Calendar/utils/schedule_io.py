@@ -2,8 +2,8 @@ import os
 import json
 from .validators import validate_schedule_structure, sanitize_filename
 
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../data/Calendar/schedules'))
-INSTRUCTIONS_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../data/Calendar/instructions.md'))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/Calendar/schedules'))
+INSTRUCTIONS_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/Calendar/instructions.md'))
 
 def list_schedules():
     """Returns a list of available schedule filenames."""

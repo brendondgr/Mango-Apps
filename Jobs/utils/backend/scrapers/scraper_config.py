@@ -35,8 +35,13 @@ REQUEST_TIMEOUT: int = 30  # Timeout for individual scraping requests in seconds
 MAX_RETRIES: int = 3  # Maximum number of retry attempts for failed requests
 RETRY_DELAY: float = 1.0  # Delay between retries in seconds
 
+from pathlib import Path
+
+# Get project root directory (5 levels up: scrapers -> backend -> utils -> Jobs -> apps -> Mango)
+PROJECT_ROOT = Path(__file__).resolve().parents[5]
+
 # Data directory settings
-DEFAULT_DATA_DIR: str = 'data'
+DEFAULT_DATA_DIR: Path = PROJECT_ROOT / "apps" / "data" / "Jobs" / "scrapers"
 
 # Field mapping: jobspy field names to database column names
 # This maps the raw jobspy output to our database schema

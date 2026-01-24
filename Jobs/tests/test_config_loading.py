@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 
 # Add project root to path
-sys.path.append(str(Path(__file__).resolve().parents[3]))
+# Get Mango root directory (3 levels up: tests -> Jobs -> apps -> Mango)
+ROOT_DIR = Path(__file__).resolve().parents[3]
+sys.path.append(str(ROOT_DIR))
 
 # Mock logging to avoid noise
 import logging
@@ -38,7 +40,7 @@ def test_workflow_config_loading():
         print(f"Workflow stopped (expectedly): {e}")
 
     # Read the config file to compare
-    config_path = Path(__file__).resolve().parents[3] / "config" / "jobs_config.json"
+    config_path = ROOT_DIR / "config" / "jobs_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
     

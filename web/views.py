@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 LIBS_PATH = Path(__file__).resolve().parent.parent.parent / 'libs'
 sys.path.insert(0, str(LIBS_PATH))
 import llm_service
+import csv
 
 # Flask app for ProjectManager
 from apps.ProjectManager.web import create_app as create_projectmanager_app
@@ -306,6 +307,59 @@ def flask_proxy_jobs(request, path=''):
         if settings.DEBUG:
             return HttpResponse(f"<h1>Proxy Error (Jobs)</h1><pre>{tb}</pre>", status=500)
         return HttpResponse("Internal Server Error in Jobs", status=500)
+
+
+def get_projects():
+    """Helper to read and parse Projects.csv"""
+    projects_csv_path = Path(settings.BASE_DIR) / 'data' / 'csv' / 'Projects.csv'
+    projects = []
+    try:
+        with open(projects_csv_path, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                projects.append(row)
+    except Exception as e:
+        logger.error(f"Error reading Projects.csv: {e}")
+    return projects
+
+
+def project_detail(request, route):
+    """Serve specific project HTML based on route"""
+    projects = get_projects()
+    project = next((p for p in projects if p['route'] == route), None)
+    
+    if not project:
+        logger.error(f"Project not found in CSV for route: {route}")
+        raise Http404("Project not found")
+    
+    # Try multiple possible file locations
+    possible_paths = [
+        Path(settings.BASE_DIR) / 'web' / 'projects' / route / 'index.html',
+        Path(settings.BASE_DIR) / 'web' / 'projects' / route / project.get('html', 'index.html'),
+        Path(settings.BASE_DIR) / 'web' / 'projects' / route / f"{route}.html",
+    ]
+    
+    project_html_path = None
+    for path in possible_paths:
+        if path.exists():
+            project_html_path = path
+            break
+
+    if not project_html_path:
+        logger.error(f"Project HTML not found for route '{route}'. Tried: {[str(p) for p in possible_paths]}")
+        raise Http404("Project content not found")
+        
+    # Serve the file
+    content_type, _ = mimetypes.guess_type(str(project_html_path))
+    if content_type is None:
+        content_type = 'text/html'
+        
+    return FileResponse(open(project_html_path, 'rb'), content_type=content_type)
+
+
+def custom_404_view(request, exception):
+    """Custom 404 error handler"""
+    return render(request, '404.html', status=404)
 
 
 # Path to the Astro frontend build

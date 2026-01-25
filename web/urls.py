@@ -14,6 +14,9 @@ urlpatterns = [
     
     # Public Static Apps
     re_path(r'^mimiciv/?(?P<path>.*)$', views.mimic_view, name='mimic_app'),
+    
+    # Project Detail (Dynamic routing from CSV)
+    path('projects/<str:route>/', views.project_detail, name='project_detail'),
 
 
     # Main Dashboard (PR)
